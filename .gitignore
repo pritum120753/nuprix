@@ -1,5 +1,7 @@
 ﻿.env
 .env.*
+# Local TLS certificates and environment-specific files
+supabase-ca.crt
 !.env.example
 node_modules/
 .next/
