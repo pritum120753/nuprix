@@ -21,7 +21,16 @@ export default async function ProductRail({
   })
 
   if (!pricedProducts?.length) {
-    return null
+    return (
+      <section className="content-container py-12" role="status">
+        <p className="text-sm text-[#788279]">
+          No featured products are available in {collection.title} right now.
+        </p>
+        <div className="mt-3">
+          <InteractiveLink href="/store">Browse all products</InteractiveLink>
+        </div>
+      </section>
+    )
   }
 
   return (

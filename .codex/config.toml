@@ -1,0 +1,31 @@
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 3
+
+[agents.lead_architect]
+description = "Coordinates sequential Nuprix phase work, dependencies, and integration reviews under the master development authorization."
+config_file = "agents/lead-architect.toml"
+
+[agents.frontend_specialist]
+description = "Implements approved Nuprix storefront UI and responsive UX changes with a dedicated file scope."
+config_file = "agents/frontend-specialist.toml"
+
+[agents.ecommerce_specialist]
+description = "Reviews customer journeys for catalog, cart, checkout, orders, and account experience; coordinates UI requirements without overlapping implementation edits."
+config_file = "agents/ecommerce-specialist.toml"
+
+[agents.supplier_integration_specialist]
+description = "Researches and implements supplier APIs, catalog mapping, and inventory synchronization in the planned phase after supplier choices are confirmed."
+config_file = "agents/supplier-integration-specialist.toml"
+
+[agents.backend_specialist]
+description = "Implements approved Medusa modules, workflows, API routes, and marketplace backend logic within an assigned scope."
+config_file = "agents/backend-specialist.toml"
+
+[agents.qa_security_specialist]
+description = "Performs scoped QA, privacy, security, and regression reviews; tests only when authorized by the task."
+config_file = "agents/qa-security-specialist.toml"
+
+[agents.code_reviewer]
+description = "Read-only reviewer for correctness, security, maintainability, and regressions on Nuprix changes."
+config_file = "agents/code-reviewer.toml"

@@ -165,40 +165,12 @@ export default async function Footer() {
                 </li>
               </ul>
             </div>
-            <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">About Nuprix</span>
-              <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-                <li>
-                  <a
-                    href="https://github.com/pritum120753/nuprix"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Nuprix on GitHub
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://medusajs.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Store platform
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://github.com/pritum120753/nuprix"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:text-ui-fg-base"
-                  >
-                    Our project
-                  </a>
-                </li>
-              </ul>
+            <div className="flex max-w-xs flex-col gap-y-2">
+              <span className="txt-small-plus txt-ui-fg-base">Discover Nuprix</span>
+              <p className="text-ui-fg-subtle txt-small">
+                A thoughtful mix of digital finds and physical products for
+                everyday life.
+              </p>
             </div>
           </div>
         </div>
