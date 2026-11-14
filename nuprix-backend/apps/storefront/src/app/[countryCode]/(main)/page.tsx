@@ -5,7 +5,12 @@ import Hero from "@modules/home/components/hero"
 import { listCollections } from "@lib/data/collections"
 import { getRegion, listRegions } from "@lib/data/regions"
 import { toJsonLd } from "@lib/util/product-structured-data"
-import { getSiteOrigin, listCountryCodes, STORE_NAME } from "@lib/util/site"
+import {
+  getDefaultCountryCode,
+  getSiteOrigin,
+  listCountryCodes,
+  STORE_NAME,
+} from "@lib/util/site"
 import { buildRegionsReturnPolicies } from "@lib/util/store-policies"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
@@ -54,12 +59,15 @@ export default async function Home(props: {
 }) {
   const params = await props.params
   const { countryCode } = params
-  const region = await getRegion(countryCode)
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  })
+  const [region, regions, { collections }] = await Promise.all([
+    getRegion(countryCode),
+    listRegions(),
+    listCollections({ fields: "id, handle, title" }),
+  ])
 
   if (!region) {
+    const fallbackCountryCode = getDefaultCountryCode(regions)
+
     return (
       <section className="content-container py-20 text-center" role="status">
         <h1 className="text-2xl font-semibold tracking-tight text-[#172b20]">
@@ -69,17 +77,19 @@ export default async function Home(props: {
           We couldn&apos;t load the store region for this page. Please try again
           later.
         </p>
-        <a
-          href="/"
-          className="mt-6 inline-flex min-h-11 items-center rounded-md bg-[#172b20] px-5 text-sm font-semibold text-white transition hover:bg-[#294b35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#548365]"
-        >
-          Return to Nuprix
-        </a>
+        {fallbackCountryCode && (
+          <a
+            href={`/${fallbackCountryCode}`}
+            className="mt-6 inline-flex min-h-11 items-center rounded-md bg-[#172b20] px-5 text-sm font-semibold text-white transition hover:bg-[#294b35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#548365]"
+          >
+            Browse the available Nuprix store
+          </a>
+        )}
       </section>
     )
   }
 
-  const [origin, regions] = await Promise.all([getSiteOrigin(), listRegions()])
+  const origin = await getSiteOrigin()
   const homeUrl = `${origin}/${countryCode}`
   const returnPolicies = buildRegionsReturnPolicies(regions)
   const structuredData = [
