@@ -11,7 +11,7 @@ export async function GET(
   res: MedusaResponse
 ) {
   const customerId = req.auth_context?.actor_id
-  if (!customerId) {
+  if (req.auth_context?.actor_type !== "customer" || !customerId) {
     return res.status(401).json({ message: "You must sign in to view downloads." })
   }
 
