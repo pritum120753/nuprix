@@ -1,7 +1,5 @@
 import { listProducts } from "@lib/data/products"
 import { HttpTypes } from "@medusajs/types"
-import { Text } from "@modules/common/components/ui"
-
 import InteractiveLink from "@modules/common/components/interactive-link"
 import ProductPreview from "@modules/products/components/product-preview"
 
@@ -22,26 +20,35 @@ export default async function ProductRail({
     },
   })
 
-  if (!pricedProducts) {
+  if (!pricedProducts?.length) {
     return null
   }
 
   return (
-    <div className="content-container py-12 small:py-24">
-      <div className="flex justify-between mb-8">
-        <Text className="txt-xlarge">{collection.title}</Text>
+    <section className="content-container py-12 small:py-20">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4 small:mb-10">
+        <div>
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#71917a]">
+            Curated for your next idea
+          </p>
+          <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[#172b20] small:text-3xl">
+            {collection.title}
+          </h2>
+          <p className="mt-2 max-w-lg text-sm leading-6 text-[#788279]">
+            Thoughtful digital finds to help you learn, work, and create.
+          </p>
+        </div>
         <InteractiveLink href={`/collections/${collection.handle}`}>
-          View all
+          View all products
         </InteractiveLink>
       </div>
-      <ul className="grid grid-cols-2 small:grid-cols-3 gap-x-6 gap-y-24 small:gap-y-36">
-        {pricedProducts &&
-          pricedProducts.map((product) => (
-            <li key={product.id}>
-              <ProductPreview product={product} region={region} isFeatured />
-            </li>
-          ))}
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-10 small:grid-cols-3 small:gap-x-6 small:gap-y-14">
+        {pricedProducts.map((product) => (
+          <li key={product.id} className="min-w-0">
+            <ProductPreview product={product} region={region} isFeatured />
+          </li>
+        ))}
       </ul>
-    </div>
+    </section>
   )
 }
