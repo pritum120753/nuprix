@@ -89,6 +89,19 @@ const AccountNav = ({
                   </LocalizedClientLink>
                 </li>
                 <li>
+                  <LocalizedClientLink
+                    href="/account/downloads"
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
+                    data-testid="downloads-link"
+                  >
+                    <div className="flex items-center gap-x-2">
+                      <Package size={20} />
+                      <span>My Downloads</span>
+                    </div>
+                    <ChevronDown className="transform -rotate-90" />
+                  </LocalizedClientLink>
+                </li>
+                <li>
                   <button
                     type="button"
                     className="flex items-center justify-between py-4 border-b border-gray-200 px-8 w-full"
@@ -115,47 +128,32 @@ const AccountNav = ({
           <div className="text-base-regular">
             <ul className="flex mb-0 justify-start items-start flex-col gap-y-4">
               <li>
-                <AccountNavLink
-                  href="/account"
-                  route={route!}
-                  data-testid="overview-link"
-                >
+                <AccountNavLink href="/account" route={route!} data-testid="overview-link">
                   Overview
                 </AccountNavLink>
               </li>
               <li>
-                <AccountNavLink
-                  href="/account/profile"
-                  route={route!}
-                  data-testid="profile-link"
-                >
+                <AccountNavLink href="/account/profile" route={route!} data-testid="profile-link">
                   Profile
                 </AccountNavLink>
               </li>
               <li>
-                <AccountNavLink
-                  href="/account/addresses"
-                  route={route!}
-                  data-testid="addresses-link"
-                >
+                <AccountNavLink href="/account/addresses" route={route!} data-testid="addresses-link">
                   Addresses
                 </AccountNavLink>
               </li>
               <li>
-                <AccountNavLink
-                  href="/account/orders"
-                  route={route!}
-                  data-testid="orders-link"
-                >
+                <AccountNavLink href="/account/orders" route={route!} data-testid="orders-link">
                   Orders
                 </AccountNavLink>
               </li>
+              <li>
+                <AccountNavLink href="/account/downloads" route={route!} data-testid="downloads-link">
+                  My Downloads
+                </AccountNavLink>
+              </li>
               <li className="text-grey-700">
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  data-testid="logout-button"
-                >
+                <button type="button" onClick={handleLogout} data-testid="logout-button">
                   Log out
                 </button>
               </li>
