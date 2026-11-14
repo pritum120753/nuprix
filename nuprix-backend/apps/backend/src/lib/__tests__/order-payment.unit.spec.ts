@@ -34,3 +34,29 @@ describe("isFullyPaid", () => {
     ).toBe(true)
   })
 })
+
+import { getPaymentState } from "../order-payment"
+
+describe("getPaymentState", () => {
+  it("unpaid for none, uncaptured and partially captured", () => {
+    expect(getPaymentState([])).toBe("unpaid")
+    expect(getPaymentState([{ amount: 10, captured_amount: 0 }])).toBe("unpaid")
+    expect(getPaymentState([{ amount: 10, captured_amount: 9 }])).toBe("unpaid")
+  })
+
+  it("paid when every active collection is fully captured", () => {
+    expect(getPaymentState([{ amount: 10, captured_amount: 10 }])).toBe("paid")
+    expect(
+      getPaymentState([
+        { status: "canceled", amount: 5, captured_amount: 0 },
+        { amount: 10, captured_amount: 10 },
+      ])
+    ).toBe("paid")
+  })
+
+  it("refunded as soon as anything was refunded", () => {
+    expect(
+      getPaymentState([{ amount: 10, captured_amount: 10, refunded_amount: 1 }])
+    ).toBe("refunded")
+  })
+})

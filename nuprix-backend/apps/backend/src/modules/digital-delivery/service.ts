@@ -1,5 +1,7 @@
 import { MedusaError, MedusaService } from "@medusajs/framework/utils"
+import { canServeFiles, type OrderAccess } from "../../lib/download-access"
 import { hashDownloadToken, newDownloadToken } from "../../lib/download-token"
+import { entitlementBlockReason } from "../../lib/entitlement-status"
 import DigitalFile from "./models/digital-file"
 import DownloadEntitlement from "./models/download-entitlement"
 
@@ -16,6 +18,15 @@ export type DownloadCheck =
   | { ok: true; entitlement_id: string; digital_file_id: string }
   | { ok: false; reason: "invalid" | "revoked" | "expired" | "limit_reached" }
 
+export type CustomerDownloadStatus =
+  | "available"
+  | "awaiting_payment"
+  | "refunded"
+  | "order_canceled"
+  | "expired"
+  | "revoked"
+  | "limit_reached"
+
 export type CustomerDownloadSummary = {
   id: string
   order_id: string
@@ -28,7 +39,7 @@ export type CustomerDownloadSummary = {
   revoked_at: Date | null
   last_downloaded_at: Date | null
   created_at: Date
-  status: "available" | "expired" | "revoked" | "limit_reached"
+  status: CustomerDownloadStatus
 }
 
 class DigitalDeliveryModuleService extends MedusaService({
@@ -66,7 +77,8 @@ class DigitalDeliveryModuleService extends MedusaService({
   // Returns only safe display fields; never return token_hash or a raw token.
   async listCustomerDownloads(
     customerId: string,
-    orderIds: string[]
+    orderIds: string[],
+    access: Map<string, OrderAccess>
   ): Promise<CustomerDownloadSummary[]> {
     if (!customerId || orderIds.length === 0) {
       return []
@@ -82,17 +94,25 @@ class DigitalDeliveryModuleService extends MedusaService({
       ? await this.listDigitalFiles({ id: fileIds }, { take: fileIds.length })
       : []
     const fileById = new Map(files.map((file) => [file.id, file]))
-    const now = Date.now()
-
     return entitlements.map((item) => {
       const file = fileById.get(item.digital_file_id)
-      const status: CustomerDownloadSummary["status"] = item.revoked_at
-        ? "revoked"
-        : item.expires_at && new Date(item.expires_at).getTime() < now
-          ? "expired"
-          : item.download_count >= item.max_downloads
-            ? "limit_reached"
-            : "available"
+      const orderAccess = access.get(item.order_id) ?? "missing"
+      const blocked = entitlementBlockReason(item)
+
+      let status: CustomerDownloadStatus
+      if (blocked === "revoked") {
+        status = "revoked"
+      } else if (orderAccess === "canceled" || orderAccess === "missing") {
+        status = "order_canceled"
+      } else if (orderAccess === "refunded") {
+        status = "refunded"
+      } else if (blocked) {
+        status = blocked
+      } else if (orderAccess === "unpaid" && !canServeFiles(orderAccess)) {
+        status = "awaiting_payment"
+      } else {
+        status = "available"
+      }
 
       return {
         id: item.id,
@@ -130,14 +150,9 @@ class DigitalDeliveryModuleService extends MedusaService({
     if (!entitlement) {
       return { ok: false, reason: "invalid" }
     }
-    if (entitlement.revoked_at) {
-      return { ok: false, reason: "revoked" }
-    }
-    if (entitlement.expires_at && new Date(entitlement.expires_at) < new Date()) {
-      return { ok: false, reason: "expired" }
-    }
-    if (entitlement.download_count >= entitlement.max_downloads) {
-      return { ok: false, reason: "limit_reached" }
+    const blocked = entitlementBlockReason(entitlement)
+    if (blocked) {
+      return { ok: false, reason: blocked }
     }
 
     return {

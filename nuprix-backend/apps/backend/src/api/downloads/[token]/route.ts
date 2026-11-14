@@ -1,10 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { createDownloadUrl } from "../../../lib/digital-storage"
-import {
-  isFullyPaid,
-  PAYMENT_COLLECTION_FIELDS,
-} from "../../../lib/order-payment"
+import { canServeFiles, getOrderAccess } from "../../../lib/download-access"
 import { DIGITAL_DELIVERY_MODULE } from "../../../modules/digital-delivery"
 import type DigitalDeliveryModuleService from "../../../modules/digital-delivery/service"
 
@@ -26,7 +23,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const service: DigitalDeliveryModuleService = req.scope.resolve(
     DIGITAL_DELIVERY_MODULE
   )
-  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   const locking = req.scope.resolve(Modules.LOCKING)
 
   const preliminary = await service.checkToken(token)
@@ -39,17 +35,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     preliminary.entitlement_id
   )
 
-  const { data: orders } = await query.graph({
-    entity: "order",
-    fields: ["id", "status", ...PAYMENT_COLLECTION_FIELDS],
-    filters: { id: entitlement.order_id },
-  })
-  const order = orders[0]
-  const requireCapture = process.env.DIGITAL_ALLOW_UNCAPTURED !== "true"
-  const paid = isFullyPaid(order?.payment_collections)
-  const canceled = order?.status === "canceled"
-
-  if (!order || canceled || (requireCapture && !paid)) {
+  const access = await getOrderAccess(req.scope, entitlement.order_id)
+  if (!canServeFiles(access)) {
     return res.status(402).json({ message: MESSAGES.unpaid })
   }
 

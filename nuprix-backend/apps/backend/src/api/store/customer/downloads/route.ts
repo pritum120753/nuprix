@@ -3,6 +3,7 @@ import type {
   MedusaResponse,
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { getOrderAccessMap } from "../../../../lib/download-access"
 import { DIGITAL_DELIVERY_MODULE } from "../../../../modules/digital-delivery"
 import type DigitalDeliveryModuleService from "../../../../modules/digital-delivery/service"
 
@@ -26,7 +27,12 @@ export async function GET(
   const service: DigitalDeliveryModuleService = req.scope.resolve(
     DIGITAL_DELIVERY_MODULE
   )
-  const downloads = await service.listCustomerDownloads(customerId, orderIds)
+  const access = await getOrderAccessMap(req.scope, orderIds)
+  const downloads = await service.listCustomerDownloads(
+    customerId,
+    orderIds,
+    access
+  )
 
   res.setHeader("Cache-Control", "private, no-store")
   return res.json({ downloads })

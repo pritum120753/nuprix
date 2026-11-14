@@ -1,15 +1,9 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk"
+import { buildDownloadUrl } from "../../lib/download-url"
 import type { GrantResult } from "./grant-download-entitlements"
 
 export const sendDownloadEmailStepId = "send-download-email"
-
-function downloadBaseUrl(): string {
-  return (process.env.DOWNLOAD_BASE_URL || "http://localhost:9000").replace(
-    /\/$/,
-    ""
-  )
-}
 
 // Delivery email failures must never roll back a paid order, so this step
 // swallows and logs errors instead of throwing.
@@ -38,7 +32,7 @@ export const sendDownloadEmailStep = createStep(
           downloads: granted.downloads.map((d) => ({
             title: d.title,
             file_name: d.file_name,
-            url: `${downloadBaseUrl()}/downloads/${d.token}`,
+            url: buildDownloadUrl(d.token),
             max_downloads: d.max_downloads,
             expires_at: d.expires_at,
           })),

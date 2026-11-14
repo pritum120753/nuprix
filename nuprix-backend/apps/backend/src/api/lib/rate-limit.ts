@@ -9,7 +9,12 @@ type Bucket = { count: number; resetAt: number }
 // Fixed-window limiter kept in process memory. It stops casual token
 // guessing and hammering on a single server. When you run more than one
 // backend instance, move this to Redis so the count is shared.
-export function rateLimit(options: { windowMs: number; max: number }) {
+export function rateLimit(options: {
+  windowMs: number
+  max: number
+  // Defaults to the client IP. Use the signed-in customer for per-account limits.
+  key?: (req: MedusaRequest) => string | undefined
+}) {
   const buckets = new Map<string, Bucket>()
 
   const sweep = setInterval(() => {
@@ -27,7 +32,8 @@ export function rateLimit(options: { windowMs: number; max: number }) {
     res: MedusaResponse,
     next: MedusaNextFunction
   ) => {
-    const key = req.ip || req.socket.remoteAddress || "unknown"
+    const key =
+      options.key?.(req) || req.ip || req.socket.remoteAddress || "unknown"
     const now = Date.now()
     const bucket = buckets.get(key)
 

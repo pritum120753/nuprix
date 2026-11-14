@@ -1,5 +1,6 @@
 import {
   configureStoreSearch,
+  authenticate,
   defineMiddlewares,
   validateAndTransformBody,
 } from '@medusajs/framework/http'
@@ -17,6 +18,25 @@ export default defineMiddlewares({
       method: ['GET'],
       matcher: '/downloads/*',
       middlewares: [rateLimit({ windowMs: 60_000, max: 30 })],
+    },
+    {
+      method: ['GET'],
+      matcher: '/store/customer/downloads',
+      middlewares: [authenticate('customer', ['session', 'bearer'])],
+    },
+    {
+      method: ['POST'],
+      matcher: '/store/customer/downloads/:id/link',
+      middlewares: [
+        authenticate('customer', ['session', 'bearer']),
+        rateLimit({
+          windowMs: 60_000,
+          max: 6,
+          key: (req) =>
+            (req as { auth_context?: { actor_id?: string } }).auth_context
+              ?.actor_id,
+        }),
+      ],
     },
     {
       method: ['POST'],

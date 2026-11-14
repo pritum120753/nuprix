@@ -1,6 +1,6 @@
 // The Order record has no stored payment_status: Medusa derives it from the
-// order's payment collections. This applies the same idea for one question:
-// "has this order been paid in full and not refunded?"
+// order's payment collections. These helpers answer one question: "can the
+// customer be given the files for this order?"
 
 type PaymentCollectionRow = {
   status?: string | null
@@ -8,6 +8,8 @@ type PaymentCollectionRow = {
   captured_amount?: unknown
   refunded_amount?: unknown
 }
+
+export type PaymentState = "paid" | "unpaid" | "refunded"
 
 const EPSILON = 0.005
 
@@ -28,20 +30,32 @@ export const PAYMENT_COLLECTION_FIELDS = [
   "payment_collections.refunded_amount",
 ]
 
-export function isFullyPaid(
+// - refunded: any money has been refunded (access is withdrawn)
+// - paid: every active collection is fully captured
+// - unpaid: anything else, including no payment collection at all
+export function getPaymentState(
   collections: (PaymentCollectionRow | null | undefined)[] | null | undefined
-): boolean {
+): PaymentState {
   const active = (collections ?? []).filter(
     (c): c is PaymentCollectionRow => Boolean(c) && c?.status !== "canceled"
   )
   if (!active.length) {
-    return false
+    return "unpaid"
   }
 
-  return active.every((c) => {
-    const amount = toNumber(c.amount)
+  if (active.some((c) => toNumber(c.refunded_amount) > EPSILON)) {
+    return "refunded"
+  }
+
+  const allCaptured = active.every((c) => {
     const captured = toNumber(c.captured_amount)
-    const refunded = toNumber(c.refunded_amount)
-    return refunded <= EPSILON && captured > 0 && amount - captured <= EPSILON
+    return captured > 0 && toNumber(c.amount) - captured <= EPSILON
   })
+  return allCaptured ? "paid" : "unpaid"
+}
+
+export function isFullyPaid(
+  collections: (PaymentCollectionRow | null | undefined)[] | null | undefined
+): boolean {
+  return getPaymentState(collections) === "paid"
 }

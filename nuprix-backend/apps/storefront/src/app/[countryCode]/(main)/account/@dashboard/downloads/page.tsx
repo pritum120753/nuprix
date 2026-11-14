@@ -1,18 +1,32 @@
 import type { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { listCustomerDownloads } from "@lib/data/downloads"
+import type { CustomerDownloadStatus } from "@lib/data/downloads"
+import DownloadLinkButton from "@modules/account/components/download-link-button"
 
 export const metadata: Metadata = {
   title: "My Downloads | Nuprix",
   description: "View your purchased digital products and download access.",
 }
 
-const statusLabels = {
+const statusLabels: Record<CustomerDownloadStatus, string> = {
   available: "Available",
+  awaiting_payment: "Awaiting payment",
+  refunded: "Refunded",
+  order_canceled: "Order canceled",
   expired: "Expired",
   revoked: "Access revoked",
   limit_reached: "Limit reached",
-} as const
+}
+
+const statusHints: Partial<Record<CustomerDownloadStatus, string>> = {
+  awaiting_payment: "Your file unlocks once your payment is confirmed.",
+  refunded: "This order was refunded, so the file is no longer available.",
+  order_canceled: "This order was canceled, so the file is not available.",
+  expired: "This download has expired. Contact support if you need help.",
+  revoked: "Access to this file was withdrawn. Contact support if you need help.",
+  limit_reached: "You have used all downloads for this file. Contact support if you need more.",
+}
 
 export default async function DownloadsPage() {
   const downloads = await listCustomerDownloads()
@@ -28,7 +42,7 @@ export default async function DownloadsPage() {
         </h1>
         <p className="mt-2 text-sm leading-6 text-[#788279]">
           Find your purchased files and check the status of your download access.
-          Your secure download link is also sent to your order email.
+          Your secure download link is also sent to your order email. Getting a new link replaces the old one.
         </p>
       </div>
 
@@ -69,15 +83,30 @@ export default async function DownloadsPage() {
                   Order: {download.order_id}
                 </p>
               </div>
-              <span
-                className={`inline-flex w-fit shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                  download.status === "available"
-                    ? "bg-[#eaf3eb] text-[#42644d]"
-                    : "bg-[#f2f2ef] text-[#777c75]"
-                }`}
-              >
-                {statusLabels[download.status]}
-              </span>
+              <div className="flex shrink-0 flex-col gap-3 small:items-end">
+                <span
+                  className={`inline-flex w-fit rounded-full px-3 py-1.5 text-xs font-semibold ${
+                    download.status === "available"
+                      ? "bg-[#eaf3eb] text-[#42644d]"
+                      : download.status === "awaiting_payment"
+                        ? "bg-[#fbf3e2] text-[#8a6a1f]"
+                        : "bg-[#f2f2ef] text-[#777c75]"
+                  }`}
+                  data-testid="download-status"
+                >
+                  {statusLabels[download.status]}
+                </span>
+                {download.status === "available" ? (
+                  <DownloadLinkButton
+                    downloadId={download.id}
+                    title={download.title}
+                  />
+                ) : (
+                  <p className="max-w-[16rem] text-xs text-[#788279] small:text-right">
+                    {statusHints[download.status]}
+                  </p>
+                )}
+              </div>
             </li>
           ))}
         </ul>
