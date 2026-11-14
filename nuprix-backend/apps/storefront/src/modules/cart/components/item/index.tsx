@@ -79,6 +79,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
             <CartItemSelect
               value={item.quantity}
               onChange={(value) => changeQuantity(parseInt(value.target.value))}
+              disabled={updating}
               className="w-14 h-10 p-4"
               data-testid="product-select-button"
             >
