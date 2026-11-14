@@ -30,7 +30,7 @@ This roadmap divides delivery into eight independently reviewable phases. Each p
 
 ## Phase 7 — Digital delivery hardening
 
-**Status: In progress.** Harden payment-gated entitlements, authenticated customer link regeneration, payment-aware download status, and safe email handling. Private storage configuration, production refund/cancel revocation, auditability, and recovery procedures still need verification and follow-up before this phase is complete.
+**Status: In progress.** Harden payment-gated entitlements, authenticated customer link regeneration, payment-aware download status, and safe email handling. Download-token request-path redaction, shared status precedence, zero-total/multiple-payment handling, and cross-process locking are included in this hardening pass. Production still requires a PostgreSQL-backed locking provider and a verified private storage configuration; refund/cancel revocation, auditability, and recovery procedures need end-to-end verification before this phase is complete. `DIGITAL_ALLOW_UNCAPTURED` is development/test-only and must never bypass production payment checks.
 
 ## Phase 8 — Launch readiness and controlled rollout
 

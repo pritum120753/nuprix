@@ -3,8 +3,11 @@ import type {
   MedusaResponse,
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { getCustomerDownloadStatus } from "../../../../lib/customer-download-status"
-import { PAYMENT_COLLECTION_FIELDS } from "../../../../lib/order-payment"
+import type { DownloadOrderStatusInput } from "../../../../lib/customer-download-status"
+import {
+  getPaymentState,
+  PAYMENT_COLLECTION_FIELDS,
+} from "../../../../lib/order-payment"
 import { DIGITAL_DELIVERY_MODULE } from "../../../../modules/digital-delivery"
 import type DigitalDeliveryModuleService from "../../../../modules/digital-delivery/service"
 
@@ -18,30 +21,33 @@ export async function GET(
   }
 
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-  const { data: orders } = await query.graph({
-    entity: "order",
-    fields: ["id", "status", ...PAYMENT_COLLECTION_FIELDS],
-    filters: { customer_id: customerId },
-  })
-  const orderIds = orders.map((order: { id: string }) => order.id)
+  const orders: Array<{
+    id: string
+    status?: string | null
+    total?: unknown
+    payment_collections?: Parameters<typeof getPaymentState>[0]
+  }> = []
+  const pageSize = 100
+  for (let skip = 0; ; skip += pageSize) {
+    const { data: page } = await query.graph({
+      entity: "order",
+      fields: ["id", "status", "total", ...PAYMENT_COLLECTION_FIELDS],
+      filters: { customer_id: customerId },
+      pagination: { skip, take: pageSize },
+    })
+    orders.push(...(page as typeof orders))
+    if (page.length < pageSize) {
+      break
+    }
+  }
 
   const service: DigitalDeliveryModuleService = req.scope.resolve(
     DIGITAL_DELIVERY_MODULE
   )
-  const customerDownloads = await service.listCustomerDownloads(
-    customerId,
-    orderIds
+  const orderById = new Map<string, DownloadOrderStatusInput>(
+    orders.map((order) => [order.id, order])
   )
-  const orderById = new Map(
-    orders.map((order: { id: string }) => [order.id, order])
-  )
-  const downloads = customerDownloads.map((download) => ({
-    ...download,
-    status: getCustomerDownloadStatus(
-      download,
-      orderById.get(download.order_id) ?? null
-    ),
-  }))
+  const downloads = await service.listCustomerDownloads(customerId, orderById)
 
   res.setHeader("Cache-Control", "private, no-store")
   return res.json({ downloads })

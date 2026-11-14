@@ -1,4 +1,7 @@
-import { getCustomerDownloadStatus } from "../customer-download-status"
+import {
+  allowsUncapturedDownloads,
+  resolveDownloadStatus,
+} from "../customer-download-status"
 
 const entitlement = {
   revoked_at: null,
@@ -9,6 +12,7 @@ const entitlement = {
 
 const paidOrder = {
   status: "completed",
+  total: 25,
   payment_collections: [
     {
       status: "completed",
@@ -19,59 +23,126 @@ const paidOrder = {
   ],
 }
 
-describe("getCustomerDownloadStatus", () => {
-  it("shows pending until payment is fully captured and not refunded", () => {
-    expect(getCustomerDownloadStatus(entitlement, null)).toBe("pending")
+describe("resolveDownloadStatus", () => {
+  it("distinguishes missing, unpaid, refunded and canceled order states", () => {
+    expect(resolveDownloadStatus(entitlement, null)).toBe("unavailable")
     expect(
-      getCustomerDownloadStatus(entitlement, {
+      resolveDownloadStatus(entitlement, {
         ...paidOrder,
+        total: 25,
         payment_collections: [
           { amount: 25, captured_amount: 12, refunded_amount: 0 },
         ],
       })
-    ).toBe("pending")
+    ).toBe("awaiting_payment")
     expect(
-      getCustomerDownloadStatus(entitlement, {
+      resolveDownloadStatus(entitlement, {
         ...paidOrder,
         payment_collections: [
-          { amount: 25, captured_amount: 25, refunded_amount: 25 },
+          { amount: 25, captured_amount: 25, refunded_amount: 1 },
         ],
       })
-    ).toBe("pending")
+    ).toBe("refunded")
     expect(
-      getCustomerDownloadStatus(entitlement, {
+      resolveDownloadStatus(entitlement, {
         ...paidOrder,
         status: "canceled",
       })
-    ).toBe("pending")
+    ).toBe("order_canceled")
   })
 
   it("shows available for fully paid orders", () => {
-    expect(getCustomerDownloadStatus(entitlement, paidOrder)).toBe("available")
+    expect(resolveDownloadStatus(entitlement, paidOrder)).toBe("available")
   })
 
-  it("prioritizes revoked, expired, and exhausted entitlements", () => {
-    const now = new Date("2026-11-14T00:00:00.000Z")
+  it("treats a zero-total order as paid without a payment collection", () => {
     expect(
-      getCustomerDownloadStatus(
-        { ...entitlement, revoked_at: now },
-        null,
-        now
+      resolveDownloadStatus(entitlement, {
+        status: "completed",
+        total: 0,
+        payment_collections: [],
+      })
+    ).toBe("available")
+  })
+
+  it("uses captured funds against the order total, ignoring extra uncaptured collections", () => {
+    expect(
+      resolveDownloadStatus(entitlement, {
+        status: "completed",
+        total: 25,
+        payment_collections: [
+          { amount: 25, captured_amount: 25, refunded_amount: 0 },
+          { amount: 25, captured_amount: 0, refunded_amount: 0 },
+        ],
+      })
+    ).toBe("available")
+  })
+
+  it("reports refunds before expiry or exhausted download limits", () => {
+    expect(
+      resolveDownloadStatus(
+        {
+          ...entitlement,
+          expires_at: "2026-11-13T00:00:00.000Z",
+          download_count: 5,
+        },
+        {
+          ...paidOrder,
+          payment_collections: [
+            { amount: 25, captured_amount: 25, refunded_amount: 1 },
+          ],
+        },
+        new Date("2026-11-14T00:00:00.000Z")
+      )
+    ).toBe("refunded")
+  })
+
+  it("treats a missing order as unavailable and applies entitlement precedence", () => {
+    expect(
+      resolveDownloadStatus(
+        { ...entitlement, expires_at: "2026-11-13T00:00:00.000Z" },
+        null
+      )
+    ).toBe("unavailable")
+    expect(
+      resolveDownloadStatus(
+        { ...entitlement, revoked_at: new Date() },
+        { ...paidOrder, status: "canceled" }
       )
     ).toBe("revoked")
     expect(
-      getCustomerDownloadStatus(
+      resolveDownloadStatus(
         { ...entitlement, expires_at: "2026-11-13T00:00:00.000Z" },
-        null,
-        now
+        paidOrder,
+        new Date("2026-11-14T00:00:00.000Z")
       )
     ).toBe("expired")
     expect(
-      getCustomerDownloadStatus(
+      resolveDownloadStatus(
         { ...entitlement, download_count: 5 },
-        null,
-        now
+        paidOrder
       )
     ).toBe("limit_reached")
+  })
+
+  it("only allows the uncaptured-payment bypass in development and test", () => {
+    expect(
+      allowsUncapturedDownloads({
+        NODE_ENV: "development",
+        DIGITAL_ALLOW_UNCAPTURED: "true",
+      } as NodeJS.ProcessEnv)
+    ).toBe(true)
+    expect(
+      allowsUncapturedDownloads({
+        NODE_ENV: "production",
+        DIGITAL_ALLOW_UNCAPTURED: "true",
+      } as NodeJS.ProcessEnv)
+    ).toBe(false)
+    expect(
+      allowsUncapturedDownloads({
+        NODE_ENV: "preview",
+        DIGITAL_ALLOW_UNCAPTURED: "true",
+      } as NodeJS.ProcessEnv)
+    ).toBe(false)
   })
 })

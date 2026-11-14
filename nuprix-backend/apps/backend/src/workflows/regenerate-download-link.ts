@@ -10,8 +10,9 @@ import {
   WorkflowResponse,
 } from "@medusajs/framework/workflows-sdk"
 import { randomUUID } from "crypto"
+import { resolveDownloadStatus } from "../lib/customer-download-status"
 import { isDownloadOwnedByCustomer } from "../lib/download-ownership"
-import { isFullyPaid, PAYMENT_COLLECTION_FIELDS } from "../lib/order-payment"
+import { PAYMENT_COLLECTION_FIELDS } from "../lib/order-payment"
 import { DIGITAL_DELIVERY_MODULE } from "../modules/digital-delivery"
 import type DigitalDeliveryModuleService from "../modules/digital-delivery/service"
 
@@ -60,6 +61,7 @@ const regenerateDownloadLinkStep = createStep(
             "email",
             "display_id",
             "status",
+            "total",
             ...PAYMENT_COLLECTION_FIELDS,
           ],
           filters: {
@@ -82,21 +84,20 @@ const regenerateDownloadLinkStep = createStep(
             "Download access was not found."
           )
         }
-        if (order.status === "canceled" || !isFullyPaid(order.payment_collections)) {
+        const status = resolveDownloadStatus(
+          entitlement,
+          order as Parameters<typeof resolveDownloadStatus>[1]
+        )
+        if (status !== "available") {
           throw new MedusaError(
             MedusaError.Types.INVALID_DATA,
-            "A new link is available after payment is confirmed and not refunded."
-          )
-        }
-        if (
-          entitlement.revoked_at ||
-          (entitlement.expires_at &&
-            new Date(entitlement.expires_at).getTime() <= Date.now()) ||
-          entitlement.download_count >= entitlement.max_downloads
-        ) {
-          throw new MedusaError(
-            MedusaError.Types.INVALID_DATA,
-            "This download entitlement is no longer available."
+            status === "awaiting_payment"
+              ? "A new link is available after payment is confirmed."
+              : status === "refunded"
+                ? "This order was refunded, so the download is unavailable."
+                : status === "order_canceled" || status === "unavailable"
+                  ? "This order is unavailable, so the download cannot be regenerated."
+                  : "This download entitlement is no longer available."
           )
         }
 
