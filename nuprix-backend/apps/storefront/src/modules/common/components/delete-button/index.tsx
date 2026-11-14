@@ -8,20 +8,34 @@ const DeleteButton = ({
   id,
   children,
   className,
+  disabled = false,
+  onPendingChange,
 }: {
   id: string
   children?: React.ReactNode
   className?: string
+  disabled?: boolean
+  onPendingChange?: (pending: boolean) => void
 }) => {
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async (id: string) => {
+    if (disabled || isDeleting) {
+      return
+    }
+
     setIsDeleting(true)
-    await deleteLineItem(id)
-      .then(notifyCartUpdated)
-      .catch((_err) => {
-        setIsDeleting(false)
-      })
+    onPendingChange?.(true)
+
+    try {
+      await deleteLineItem(id)
+      notifyCartUpdated()
+    } catch (_err) {
+      // Keep the existing behavior: the row stays visible and the button resets.
+    } finally {
+      setIsDeleting(false)
+      onPendingChange?.(false)
+    }
   }
 
   return (
@@ -32,6 +46,7 @@ const DeleteButton = ({
       )}
     >
       <button
+        disabled={disabled || isDeleting}
         className="flex gap-x-1 text-ui-fg-subtle hover:text-ui-fg-base cursor-pointer"
         onClick={() => handleDelete(id)}
       >

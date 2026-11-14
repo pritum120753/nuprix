@@ -10,7 +10,7 @@ This roadmap divides delivery into eight independently reviewable phases. Each p
 
 ## Phase 2 — Commerce rules and customer journey completion
 
-**Status: In progress.** Complete catalog, cart, checkout, account, order-history, and support journeys using existing Medusa capabilities and truthful generic UI. Capture launch market, currency, product classification, mixed-cart rules, tax, refund, license, and shipping choices as unresolved inputs when implementation depends on them.
+**Status: In progress.** Cart quantity changes and item removal are serialized; quantity controls provide accessible labels and update feedback. Continue catalog, checkout, account, order-history, and support journeys using existing Medusa capabilities and truthful generic UI. Capture launch market, currency, product classification, mixed-cart rules, tax, refund, license, and shipping choices as unresolved inputs when implementation depends on them.
 
 ## Phase 3 — Marketplace core and operator workflows
 
