@@ -18,9 +18,20 @@ export async function generateMetadata(props: {
   const [origin, regions] = await Promise.all([getSiteOrigin(), listRegions()])
 
   return {
-    title: "Medusa Next.js Starter Template",
+    title: {
+      default: "Nuprix — Digital products for bigger possibilities",
+      template: "%s | Nuprix",
+    },
     description:
-      "A performant frontend ecommerce starter template with Next.js 16 and Medusa.",
+      "Discover useful digital products, creative resources, and tools at Nuprix.",
+    applicationName: STORE_NAME,
+    openGraph: {
+      title: "Nuprix — Digital products for bigger possibilities",
+      description: "Discover useful digital products, creative resources, and tools at Nuprix.",
+      url: `${origin}/${countryCode}`,
+      siteName: STORE_NAME,
+      type: "website",
+    },
     alternates: {
       canonical: `${origin}/${countryCode}`,
       languages: {
@@ -40,11 +51,8 @@ export default async function Home(props: {
   params: Promise<{ countryCode: string }>
 }) {
   const params = await props.params
-
   const { countryCode } = params
-
   const region = await getRegion(countryCode)
-
   const { collections } = await listCollections({
     fields: "id, handle, title",
   })
