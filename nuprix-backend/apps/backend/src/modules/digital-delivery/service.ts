@@ -1,4 +1,9 @@
 import { MedusaError, MedusaService } from "@medusajs/framework/utils"
+import {
+  type CustomerDownloadStatus,
+  type DownloadOrderStatusInput,
+  resolveDownloadStatus,
+} from "../../lib/customer-download-status"
 import { hashDownloadToken, newDownloadToken } from "../../lib/download-token"
 import DigitalFile from "./models/digital-file"
 import DownloadEntitlement from "./models/download-entitlement"
@@ -14,7 +19,7 @@ export type GrantInput = {
 
 export type DownloadCheck =
   | { ok: true; entitlement_id: string; digital_file_id: string }
-  | { ok: false; reason: "invalid" | "revoked" | "expired" | "limit_reached" }
+  | { ok: false; reason: "invalid" }
 
 export type CustomerDownloadSummary = {
   id: string
@@ -28,7 +33,7 @@ export type CustomerDownloadSummary = {
   revoked_at: Date | null
   last_downloaded_at: Date | null
   created_at: Date
-  status: "available" | "expired" | "revoked" | "limit_reached"
+  status: CustomerDownloadStatus
 }
 
 class DigitalDeliveryModuleService extends MedusaService({
@@ -66,33 +71,39 @@ class DigitalDeliveryModuleService extends MedusaService({
   // Returns only safe display fields; never return token_hash or a raw token.
   async listCustomerDownloads(
     customerId: string,
-    orderIds: string[]
+    orderById: ReadonlyMap<string, DownloadOrderStatusInput>
   ): Promise<CustomerDownloadSummary[]> {
-    if (!customerId || orderIds.length === 0) {
+    if (!customerId) {
       return []
     }
 
+    const pageSize = 100
     const entitlements = await this.listDownloadEntitlements(
-      { customer_id: customerId, order_id: orderIds },
-      { order: { created_at: "DESC" }, take: 200 }
+      { customer_id: customerId },
+      { order: { created_at: "DESC" }, take: pageSize, skip: 0 }
     )
+    for (let skip = pageSize; entitlements.length === skip; skip += pageSize) {
+      const page = await this.listDownloadEntitlements(
+        { customer_id: customerId },
+        { order: { created_at: "DESC" }, take: pageSize, skip }
+      )
+      entitlements.push(...page)
+      if (page.length < pageSize) {
+        break
+      }
+    }
 
     const fileIds = [...new Set(entitlements.map((item) => item.digital_file_id))]
     const files = fileIds.length
       ? await this.listDigitalFiles({ id: fileIds }, { take: fileIds.length })
       : []
     const fileById = new Map(files.map((file) => [file.id, file]))
-    const now = Date.now()
-
     return entitlements.map((item) => {
       const file = fileById.get(item.digital_file_id)
-      const status: CustomerDownloadSummary["status"] = item.revoked_at
-        ? "revoked"
-        : item.expires_at && new Date(item.expires_at).getTime() < now
-          ? "expired"
-          : item.download_count >= item.max_downloads
-            ? "limit_reached"
-            : "available"
+      const status = resolveDownloadStatus(
+        item,
+        orderById.get(item.order_id) ?? null
+      )
 
       return {
         id: item.id,
@@ -112,13 +123,33 @@ class DigitalDeliveryModuleService extends MedusaService({
   }
 
   // Replaces the token of an existing entitlement (for "resend my link").
-  async rotateToken(entitlement_id: string): Promise<string> {
+  async rotateToken(
+    entitlement_id: string
+  ): Promise<{ token: string; previous_token_hash: string }> {
+    const entitlement = await this.retrieveDownloadEntitlement(entitlement_id)
     const token = newDownloadToken()
     await this.updateDownloadEntitlements({
       id: entitlement_id,
       token_hash: hashDownloadToken(token),
     })
-    return token
+    return { token, previous_token_hash: entitlement.token_hash }
+  }
+
+  // Restore the prior link only if the failed email attempt still owns the
+  // current token hash. Callers serialize this with the download lock.
+  async restoreRotatedToken(
+    entitlement_id: string,
+    token: string,
+    previous_token_hash: string
+  ): Promise<void> {
+    const entitlement = await this.retrieveDownloadEntitlement(entitlement_id)
+    if (entitlement.token_hash !== hashDownloadToken(token)) {
+      return
+    }
+    await this.updateDownloadEntitlements({
+      id: entitlement_id,
+      token_hash: previous_token_hash,
+    })
   }
 
   async checkToken(token: string): Promise<DownloadCheck> {
@@ -130,16 +161,6 @@ class DigitalDeliveryModuleService extends MedusaService({
     if (!entitlement) {
       return { ok: false, reason: "invalid" }
     }
-    if (entitlement.revoked_at) {
-      return { ok: false, reason: "revoked" }
-    }
-    if (entitlement.expires_at && new Date(entitlement.expires_at) < new Date()) {
-      return { ok: false, reason: "expired" }
-    }
-    if (entitlement.download_count >= entitlement.max_downloads) {
-      return { ok: false, reason: "limit_reached" }
-    }
-
     return {
       ok: true,
       entitlement_id: entitlement.id,

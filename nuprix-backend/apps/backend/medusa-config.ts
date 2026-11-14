@@ -1,8 +1,16 @@
-import { loadEnv, defineConfig } from '@medusajs/framework/utils'
+import { logger as defaultLogger } from "@medusajs/framework/logger"
+import { defineConfig, loadEnv } from "@medusajs/framework/utils"
+import { createTokenRedactingLogger } from "./src/lib/http-log-redaction"
 
-loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+loadEnv(process.env.NODE_ENV || "development", process.cwd())
+
+// Medusa's HTTP logger writes request paths through Logger.http. Download
+// tokens are bearer credentials, so redact them before any HTTP log sink sees
+// the formatted message.
+const logger = createTokenRedactingLogger(defaultLogger)
 
 module.exports = defineConfig({
+  logger,
   projectConfig: {
     databaseUrl: process.env.DATABASE_URL,
     http: {
@@ -11,9 +19,21 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET,
       cookieSecret: process.env.COOKIE_SECRET,
-    }
+    },
   },
   modules: [
+    {
+      resolve: "@medusajs/medusa/locking",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/locking-postgres",
+            id: "locking-postgres",
+            is_default: true,
+          },
+        ],
+      },
+    },
     { resolve: "./src/modules/digital-delivery" },
     // Order and download emails go through Resend when a key is set. Without
     // one, Medusa keeps its default local (feed-only) notification provider.
