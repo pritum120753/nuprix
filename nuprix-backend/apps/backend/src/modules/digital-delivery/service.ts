@@ -28,7 +28,7 @@ export type CustomerDownloadSummary = {
   revoked_at: Date | null
   last_downloaded_at: Date | null
   created_at: Date
-  status: "available" | "expired" | "revoked" | "limit_reached"
+  status: "available" | "pending" | "expired" | "revoked" | "limit_reached"
 }
 
 class DigitalDeliveryModuleService extends MedusaService({
@@ -112,13 +112,33 @@ class DigitalDeliveryModuleService extends MedusaService({
   }
 
   // Replaces the token of an existing entitlement (for "resend my link").
-  async rotateToken(entitlement_id: string): Promise<string> {
+  async rotateToken(
+    entitlement_id: string
+  ): Promise<{ token: string; previous_token_hash: string }> {
+    const entitlement = await this.retrieveDownloadEntitlement(entitlement_id)
     const token = newDownloadToken()
     await this.updateDownloadEntitlements({
       id: entitlement_id,
       token_hash: hashDownloadToken(token),
     })
-    return token
+    return { token, previous_token_hash: entitlement.token_hash }
+  }
+
+  // Restore the prior link only if the failed email attempt still owns the
+  // current token hash. Callers serialize this with the download lock.
+  async restoreRotatedToken(
+    entitlement_id: string,
+    token: string,
+    previous_token_hash: string
+  ): Promise<void> {
+    const entitlement = await this.retrieveDownloadEntitlement(entitlement_id)
+    if (entitlement.token_hash !== hashDownloadToken(token)) {
+      return
+    }
+    await this.updateDownloadEntitlements({
+      id: entitlement_id,
+      token_hash: previous_token_hash,
+    })
   }
 
   async checkToken(token: string): Promise<DownloadCheck> {

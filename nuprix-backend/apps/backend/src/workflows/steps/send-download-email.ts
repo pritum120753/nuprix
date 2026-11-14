@@ -45,12 +45,9 @@ export const sendDownloadEmailStep = createStep(
         },
       })
       return new StepResponse({ sent: true })
-    } catch (error) {
-      logger.error(
-        `Could not send download email for order ${granted.order_id}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      )
+    } catch {
+      // Provider errors can contain sensitive request payloads; never log them.
+      logger.error("Could not send a digital download email.")
       return new StepResponse({ sent: false })
     }
   }

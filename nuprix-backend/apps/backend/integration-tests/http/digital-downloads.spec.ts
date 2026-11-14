@@ -15,8 +15,21 @@ medusaIntegrationTestRunner({
     DIGITAL_S3_SECRET_ACCESS_KEY: "test-secret",
   },
   testSuite: ({ api, getContainer }) => {
-    const get = (path: string) =>
-      api.get(path, { maxRedirects: 0, validateStatus: () => true })
+    const get = (
+      path: string,
+      config: { headers?: Record<string, string> } = {}
+    ) =>
+      api.get(path, {
+        ...config,
+        maxRedirects: 0,
+        validateStatus: () => true,
+      })
+    const post = (
+      path: string,
+      data: unknown = {},
+      config: { headers?: Record<string, string> } = {}
+    ) =>
+      api.post(path, data, { ...config, validateStatus: () => true })
 
     // Gives an order a real payment collection (the only source of truth
     // Medusa has for whether an order is paid).
@@ -40,9 +53,14 @@ medusaIntegrationTestRunner({
         [Modules.ORDER]: { order_id },
         [Modules.PAYMENT]: { payment_collection_id: collection.id },
       })
+      return collection
     }
 
-    async function seed(max_downloads = 2) {
+    async function seed(
+      max_downloads = 2,
+      customer_id?: string,
+      email = "buyer@example.com"
+    ) {
       const container = getContainer()
       const orders = container.resolve(Modules.ORDER)
       const service: DigitalDeliveryModuleService = container.resolve(
@@ -51,7 +69,8 @@ medusaIntegrationTestRunner({
 
       const order = await orders.createOrders({
         currency_code: "usd",
-        email: "buyer@example.com",
+        email,
+        customer_id,
         items: [
           { title: "Course", quantity: 1, unit_price: 10, product_id: "prod_x" },
         ],
@@ -65,11 +84,32 @@ medusaIntegrationTestRunner({
       })
       const { token, id } = await service.grant({
         order_id: order.id,
-        email: "buyer@example.com",
+        customer_id,
+        email,
         digital_file_id: file.id,
         max_downloads,
       })
       return { service, order, file, token, entitlementId: id }
+    }
+
+    async function createCustomer(email: string) {
+      const password = "Safe-test-password-2026!"
+      const registration = await post("/auth/customer/emailpass/register", {
+        email,
+        password,
+      })
+      expect(registration.status).toBe(200)
+
+      const createResponse = await post(
+        "/store/customers",
+        { email, first_name: "Local", last_name: "Test" },
+        { headers: { authorization: `Bearer ${registration.data.token}` } }
+      )
+      expect(createResponse.status).toBe(200)
+
+      const login = await post("/auth/customer/emailpass", { email, password })
+      expect(login.status).toBe(200)
+      return { id: createResponse.data.customer.id, token: login.data.token }
     }
 
     afterEach(() => {
@@ -79,6 +119,69 @@ medusaIntegrationTestRunner({
     it("returns 404 for an unknown token", async () => {
       const res = await get("/downloads/not-a-real-token")
       expect(res.status).toBe(404)
+    })
+
+    it("requires a customer session for download summaries and regeneration", async () => {
+      const summary = await get("/store/customer/downloads")
+      expect(summary.status).toBe(401)
+
+      const regenerate = await post(
+        "/store/customer/downloads/dent_not_owned/regenerate"
+      )
+      expect(regenerate.status).toBe(401)
+    })
+
+    it("regenerates only the owner's paid download link and never returns the token", async () => {
+      const owner = await createCustomer("owner-download-test@example.com")
+      const otherCustomer = await createCustomer(
+        "other-download-test@example.com"
+      )
+      const { order, token, entitlementId } = await seed(
+        2,
+        owner.id,
+        "owner-download-test@example.com"
+      )
+      await attachPayment(order.id, {
+        amount: 10,
+        captured_amount: 10,
+      })
+
+      const notification = getContainer().resolve(Modules.NOTIFICATION)
+      const sendEmail = jest
+        .spyOn(notification, "createNotifications")
+        .mockResolvedValue([])
+
+      const wrongOwner = await post(
+        `/store/customer/downloads/${entitlementId}/regenerate`,
+        {},
+        { headers: { authorization: `Bearer ${otherCustomer.token}` } }
+      )
+      expect(wrongOwner.status).toBe(404)
+      expect(sendEmail).not.toHaveBeenCalled()
+
+      const result = await post(
+        `/store/customer/downloads/${entitlementId}/regenerate`,
+        {},
+        { headers: { authorization: `Bearer ${owner.token}` } }
+      )
+      expect(result.status).toBe(202)
+      expect(JSON.stringify(result.data)).not.toContain(token)
+      expect(JSON.stringify(result.data)).not.toContain("token_hash")
+      expect(sendEmail).toHaveBeenCalledTimes(1)
+
+      const emailUrl = sendEmail.mock.calls[0][0].data.downloads[0].url
+      const nextToken = emailUrl.split("/downloads/")[1]
+      expect(nextToken).toBeTruthy()
+      expect(nextToken).not.toBe(token)
+      expect((await get(`/downloads/${token}`)).status).toBe(404)
+
+      const summary = await get("/store/customer/downloads", {
+        headers: { authorization: `Bearer ${owner.token}` },
+      })
+      expect(summary.status).toBe(200)
+      expect(summary.data.downloads[0].status).toBe("available")
+      expect(JSON.stringify(summary.data)).not.toContain(nextToken)
+      expect(JSON.stringify(summary.data)).not.toContain("token_hash")
     })
 
     it("refuses to serve a file until payment is captured", async () => {

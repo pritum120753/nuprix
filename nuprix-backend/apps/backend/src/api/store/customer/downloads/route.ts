@@ -3,6 +3,8 @@ import type {
   MedusaResponse,
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { getCustomerDownloadStatus } from "../../../../lib/customer-download-status"
+import { PAYMENT_COLLECTION_FIELDS } from "../../../../lib/order-payment"
 import { DIGITAL_DELIVERY_MODULE } from "../../../../modules/digital-delivery"
 import type DigitalDeliveryModuleService from "../../../../modules/digital-delivery/service"
 
@@ -18,7 +20,7 @@ export async function GET(
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   const { data: orders } = await query.graph({
     entity: "order",
-    fields: ["id"],
+    fields: ["id", "status", ...PAYMENT_COLLECTION_FIELDS],
     filters: { customer_id: customerId },
   })
   const orderIds = orders.map((order: { id: string }) => order.id)
@@ -26,7 +28,20 @@ export async function GET(
   const service: DigitalDeliveryModuleService = req.scope.resolve(
     DIGITAL_DELIVERY_MODULE
   )
-  const downloads = await service.listCustomerDownloads(customerId, orderIds)
+  const customerDownloads = await service.listCustomerDownloads(
+    customerId,
+    orderIds
+  )
+  const orderById = new Map(
+    orders.map((order: { id: string }) => [order.id, order])
+  )
+  const downloads = customerDownloads.map((download) => ({
+    ...download,
+    status: getCustomerDownloadStatus(
+      download,
+      orderById.get(download.order_id) ?? null
+    ),
+  }))
 
   res.setHeader("Cache-Control", "private, no-store")
   return res.json({ downloads })

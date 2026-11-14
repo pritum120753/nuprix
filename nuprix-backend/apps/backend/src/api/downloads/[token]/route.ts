@@ -68,6 +68,22 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         if (!check.ok) {
           return check
         }
+        const currentEntitlement = await service.retrieveDownloadEntitlement(
+          check.entitlement_id
+        )
+        const { data: currentOrders } = await query.graph({
+          entity: "order",
+          fields: ["id", "status", ...PAYMENT_COLLECTION_FIELDS],
+          filters: { id: currentEntitlement.order_id },
+        })
+        const currentOrder = currentOrders[0]
+        if (
+          !currentOrder ||
+          currentOrder.status === "canceled" ||
+          (requireCapture && !isFullyPaid(currentOrder.payment_collections))
+        ) {
+          return { ok: false as const, reason: "unpaid" as const }
+        }
         const file = await service.retrieveDigitalFile(check.digital_file_id)
         const url = await createDownloadUrl(file.file_key, file.file_name)
         await service.recordDownload(check.entitlement_id)
@@ -87,6 +103,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   }
 
   if (!outcome.ok) {
+    if (outcome.reason === "unpaid") {
+      return res.status(402).json({ message: MESSAGES.unpaid })
+    }
     const status = outcome.reason === "invalid" ? 404 : 410
     return res.status(status).json({ message: MESSAGES[outcome.reason] })
   }

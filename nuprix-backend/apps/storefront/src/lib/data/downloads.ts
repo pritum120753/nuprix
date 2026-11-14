@@ -16,7 +16,7 @@ export type CustomerDownload = {
   revoked_at: string | null
   last_downloaded_at: string | null
   created_at: string
-  status: "available" | "expired" | "revoked" | "limit_reached"
+  status: "available" | "pending" | "expired" | "revoked" | "limit_reached"
 }
 
 export const listCustomerDownloads = async (): Promise<CustomerDownload[]> => {
@@ -30,4 +30,25 @@ export const listCustomerDownloads = async (): Promise<CustomerDownload[]> => {
     })
     .then(({ downloads }) => downloads)
     .catch((error) => medusaError(error))
+}
+
+export const regenerateCustomerDownload = async (
+  entitlementId: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    const headers = await getAuthHeaders()
+    await sdk.client.fetch(
+      `/store/customer/downloads/${encodeURIComponent(entitlementId)}/regenerate`,
+      { method: "POST", headers, cache: "no-store" }
+    )
+    return {
+      success: true,
+      message: "A fresh download link was sent to your order email.",
+    }
+  } catch {
+    return {
+      success: false,
+      message: "We could not send a new link. Please try again later.",
+    }
+  }
 }

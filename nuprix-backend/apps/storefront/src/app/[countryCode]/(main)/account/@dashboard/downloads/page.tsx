@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { listCustomerDownloads } from "@lib/data/downloads"
+import RegenerateDownloadButton from "@modules/account/components/regenerate-download-button"
 
 export const metadata: Metadata = {
   title: "My Downloads | Nuprix",
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
 
 const statusLabels = {
   available: "Available",
+  pending: "Pending payment",
   expired: "Expired",
   revoked: "Access revoked",
   limit_reached: "Limit reached",
@@ -78,6 +80,9 @@ export default async function DownloadsPage() {
               >
                 {statusLabels[download.status]}
               </span>
+              {download.status === "available" ? (
+                <RegenerateDownloadButton entitlementId={download.id} />
+              ) : null}
             </li>
           ))}
         </ul>
