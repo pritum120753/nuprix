@@ -1,4 +1,4 @@
-﻿.env
+.env
 .env.*
 # Local TLS certificates and environment-specific files
 supabase-ca.crt

@@ -1,0 +1,97 @@
+export type RenderedEmail = {
+  subject: string
+  html: string
+  text: string
+}
+
+type DownloadItem = {
+  title: string
+  file_name: string
+  url: string
+  max_downloads: number
+  expires_at: string | null
+}
+
+type DigitalDownloadData = {
+  display_id?: number | string | null
+  downloads?: DownloadItem[]
+}
+
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+// Only http(s) links may appear in an email button.
+function safeUrl(value: string): string {
+  try {
+    const url = new URL(value)
+    return url.protocol === "https:" || url.protocol === "http:"
+      ? url.toString()
+      : "#"
+  } catch {
+    return "#"
+  }
+}
+
+function formatDate(iso: string | null): string {
+  return iso ? new Date(iso).toISOString().slice(0, 10) : ""
+}
+
+function digitalDownload(data: DigitalDownloadData): RenderedEmail {
+  const downloads = data.downloads ?? []
+  const orderLabel = data.display_id ? ` (order #${data.display_id})` : ""
+
+  const rows = downloads
+    .map((d) => {
+      const notes = [
+        `${d.max_downloads} downloads`,
+        d.expires_at ? `valid until ${formatDate(d.expires_at)}` : null,
+      ]
+        .filter(Boolean)
+        .join(", ")
+      return `<tr><td style="padding:12px 0;border-bottom:1px solid #eee">
+<strong>${escapeHtml(d.title)}</strong><br>
+<span style="color:#666;font-size:13px">${escapeHtml(d.file_name)} - ${escapeHtml(notes)}</span><br>
+<a href="${escapeHtml(safeUrl(d.url))}" style="display:inline-block;margin-top:8px;padding:10px 16px;background:#111;color:#fff;text-decoration:none;border-radius:6px">Download</a>
+</td></tr>`
+    })
+    .join("")
+
+  const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111">
+<h2>Your Nuprix downloads${escapeHtml(orderLabel)}</h2>
+<p>Thank you for your purchase. Your files are ready once your payment is confirmed.</p>
+<table style="width:100%;border-collapse:collapse">${rows}</table>
+<p style="color:#666;font-size:12px;margin-top:24px">These links are personal. Please do not share them.</p>
+</div>`
+
+  const text = [
+    `Your Nuprix downloads${orderLabel}`,
+    "",
+    ...downloads.map((d) => `${d.title}: ${d.url}`),
+    "",
+    "These links are personal. Please do not share them.",
+  ].join("\n")
+
+  return {
+    subject: `Your Nuprix downloads${orderLabel}`,
+    html,
+    text,
+  }
+}
+
+const RENDERERS: Record<string, (data: never) => RenderedEmail> = {
+  "digital-download": digitalDownload as (data: never) => RenderedEmail,
+}
+
+export function renderTemplate(
+  template: string,
+  data: unknown
+): RenderedEmail | null {
+  const render = RENDERERS[template]
+  return render ? render((data ?? {}) as never) : null
+}
