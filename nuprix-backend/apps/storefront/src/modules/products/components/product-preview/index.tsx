@@ -16,10 +16,7 @@ export default async function ProductPreview({
   const { cheapestPrice } = getProductPrice({ product })
 
   return (
-    <LocalizedClientLink
-      href={`/products/${product.handle}`}
-      className="group block h-full"
-    >
+    <LocalizedClientLink href={`/products/${product.handle}`} className="group block h-full">
       <article className="flex h-full flex-col">
         <div className="relative">
           <Thumbnail
@@ -30,9 +27,6 @@ export default async function ProductPreview({
             isFeatured={isFeatured}
             className="rounded-[1.35rem] border border-[#e6eae3] bg-[#eef1eb] p-3 shadow-none transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_18px_45px_rgba(28,48,34,0.12)]"
           />
-          <span className="absolute left-5 top-5 rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#42644d] backdrop-blur">
-            Digital product
-          </span>
           <span className="absolute bottom-5 right-5 grid h-10 w-10 translate-y-2 place-items-center rounded-full bg-[#172b20] text-lg text-white opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100" aria-hidden="true">
             ↗
           </span>
@@ -56,7 +50,7 @@ export default async function ProductPreview({
           )}
         </div>
         <span className="mt-4 inline-flex w-fit items-center gap-2 border-b border-[#b8c9ba] pb-1 text-xs font-semibold text-[#42644d] transition-colors group-hover:border-[#42644d]">
-          Explore product <span aria-hidden="true">→</span>
+          View product <span aria-hidden="true">→</span>
         </span>
       </article>
     </LocalizedClientLink>
