@@ -16,6 +16,21 @@ export type DownloadCheck =
   | { ok: true; entitlement_id: string; digital_file_id: string }
   | { ok: false; reason: "invalid" | "revoked" | "expired" | "limit_reached" }
 
+export type CustomerDownloadSummary = {
+  id: string
+  order_id: string
+  digital_file_id: string
+  title: string
+  file_name: string
+  download_count: number
+  max_downloads: number
+  expires_at: Date | null
+  revoked_at: Date | null
+  last_downloaded_at: Date | null
+  created_at: Date
+  status: "available" | "expired" | "revoked" | "limit_reached"
+}
+
 class DigitalDeliveryModuleService extends MedusaService({
   DigitalFile,
   DownloadEntitlement,
@@ -46,6 +61,54 @@ class DigitalDeliveryModuleService extends MedusaService({
     })
 
     return { id: created.id, token }
+  }
+
+  // Returns only safe display fields; never return token_hash or a raw token.
+  async listCustomerDownloads(
+    customerId: string,
+    orderIds: string[]
+  ): Promise<CustomerDownloadSummary[]> {
+    if (!customerId || orderIds.length === 0) {
+      return []
+    }
+
+    const entitlements = await this.listDownloadEntitlements(
+      { customer_id: customerId, order_id: orderIds },
+      { order: { created_at: "DESC" }, take: 200 }
+    )
+
+    const fileIds = [...new Set(entitlements.map((item) => item.digital_file_id))]
+    const files = fileIds.length
+      ? await this.listDigitalFiles({ id: fileIds }, { take: fileIds.length })
+      : []
+    const fileById = new Map(files.map((file) => [file.id, file]))
+    const now = Date.now()
+
+    return entitlements.map((item) => {
+      const file = fileById.get(item.digital_file_id)
+      const status: CustomerDownloadSummary["status"] = item.revoked_at
+        ? "revoked"
+        : item.expires_at && new Date(item.expires_at).getTime() < now
+          ? "expired"
+          : item.download_count >= item.max_downloads
+            ? "limit_reached"
+            : "available"
+
+      return {
+        id: item.id,
+        order_id: item.order_id,
+        digital_file_id: item.digital_file_id,
+        title: file?.title ?? "Digital product",
+        file_name: file?.file_name ?? "Download",
+        download_count: item.download_count,
+        max_downloads: item.max_downloads,
+        expires_at: item.expires_at,
+        revoked_at: item.revoked_at,
+        last_downloaded_at: item.last_downloaded_at,
+        created_at: item.created_at,
+        status,
+      }
+    })
   }
 
   // Replaces the token of an existing entitlement (for "resend my link").
