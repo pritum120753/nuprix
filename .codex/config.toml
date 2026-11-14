@@ -3,7 +3,7 @@ enabled = true
 max_concurrent_threads_per_session = 3
 
 [agents.lead_architect]
-description = "Coordinates Nuprix phase work, dependencies, and integration reviews. Use as the project lead; it does not authorize work beyond the currently approved phase."
+description = "Coordinates sequential Nuprix phase work, dependencies, and integration reviews under the master development authorization."
 config_file = "agents/lead-architect.toml"
 
 [agents.frontend_specialist]
@@ -15,7 +15,7 @@ description = "Reviews customer journeys for catalog, cart, checkout, orders, an
 config_file = "agents/ecommerce-specialist.toml"
 
 [agents.supplier_integration_specialist]
-description = "Researches and implements supplier APIs, catalog mapping, and inventory synchronization only in an approved phase and after supplier choices are confirmed."
+description = "Researches and implements supplier APIs, catalog mapping, and inventory synchronization in the planned phase after supplier choices are confirmed."
 config_file = "agents/supplier-integration-specialist.toml"
 
 [agents.backend_specialist]

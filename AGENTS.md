@@ -3,11 +3,11 @@
 ## Scope and approvals
 
 - Work only in this Nuprix repository.
-- Follow the currently approved phase in `docs/implementation-roadmap.md`. Phase 1 is authorized; Phases 2–8 require separate user approval.
-- Do not expose secrets, purchase services, deploy, push to `main`, merge pull requests, or perform destructive database operations.
+- Continue phases in roadmap order under the user's master development authorization. Record unknown business decisions as blockers; do not invent supplier capabilities or legal/payment policies.
+- Do not expose secrets, purchase services, deploy, push directly to `main`, merge pull requests, or perform destructive database operations. Feature-branch pushes and draft PR creation/updates are authorized.
 - Do not install packages or change dependencies unless the user separately approves it.
 - Keep the pre-existing modifications to `nuprix-backend/package.json` and `nuprix-backend/package-lock.json` intact.
-- Use a dedicated `codex/` feature branch for each approved phase. Prepare a reviewable branch and report PR readiness; never push or merge without explicit authorization.
+- Use a dedicated `codex/` feature branch and reviewable PR for each phase. Preserve PR #5 and its history. Do not merge PRs or push to `main`.
 - Do not modify files owned by another active agent. The lead assigns non-overlapping file scopes and reviews integration.
 
 ## Repository facts
