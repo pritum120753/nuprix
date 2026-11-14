@@ -25,39 +25,20 @@ export default async function Nav() {
               <SideMenu regions={regions} locales={locales} currentLocale={currentLocale} />
             </div>
           </div>
-
           <div className="flex items-center h-full">
-            <LocalizedClientLink
-              href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
-              data-testid="nav-store-link"
-            >
-              Medusa Store
+            <LocalizedClientLink href="/" className="flex items-center gap-2 text-xl font-semibold tracking-tight text-slate-900" data-testid="nav-store-link">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-sm font-bold text-white">N</span>
+              <span>nuprix</span>
             </LocalizedClientLink>
           </div>
-
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
             <Search />
             <div className="hidden small:flex items-center gap-x-6 h-full">
-              <LocalizedClientLink
-                className="hover:text-ui-fg-base"
-                href="/account"
-                data-testid="nav-account-link"
-              >
+              <LocalizedClientLink className="hover:text-ui-fg-base" href="/account" data-testid="nav-account-link">
                 Account
               </LocalizedClientLink>
             </div>
-            <Suspense
-              fallback={
-                <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex gap-2"
-                  href="/cart"
-                  data-testid="nav-cart-link"
-                >
-                  Cart (0)
-                </LocalizedClientLink>
-              }
-            >
+            <Suspense fallback={<LocalizedClientLink className="hover:text-ui-fg-base flex gap-2" href="/cart" data-testid="nav-cart-link">Cart (0)</LocalizedClientLink>}>
               <CartButton />
             </Suspense>
           </div>
