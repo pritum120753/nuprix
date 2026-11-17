@@ -15,6 +15,7 @@ import {
 } from "./cookies"
 import { getRegion } from "./regions"
 import { getLocale } from "./locale-actions"
+import { getCartDeliverySplit } from "@lib/util/product"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -386,8 +387,13 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     return e instanceof Error ? e.message : String(e)
   }
 
+  const cart = await retrieveCart()
+  const nextStep = getCartDeliverySplit(cart?.items).isDigitalOnly
+    ? "payment"
+    : "delivery"
+
   redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
+    `/${formData.get("shipping_address.country_code")}/checkout?step=${nextStep}`
   )
 }
 

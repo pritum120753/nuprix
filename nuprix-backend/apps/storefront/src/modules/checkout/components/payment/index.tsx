@@ -2,6 +2,7 @@
 import { RadioGroup } from "@headlessui/react"
 import { getPaymentInfo, isStripeLike } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
+import { getCartDeliverySplit } from "@lib/util/product"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import PaymentContainer, {
@@ -57,8 +58,11 @@ const Payment = ({
     (cart as unknown as Record<string, unknown>)?.gift_cards && ((cart as unknown as Record<string, unknown>)?.gift_cards as unknown[])?.length > 0 && cart?.total === 0
   )
 
-  const paymentReady =
-    (activeSession && (cart?.shipping_methods?.length ?? 0) !== 0) || paidByGiftcard
+  const { isDigitalOnly } = getCartDeliverySplit(cart.items)
+  const hasDelivery =
+    isDigitalOnly || (cart?.shipping_methods?.length ?? 0) !== 0
+
+  const paymentReady = (activeSession && hasDelivery) || paidByGiftcard
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
