@@ -84,8 +84,40 @@ function digitalDownload(data: DigitalDownloadData): RenderedEmail {
   }
 }
 
+type PasswordResetData = {
+  reset_url?: string
+  email?: string
+}
+
+function passwordReset(data: PasswordResetData): RenderedEmail {
+  const url = safeUrl(data.reset_url || "#")
+
+  const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#1B1F1C">
+<h2>Reset your Nuprix password</h2>
+<p>We received a request to reset the password for your Nuprix account. Click the button below to choose a new password.</p>
+<p style="margin:24px 0"><a href="${escapeHtml(url)}" style="display:inline-block;padding:12px 20px;background:#1F4D3A;color:#FAF8F3;text-decoration:none;border-radius:6px;font-weight:600">Reset password</a></p>
+<p style="color:#5A645C;font-size:12px">If you did not request a password reset, you can safely ignore this email.</p>
+</div>`
+
+  const text = [
+    "Reset your Nuprix password",
+    "",
+    "We received a request to reset the password for your Nuprix account.",
+    `Reset link: ${url}`,
+    "",
+    "If you did not request a password reset, you can safely ignore this email.",
+  ].join("\n")
+
+  return {
+    subject: "Reset your Nuprix password",
+    html,
+    text,
+  }
+}
+
 const RENDERERS: Record<string, (data: never) => RenderedEmail> = {
   "digital-download": digitalDownload as (data: never) => RenderedEmail,
+  "password-reset": passwordReset as (data: never) => RenderedEmail,
 }
 
 export function renderTemplate(
