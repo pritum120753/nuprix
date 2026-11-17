@@ -8,8 +8,12 @@ export const dynamic = "force-dynamic"
 const STATIC_PATHS = [
   "",
   "/store",
+  "/about",
+  "/faq",
   "/shipping",
   "/returns",
+  "/refund-policy",
+  "/digital-license",
   "/terms",
   "/privacy",
   "/contact",

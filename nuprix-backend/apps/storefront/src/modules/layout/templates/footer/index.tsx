@@ -84,6 +84,22 @@ export default async function Footer() {
                 <li>
                   <LocalizedClientLink
                     className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    href="/about"
+                  >
+                    About Us
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    href="/faq"
+                  >
+                    FAQ
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
                     href="/shipping"
                   >
                     Shipping Policy
@@ -95,6 +111,22 @@ export default async function Footer() {
                     href="/returns"
                   >
                     Returns & Refunds
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    href="/refund-policy"
+                  >
+                    Refund Policy
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    href="/digital-license"
+                  >
+                    Digital License
                   </LocalizedClientLink>
                 </li>
                 <li>
