@@ -1,10 +1,54 @@
 import { loadEnv, defineConfig } from '@medusajs/framework/utils'
+import { existsSync, readFileSync } from 'node:fs'
+import path from 'node:path'
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd())
 
+function resolveDatabaseCaCert(): string | undefined {
+  if (process.env.DATABASE_CA_CERT?.trim()) {
+    return process.env.DATABASE_CA_CERT.replace(/\\n/g, '\n')
+  }
+
+  const certPath = process.env.DATABASE_CA_CERT_PATH?.trim()
+  if (certPath) {
+    return readFileSync(path.resolve(process.cwd(), certPath), 'utf8')
+  }
+
+  const localCertPath = path.resolve(process.cwd(), 'supabase-ca.crt')
+  if (existsSync(localCertPath)) {
+    return readFileSync(localCertPath, 'utf8')
+  }
+
+  return undefined
+}
+
+const databaseCaCert = resolveDatabaseCaCert()
+const useDatabaseSsl = Boolean(databaseCaCert) || process.env.DATABASE_SSL === 'true'
+const databaseUrl = process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL) : undefined
+if (useDatabaseSsl) {
+  databaseUrl?.searchParams.delete('sslmode')
+}
+
+
 module.exports = defineConfig({
   projectConfig: {
-    databaseUrl: process.env.DATABASE_URL,
+    databaseUrl: databaseUrl?.toString(),
+    ...(useDatabaseSsl
+      ? {
+          databaseDriverOptions: {
+            connection: {
+              ssl: databaseCaCert
+                ? {
+                    ca: databaseCaCert,
+                    rejectUnauthorized: true,
+                  }
+                : {
+                    rejectUnauthorized: true,
+                  },
+            },
+          },
+        }
+      : {}),
     http: {
       storeCors: process.env.STORE_CORS!,
       adminCors: process.env.ADMIN_CORS!,
@@ -38,4 +82,26 @@ module.exports = defineConfig({
         ]
       : []),
   ],
+  admin: {
+    vite: () => ({
+      plugins: [
+        {
+          name: "nuprix-admin-tailwind-config",
+          enforce: "pre",
+          transform(code, id) {
+            const cssPath = id.split("?")[0].replace(/\\/g, "/")
+
+            if (
+              !cssPath.endsWith("/.medusa/client/index.css") ||
+              code.includes("@config")
+            ) {
+              return null
+            }
+
+            return `@config "../../tailwind.config.js";\n${code}`
+          },
+        },
+      ],
+    }),
+  },
 })

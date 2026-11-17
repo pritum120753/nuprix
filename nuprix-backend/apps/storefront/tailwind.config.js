@@ -20,6 +20,27 @@ module.exports = {
         padding: "padding-top padding-right padding-bottom padding-left",
       },
       colors: {
+        // Nuprix brand tokens. Use these instead of hardcoded hex values.
+        nuprix: {
+          ivory: "#f7f7f2",
+          paper: "#fbfbf8",
+          mist: "#eef1eb",
+          line: "#e3e8df",
+          "line-strong": "#cbd8cd",
+          sage: "#dce9dc",
+          leaf: "#71917a",
+          moss: "#548365",
+          pine: "#294b35",
+          forest: "#172b20",
+          ink: "#17211b",
+          charcoal: "#24372a",
+          muted: "#66736a",
+          subtle: "#788279",
+          lilac: "#e9e3fa",
+          sand: "#f5e5d7",
+          sky: "#dce8f4",
+          danger: "#9f2d2d",
+        },
         grey: {
           0: "#FFFFFF",
           5: "#F9FAFB",
@@ -57,8 +78,20 @@ module.exports = {
       fontSize: {
         "3xl": "2rem",
       },
+      boxShadow: {
+        card: "0 1px 2px rgba(23, 43, 32, 0.04), 0 8px 24px rgba(23, 43, 32, 0.06)",
+        lift: "0 18px 45px rgba(28, 48, 34, 0.12)",
+      },
       fontFamily: {
+        display: [
+          "var(--font-display)",
+          "Georgia",
+          "Cambria",
+          "Times New Roman",
+          "serif",
+        ],
         sans: [
+          "var(--font-sans)",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",

@@ -6,12 +6,14 @@ import { HttpTypes } from "@medusajs/types"
 import CartItemSelect from "@modules/cart/components/cart-item-select"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import DeleteButton from "@modules/common/components/delete-button"
+import FulfillmentBadge from "@modules/common/components/fulfillment-badge"
 import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Spinner from "@modules/common/icons/spinner"
 import Thumbnail from "@modules/products/components/thumbnail"
+import { getLineItemFulfillmentType } from "@lib/util/product"
 import { useState } from "react"
 
 const MAX_QUANTITY_OPTIONS = 10
@@ -93,6 +95,10 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
           {item.product_title}
         </Text>
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
+        <FulfillmentBadge
+          type={getLineItemFulfillmentType(item)}
+          context="cart"
+        />
       </Table.Cell>
 
       {type === "full" && (

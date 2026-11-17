@@ -49,13 +49,56 @@
   }
 }
 
+@layer base {
+  :focus-visible {
+    outline: 2px solid #548365;
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: #dce9dc;
+    color: #172b20;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
 @layer components {
   .content-container {
-    @apply max-w-[1440px] w-full mx-auto px-6;
+    @apply max-w-[1440px] w-full mx-auto px-4 xsmall:px-6;
+  }
+
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-nuprix-forest focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.2em] text-nuprix-leaf;
+  }
+
+  .heading-display {
+    @apply font-display font-medium tracking-[-0.02em] text-nuprix-forest;
+  }
+
+  .surface-card {
+    @apply rounded-2xl border border-nuprix-line bg-white;
+  }
+
+  .link-underline {
+    @apply font-semibold text-nuprix-pine underline decoration-nuprix-line-strong underline-offset-4 transition-colors hover:decoration-nuprix-pine;
   }
 
   .contrast-btn {
-    @apply px-4 py-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors duration-200 ease-in;
+    @apply px-4 py-2 border border-nuprix-forest rounded-full hover:bg-nuprix-forest hover:text-white transition-colors duration-200 ease-in;
   }
 
   .text-xsmall-regular {

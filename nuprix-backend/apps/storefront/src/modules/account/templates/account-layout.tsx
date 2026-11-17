@@ -1,7 +1,5 @@
 import React from "react"
-
-import UnderlineLink from "@modules/common/components/interactive-link"
-
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import AccountNav from "../components/account-nav"
 import { HttpTypes } from "@medusajs/types"
 
@@ -15,25 +13,28 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className="flex-1 small:py-12" data-testid="account-page">
-      <div className="flex-1 content-container h-full max-w-5xl mx-auto bg-white flex flex-col">
-        <div className="grid grid-cols-1  small:grid-cols-[240px_1fr] py-12">
-          <div>{customer && <AccountNav customer={customer} />}</div>
-          <div className="flex-1">{children}</div>
+    <div className="flex-1 py-8 small:py-16 bg-nuprix-ivory min-h-[calc(100vh-64px)]" data-testid="account-page">
+      <div className="content-container max-w-6xl mx-auto flex flex-col gap-8">
+        <div className="grid grid-cols-1 small:grid-cols-[260px_1fr] gap-8">
+          <aside className="surface-card p-6 h-fit">
+            {customer && <AccountNav customer={customer} />}
+          </aside>
+          <main className="surface-card p-6 small:p-8">
+            {children}
+          </main>
         </div>
-        <div className="flex flex-col small:flex-row items-end justify-between small:border-t border-gray-200 py-12 gap-8">
+
+        <div className="surface-card p-6 flex flex-col small:flex-row items-start small:items-center justify-between gap-4 text-sm text-nuprix-muted">
           <div>
-            <h3 className="text-xl-semi mb-4">Got questions?</h3>
-            <span className="txt-medium">
-              You can find frequently asked questions and answers on our
-              customer service page.
-            </span>
+            <h4 className="font-semibold text-nuprix-forest">Need assistance with your orders or digital library?</h4>
+            <p className="mt-0.5 text-xs">Reach out to our customer care team or read our fulfillment guidelines.</p>
           </div>
-          <div>
-            <UnderlineLink href="/customer-service">
-              Customer Service
-            </UnderlineLink>
-          </div>
+          <LocalizedClientLink
+            href="/contact"
+            className="text-xs font-semibold text-nuprix-pine hover:text-nuprix-forest underline underline-offset-4"
+          >
+            Contact Customer Care →
+          </LocalizedClientLink>
         </div>
       </div>
     </div>
