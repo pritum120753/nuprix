@@ -1,4 +1,8 @@
 import { MedusaError, MedusaService } from "@medusajs/framework/utils"
+import {
+  resolveEntitlementStatus,
+  type EntitlementStatus,
+} from "../../lib/download-status"
 import { hashDownloadToken, newDownloadToken } from "../../lib/download-token"
 import DigitalFile from "./models/digital-file"
 import DownloadEntitlement from "./models/download-entitlement"
@@ -16,6 +20,11 @@ export type DownloadCheck =
   | { ok: true; entitlement_id: string; digital_file_id: string }
   | { ok: false; reason: "invalid" | "revoked" | "expired" | "limit_reached" }
 
+export type OrderPaymentState = {
+  paid: boolean
+  canceled: boolean
+}
+
 export type CustomerDownloadSummary = {
   id: string
   order_id: string
@@ -28,7 +37,7 @@ export type CustomerDownloadSummary = {
   revoked_at: Date | null
   last_downloaded_at: Date | null
   created_at: Date
-  status: "available" | "expired" | "revoked" | "limit_reached"
+  status: EntitlementStatus
 }
 
 class DigitalDeliveryModuleService extends MedusaService({
@@ -66,7 +75,8 @@ class DigitalDeliveryModuleService extends MedusaService({
   // Returns only safe display fields; never return token_hash or a raw token.
   async listCustomerDownloads(
     customerId: string,
-    orderIds: string[]
+    orderIds: string[],
+    orderPaymentState?: Map<string, OrderPaymentState>
   ): Promise<CustomerDownloadSummary[]> {
     if (!customerId || orderIds.length === 0) {
       return []
@@ -82,17 +92,20 @@ class DigitalDeliveryModuleService extends MedusaService({
       ? await this.listDigitalFiles({ id: fileIds }, { take: fileIds.length })
       : []
     const fileById = new Map(files.map((file) => [file.id, file]))
-    const now = Date.now()
+    const nowMs = Date.now()
 
     return entitlements.map((item) => {
       const file = fileById.get(item.digital_file_id)
-      const status: CustomerDownloadSummary["status"] = item.revoked_at
-        ? "revoked"
-        : item.expires_at && new Date(item.expires_at).getTime() < now
-          ? "expired"
-          : item.download_count >= item.max_downloads
-            ? "limit_reached"
-            : "available"
+      const orderState = orderPaymentState?.get(item.order_id)
+      const status = resolveEntitlementStatus({
+        revokedAt: item.revoked_at,
+        expiresAt: item.expires_at,
+        downloadCount: item.download_count,
+        maxDownloads: item.max_downloads,
+        isOrderPaid: orderState?.paid,
+        isOrderCanceled: orderState?.canceled,
+        nowMs,
+      })
 
       return {
         id: item.id,
@@ -130,14 +143,14 @@ class DigitalDeliveryModuleService extends MedusaService({
     if (!entitlement) {
       return { ok: false, reason: "invalid" }
     }
-    if (entitlement.revoked_at) {
-      return { ok: false, reason: "revoked" }
-    }
-    if (entitlement.expires_at && new Date(entitlement.expires_at) < new Date()) {
-      return { ok: false, reason: "expired" }
-    }
-    if (entitlement.download_count >= entitlement.max_downloads) {
-      return { ok: false, reason: "limit_reached" }
+    const status = resolveEntitlementStatus({
+      revokedAt: entitlement.revoked_at,
+      expiresAt: entitlement.expires_at,
+      downloadCount: entitlement.download_count,
+      maxDownloads: entitlement.max_downloads,
+    })
+    if (status === "revoked" || status === "expired" || status === "limit_reached") {
+      return { ok: false, reason: status }
     }
 
     return {

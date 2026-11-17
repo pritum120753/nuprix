@@ -16,7 +16,12 @@ export type CustomerDownload = {
   revoked_at: string | null
   last_downloaded_at: string | null
   created_at: string
-  status: "available" | "expired" | "revoked" | "limit_reached"
+  status:
+    | "available"
+    | "awaiting_payment"
+    | "expired"
+    | "revoked"
+    | "limit_reached"
 }
 
 export const listCustomerDownloads = async (): Promise<CustomerDownload[]> => {

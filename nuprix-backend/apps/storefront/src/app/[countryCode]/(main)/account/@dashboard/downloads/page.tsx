@@ -9,6 +9,7 @@ export const metadata: Metadata = {
 
 const statusLabels = {
   available: "Available",
+  awaiting_payment: "Awaiting payment",
   expired: "Expired",
   revoked: "Access revoked",
   limit_reached: "Limit reached",
