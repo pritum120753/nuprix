@@ -168,6 +168,33 @@ class DigitalDeliveryModuleService extends MedusaService({
       last_downloaded_at: new Date(),
     })
   }
+
+  // Idempotently revokes all active entitlements for an order (used on cancel/refund).
+  async revokeByOrder(order_id: string): Promise<{ revoked_count: number }> {
+    if (!order_id) {
+      return { revoked_count: 0 }
+    }
+
+    const entitlements = await this.listDownloadEntitlements(
+      { order_id },
+      { take: 500 }
+    )
+    const now = new Date()
+    const active = entitlements.filter((item) => !item.revoked_at)
+
+    if (!active.length) {
+      return { revoked_count: 0 }
+    }
+
+    await this.updateDownloadEntitlements(
+      active.map((item) => ({
+        id: item.id,
+        revoked_at: now,
+      }))
+    )
+
+    return { revoked_count: active.length }
+  }
 }
 
 export default DigitalDeliveryModuleService
