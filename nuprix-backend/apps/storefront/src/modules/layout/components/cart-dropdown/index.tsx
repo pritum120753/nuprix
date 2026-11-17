@@ -13,6 +13,7 @@ import { getLineItemFulfillmentType } from "@lib/util/product"
 import { HttpTypes } from "@medusajs/types"
 import { buttonClasses } from "@modules/common/components/ui"
 import DeleteButton from "@modules/common/components/delete-button"
+import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
@@ -166,6 +167,10 @@ const CartDropdown = ({
                               currencyCode={cartState.currency_code}
                             />
                           </div>
+                          <LineItemOptions
+                            variant={item.variant}
+                            data-testid="cart-item-variant"
+                          />
                           <div className="mt-1 flex items-center justify-between text-xs text-nuprix-muted">
                             <span>
                               Qty: {item.quantity} ·{" "}
