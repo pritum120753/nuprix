@@ -84,6 +84,14 @@ module.exports = defineConfig({
   ],
   admin: {
     vite: () => ({
+      resolve: {
+        alias: {
+          "@medusajs/ui": path.resolve(
+            process.cwd(),
+            "node_modules/@medusajs/ui"
+          ),
+        },
+      },
       plugins: [
         {
           name: "nuprix-admin-tailwind-config",

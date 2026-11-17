@@ -1,3 +1,4 @@
+const path = require("path")
 const checkEnvVariables = require("./check-env-variables")
 
 checkEnvVariables()
@@ -73,6 +74,24 @@ const nextConfig = {
           ]
         : []),
     ],
+  },
+  // Pin React 19 in the monorepo so hoisted dependencies cannot pull React 18
+  // from the workspace root.
+  turbopack: {
+    resolveAlias: {
+      react: "./node_modules/react",
+      "react-dom": "./node_modules/react-dom",
+      "react/jsx-runtime": "./node_modules/react/jsx-runtime",
+      "react/jsx-dev-runtime": "./node_modules/react/jsx-dev-runtime",
+    },
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      react: path.resolve(__dirname, "node_modules/react"),
+      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
+    }
+    return config
   },
 }
 
