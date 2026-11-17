@@ -36,7 +36,14 @@ export default function CheckoutLayout({
           <div className="flex-1 basis-0" />
         </nav>
       </div>
-      <div className="relative py-8" data-testid="checkout-container">{children}</div>
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="relative py-8"
+        data-testid="checkout-container"
+      >
+        {children}
+      </main>
       <div className="py-8 w-full flex flex-col items-center justify-center border-t border-nuprix-line text-xs text-nuprix-muted gap-1">
         <p>© {new Date().getFullYear()} Nuprix. Secure Checkout</p>
       </div>

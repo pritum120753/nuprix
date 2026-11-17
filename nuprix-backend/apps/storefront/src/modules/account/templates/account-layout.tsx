@@ -19,9 +19,9 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
           <aside className="surface-card p-6 h-fit">
             {customer && <AccountNav customer={customer} />}
           </aside>
-          <main className="surface-card p-6 small:p-8">
+          <section className="surface-card p-6 small:p-8">
             {children}
-          </main>
+          </section>
         </div>
 
         <div className="surface-card p-6 flex flex-col small:flex-row items-start small:items-center justify-between gap-4 text-sm text-nuprix-muted">

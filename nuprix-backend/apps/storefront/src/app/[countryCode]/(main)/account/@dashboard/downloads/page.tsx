@@ -26,7 +26,7 @@ export default async function DownloadsPage() {
         <h1 className="text-2xl font-semibold tracking-tight text-[#172b20]">
           My Downloads
         </h1>
-        <p className="mt-2 text-sm leading-6 text-[#788279]">
+        <p className="mt-2 text-sm leading-6 text-nuprix-muted">
           Find your purchased files and check the status of your download access.
           Your secure download link is also sent to your order email.
         </p>
@@ -37,7 +37,7 @@ export default async function DownloadsPage() {
           <h2 className="text-lg font-semibold text-[#24372a]">
             Your library is empty
           </h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#788279]">
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-nuprix-muted">
             Digital products you purchase with this account will appear here.
           </p>
           <LocalizedClientLink
@@ -56,16 +56,16 @@ export default async function DownloadsPage() {
             >
               <div className="min-w-0">
                 <h2 className="font-semibold text-[#24372a]">{download.title}</h2>
-                <p className="mt-1 truncate text-sm text-[#788279]">
+                <p className="mt-1 truncate text-sm text-nuprix-muted">
                   {download.file_name}
                 </p>
-                <p className="mt-2 text-xs text-[#788279]">
+                <p className="mt-2 text-xs text-nuprix-muted">
                   {download.download_count} of {download.max_downloads} downloads used
                   {download.expires_at
                     ? ` · Access until ${new Date(download.expires_at).toLocaleDateString()}`
                     : " · No expiry date"}
                 </p>
-                <p className="mt-1 text-xs text-[#788279]">
+                <p className="mt-1 text-xs text-nuprix-muted">
                   Order: {download.order_id}
                 </p>
               </div>
