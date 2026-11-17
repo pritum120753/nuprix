@@ -33,4 +33,11 @@ describe("isFullyPaid", () => {
       isFullyPaid([{ amount: { numeric: 10 }, captured_amount: { numeric: 10 } }])
     ).toBe(true)
   })
+
+  it("treats free / zero-total orders as paid", () => {
+    expect(isFullyPaid([], { orderTotal: 0 })).toBe(true)
+    expect(isFullyPaid(undefined, { orderTotal: { numeric: 0 } })).toBe(true)
+    expect(isFullyPaid([{ amount: 0, captured_amount: 0 }])).toBe(true)
+    expect(isFullyPaid([], { orderTotal: 10 })).toBe(false)
+  })
 })

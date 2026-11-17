@@ -29,19 +29,28 @@ export const PAYMENT_COLLECTION_FIELDS = [
 ]
 
 export function isFullyPaid(
-  collections: (PaymentCollectionRow | null | undefined)[] | null | undefined
+  collections: (PaymentCollectionRow | null | undefined)[] | null | undefined,
+  options?: { orderTotal?: unknown }
 ): boolean {
   const active = (collections ?? []).filter(
     (c): c is PaymentCollectionRow => Boolean(c) && c?.status !== "canceled"
   )
+  const hasZeroOrderTotal =
+    options?.orderTotal !== undefined &&
+    options?.orderTotal !== null &&
+    toNumber(options.orderTotal) <= EPSILON
+
   if (!active.length) {
-    return false
+    return hasZeroOrderTotal
   }
 
   return active.every((c) => {
     const amount = toNumber(c.amount)
     const captured = toNumber(c.captured_amount)
     const refunded = toNumber(c.refunded_amount)
+    if (amount <= EPSILON) {
+      return refunded <= EPSILON && amount - captured <= EPSILON
+    }
     return refunded <= EPSILON && captured > 0 && amount - captured <= EPSILON
   })
 }

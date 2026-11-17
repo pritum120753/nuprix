@@ -41,12 +41,14 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const { data: orders } = await query.graph({
     entity: "order",
-    fields: ["id", "status", ...PAYMENT_COLLECTION_FIELDS],
+    fields: ["id", "status", "total", ...PAYMENT_COLLECTION_FIELDS],
     filters: { id: entitlement.order_id },
   })
   const order = orders[0]
   const requireCapture = process.env.DIGITAL_ALLOW_UNCAPTURED !== "true"
-  const paid = isFullyPaid(order?.payment_collections)
+  const paid = isFullyPaid(order?.payment_collections, {
+    orderTotal: order?.total,
+  })
   const canceled = order?.status === "canceled"
 
   if (!order || canceled || (requireCapture && !paid)) {
