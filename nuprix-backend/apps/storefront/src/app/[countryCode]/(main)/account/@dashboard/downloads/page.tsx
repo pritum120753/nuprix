@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import DownloadItemActions from "@modules/account/components/download-item-actions"
 import { listCustomerDownloads } from "@lib/data/downloads"
 
 export const metadata: Metadata = {
@@ -70,15 +71,22 @@ export default async function DownloadsPage() {
                   Order: {download.order_id}
                 </p>
               </div>
-              <span
-                className={`inline-flex w-fit shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                  download.status === "available"
-                    ? "bg-[#eaf3eb] text-[#42644d]"
-                    : "bg-[#f2f2ef] text-[#777c75]"
-                }`}
-              >
-                {statusLabels[download.status]}
-              </span>
+              <div className="flex flex-col items-start gap-2 small:items-end">
+                <span
+                  className={`inline-flex w-fit shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                    download.status === "available"
+                      ? "bg-[#eaf3eb] text-[#42644d]"
+                      : "bg-[#f2f2ef] text-[#777c75]"
+                  }`}
+                >
+                  {statusLabels[download.status]}
+                </span>
+                <DownloadItemActions
+                  downloadId={download.id}
+                  status={download.status}
+                  title={download.title}
+                />
+              </div>
             </li>
           ))}
         </ul>

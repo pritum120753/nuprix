@@ -36,3 +36,28 @@ export const listCustomerDownloads = async (): Promise<CustomerDownload[]> => {
     .then(({ downloads }) => downloads)
     .catch((error) => medusaError(error))
 }
+
+export const regenerateCustomerDownload = async (
+  entitlementId: string
+): Promise<{ download_url?: string; error?: string }> => {
+  const headers = await getAuthHeaders()
+
+  try {
+    const res = await sdk.client.fetch<{
+      entitlement_id: string
+      download_url: string
+    }>(`/store/customer/downloads/${encodeURIComponent(entitlementId)}/regenerate`, {
+      method: "POST",
+      headers,
+      cache: "no-store",
+    })
+    return { download_url: res.download_url }
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Could not generate a new download link. Please try again.",
+    }
+  }
+}

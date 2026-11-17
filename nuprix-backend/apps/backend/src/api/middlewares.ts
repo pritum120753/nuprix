@@ -21,6 +21,11 @@ export default defineMiddlewares({
     },
     {
       method: ['POST'],
+      matcher: '/store/customer/downloads/*/regenerate',
+      middlewares: [rateLimit({ windowMs: 60_000, max: 10 })],
+    },
+    {
+      method: ['POST'],
       matcher: '/admin/digital-files/upload-url',
       middlewares: [validateAndTransformBody(UploadUrlSchema)],
     },
