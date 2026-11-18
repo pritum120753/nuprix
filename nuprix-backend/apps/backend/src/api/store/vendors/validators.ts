@@ -12,3 +12,9 @@ export const SubmitVendorProductSchema = z.object({
   product_id: z.string().min(1),
 })
 export type SubmitVendorProductBody = z.infer<typeof SubmitVendorProductSchema>
+
+export const RequestVendorPayoutSchema = z.object({
+  amount: z.number().int().positive(),
+  currency_code: z.string().min(3).max(3),
+})
+export type RequestVendorPayoutBody = z.infer<typeof RequestVendorPayoutSchema>

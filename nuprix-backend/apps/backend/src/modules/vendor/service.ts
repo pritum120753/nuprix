@@ -1,6 +1,9 @@
 import { MedusaError, MedusaService } from "@medusajs/framework/utils"
+import { computeVendorBalance } from "./commission"
 import Vendor from "./models/vendor"
+import VendorEarning from "./models/vendor-earning"
 import VendorMember from "./models/vendor-member"
+import VendorPayout from "./models/vendor-payout"
 import VendorProduct from "./models/vendor-product"
 
 export function normalizeVendorHandle(raw: string): string {
@@ -15,6 +18,8 @@ class VendorModuleService extends MedusaService({
   Vendor,
   VendorMember,
   VendorProduct,
+  VendorEarning,
+  VendorPayout,
 }) {
   /**
    * Resolves the vendor and membership record for an authenticated user.
@@ -76,6 +81,58 @@ class VendorModuleService extends MedusaService({
       { take: 500 }
     )
     return mappings.map((m) => m.product_id)
+  }
+
+  async getEarningsSummary(vendorId: string, currencyCode = "bdt") {
+    const [earnings, payouts] = await Promise.all([
+      this.listVendorEarnings(
+        { vendor_id: vendorId },
+        { order: { created_at: "DESC" }, take: 500 }
+      ),
+      this.listVendorPayouts(
+        { vendor_id: vendorId },
+        { order: { created_at: "DESC" }, take: 200 }
+      ),
+    ])
+
+    return {
+      balance: computeVendorBalance(earnings, payouts, currencyCode),
+      earnings,
+      payouts,
+    }
+  }
+
+  async requestPayout(input: {
+    vendorId: string
+    amount: number
+    currencyCode: string
+  }) {
+    const amount = Math.round(input.amount)
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Payout amount must be positive."
+      )
+    }
+
+    const { balance } = await this.getEarningsSummary(
+      input.vendorId,
+      input.currencyCode
+    )
+
+    if (amount > balance.available_balance) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "Requested payout exceeds available balance."
+      )
+    }
+
+    return this.createVendorPayouts({
+      vendor_id: input.vendorId,
+      amount,
+      currency_code: input.currencyCode.toLowerCase(),
+      status: "requested",
+    })
   }
 }
 

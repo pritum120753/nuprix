@@ -8,6 +8,7 @@ import {
   CreateDigitalFileSchema,
   UploadUrlSchema,
 } from './admin/digital-files/validators'
+import { UpdatePayoutSchema } from './admin/payouts/validators'
 import { UpdateProductClassificationSchema } from './admin/products/[id]/classification/validators'
 import { UpdateSupportTicketSchema } from './admin/support-tickets/validators'
 import {
@@ -18,6 +19,7 @@ import {
 import { CreateSupportTicketSchema } from './store/support-tickets/validators'
 import {
   ApplyVendorSchema,
+  RequestVendorPayoutSchema,
   SubmitVendorProductSchema,
 } from './store/vendors/validators'
 
@@ -92,6 +94,16 @@ export default defineMiddlewares({
       method: ['POST'],
       matcher: '/store/vendors/me/products',
       middlewares: [validateAndTransformBody(SubmitVendorProductSchema)],
+    },
+    {
+      method: ['POST'],
+      matcher: '/store/vendors/me/payouts',
+      middlewares: [validateAndTransformBody(RequestVendorPayoutSchema)],
+    },
+    {
+      method: ['PATCH'],
+      matcher: '/admin/payouts/*',
+      middlewares: [validateAndTransformBody(UpdatePayoutSchema)],
     },
     {
       method: ['POST'],
