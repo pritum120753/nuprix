@@ -9,6 +9,11 @@ import {
   UploadUrlSchema,
 } from './admin/digital-files/validators'
 import { UpdateProductClassificationSchema } from './admin/products/[id]/classification/validators'
+import {
+  AssignVendorProductSchema,
+  CreateVendorSchema,
+  UpdateVendorSchema,
+} from './admin/vendors/validators'
 
 // The product index declares filterable `status` and `sales_channel_ids`, so
 // the route narrows it to published products in the key's sales channels.
@@ -40,6 +45,21 @@ export default defineMiddlewares({
       middlewares: [
         validateAndTransformBody(UpdateProductClassificationSchema),
       ],
+    },
+    {
+      method: ['POST'],
+      matcher: '/admin/vendors',
+      middlewares: [validateAndTransformBody(CreateVendorSchema)],
+    },
+    {
+      method: ['PATCH'],
+      matcher: '/admin/vendors/*',
+      middlewares: [validateAndTransformBody(UpdateVendorSchema)],
+    },
+    {
+      method: ['POST'],
+      matcher: '/admin/vendors/*/products',
+      middlewares: [validateAndTransformBody(AssignVendorProductSchema)],
     },
     {
       method: ['POST'],
