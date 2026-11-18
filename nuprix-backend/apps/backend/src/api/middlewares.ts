@@ -16,6 +16,10 @@ import {
   UpdateVendorSchema,
 } from './admin/vendors/validators'
 import { CreateSupportTicketSchema } from './store/support-tickets/validators'
+import {
+  ApplyVendorSchema,
+  SubmitVendorProductSchema,
+} from './store/vendors/validators'
 
 // The product index declares filterable `status` and `sales_channel_ids`, so
 // the route narrows it to published products in the key's sales channels.
@@ -75,6 +79,19 @@ export default defineMiddlewares({
       method: ['PATCH'],
       matcher: '/admin/support-tickets/*',
       middlewares: [validateAndTransformBody(UpdateSupportTicketSchema)],
+    },
+    {
+      method: ['POST'],
+      matcher: '/store/vendors/apply',
+      middlewares: [
+        rateLimit({ windowMs: 60_000, max: 5 }),
+        validateAndTransformBody(ApplyVendorSchema),
+      ],
+    },
+    {
+      method: ['POST'],
+      matcher: '/store/vendors/me/products',
+      middlewares: [validateAndTransformBody(SubmitVendorProductSchema)],
     },
     {
       method: ['POST'],
