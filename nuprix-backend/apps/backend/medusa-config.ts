@@ -62,6 +62,47 @@ module.exports = defineConfig({
     { resolve: "./src/modules/vendor" },
     { resolve: "./src/modules/audit-log" },
     { resolve: "./src/modules/support" },
+    // Payment providers (Stripe + SSLCommerz) are enabled when credentials are set.
+    ...((process.env.STRIPE_API_KEY ||
+      (process.env.SSLCOMMERZ_STORE_ID && process.env.SSLCOMMERZ_STORE_PASSWD))
+      ? [
+          {
+            resolve: "@medusajs/medusa/payment",
+            options: {
+              providers: [
+                ...(process.env.STRIPE_API_KEY
+                  ? [
+                      {
+                        resolve: "@medusajs/medusa/payment-stripe",
+                        id: "stripe",
+                        options: {
+                          apiKey: process.env.STRIPE_API_KEY,
+                          webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+                        },
+                      },
+                    ]
+                  : []),
+                ...(process.env.SSLCOMMERZ_STORE_ID &&
+                process.env.SSLCOMMERZ_STORE_PASSWD
+                  ? [
+                      {
+                        resolve: "./src/modules/sslcommerz",
+                        id: "sslcommerz",
+                        options: {
+                          storeId: process.env.SSLCOMMERZ_STORE_ID,
+                          storePassword: process.env.SSLCOMMERZ_STORE_PASSWD,
+                          sandbox: process.env.SSLCOMMERZ_SANDBOX !== "false",
+                          storefrontUrl: process.env.STOREFRONT_URL,
+                          backendUrl: process.env.DOWNLOAD_BASE_URL,
+                        },
+                      },
+                    ]
+                  : []),
+              ],
+            },
+          },
+        ]
+      : []),
     // Order and download emails go through Resend when a key is set. Without
     // one, Medusa keeps its default local (feed-only) notification provider.
     ...(process.env.RESEND_API_KEY
