@@ -3,6 +3,7 @@ import type {
   MedusaResponse,
 } from "@medusajs/framework/http"
 import { VENDOR_MODULE } from "../../../../../modules/vendor"
+import { recordAdminAudit } from "../../../../../lib/admin-audit"
 import type VendorModuleService from "../../../../../modules/vendor/service"
 import type { AssignVendorProductBody } from "../../validators"
 
@@ -62,6 +63,20 @@ export async function POST(
         approval_status: approval_status ?? "pending_review",
         rejection_reason: rejection_reason ?? null,
       })
+
+  await recordAdminAudit(req, {
+    action: "vendor.product.assigned",
+    resource_type: "vendor_product",
+    resource_id: vendor_product.id,
+    before_state: existing
+      ? { approval_status: existing.approval_status }
+      : null,
+    after_state: {
+      vendor_id: vendorId,
+      product_id,
+      approval_status: vendor_product.approval_status,
+    },
+  })
 
   res.status(existing ? 200 : 201).json({ vendor_product })
 }

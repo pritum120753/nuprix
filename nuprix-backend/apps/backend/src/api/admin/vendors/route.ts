@@ -3,6 +3,7 @@ import type {
   MedusaResponse,
 } from "@medusajs/framework/http"
 import { VENDOR_MODULE } from "../../../modules/vendor"
+import { recordAdminAudit } from "../../../lib/admin-audit"
 import type VendorModuleService from "../../../modules/vendor/service"
 import { normalizeVendorHandle } from "../../../modules/vendor/service"
 import type { CreateVendorBody } from "./validators"
@@ -42,6 +43,13 @@ export async function POST(
     description: body.description?.trim() ?? null,
     commission_rate_bps: body.commission_rate_bps ?? null,
     status: "pending",
+  })
+
+  await recordAdminAudit(req, {
+    action: "vendor.created",
+    resource_type: "vendor",
+    resource_id: vendor.id,
+    after_state: { name: vendor.name, handle: vendor.handle, status: vendor.status },
   })
 
   res.status(201).json({ vendor })

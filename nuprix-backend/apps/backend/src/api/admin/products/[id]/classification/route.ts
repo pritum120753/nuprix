@@ -1,5 +1,6 @@
-import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
+import { recordAdminAudit } from "../../../../../lib/admin-audit"
 import { DIGITAL_DELIVERY_MODULE } from "../../../../../modules/digital-delivery"
 import type DigitalDeliveryModuleService from "../../../../../modules/digital-delivery/service"
 import {
@@ -9,7 +10,7 @@ import {
 import type { UpdateProductClassificationBody } from "./validators"
 
 export async function PATCH(
-  req: MedusaRequest<UpdateProductClassificationBody>,
+  req: AuthenticatedMedusaRequest<UpdateProductClassificationBody>,
   res: MedusaResponse
 ) {
   const productId = req.params.id
@@ -48,6 +49,16 @@ export async function PATCH(
 
   await productService.updateProducts(productId, {
     metadata: nextMetadata,
+  })
+
+  await recordAdminAudit(req, {
+    action: "product.classification.updated",
+    resource_type: "product",
+    resource_id: productId,
+    before_state: {
+      product_type: product.metadata?.[PRODUCT_TYPE_METADATA_KEY] ?? null,
+    },
+    after_state: { product_type },
   })
 
   res.json(

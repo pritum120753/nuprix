@@ -60,6 +60,7 @@ module.exports = defineConfig({
   modules: [
     { resolve: "./src/modules/digital-delivery" },
     { resolve: "./src/modules/vendor" },
+    { resolve: "./src/modules/audit-log" },
     // Order and download emails go through Resend when a key is set. Without
     // one, Medusa keeps its default local (feed-only) notification provider.
     ...(process.env.RESEND_API_KEY
