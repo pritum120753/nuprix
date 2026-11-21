@@ -1,6 +1,6 @@
 "use client"
 import { RadioGroup } from "@headlessui/react"
-import { getPaymentInfo, isStripeLike } from "@lib/constants"
+import { getPaymentInfo, isSslcommerz, isStripeLike } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
 import { getCartDeliverySplit } from "@lib/util/product"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
@@ -17,7 +17,12 @@ import {
   clx,
 } from "@modules/common/components/ui"
 import { HttpTypes } from "@medusajs/types"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 
 const Payment = ({
@@ -41,6 +46,9 @@ const Payment = ({
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+  const params = useParams()
+  const countryCode =
+    typeof params?.countryCode === "string" ? params.countryCode : undefined
 
   const isOpen = searchParams.get("step") === "payment"
 
@@ -89,9 +97,29 @@ const Payment = ({
       const checkActiveSession =
         activeSession?.provider_id === selectedPaymentMethod
 
-      if (!checkActiveSession) {
+      if (!checkActiveSession || isSslcommerz(selectedPaymentMethod)) {
+        const customerName = [
+          cart.billing_address?.first_name || cart.shipping_address?.first_name,
+          cart.billing_address?.last_name || cart.shipping_address?.last_name,
+        ]
+          .filter(Boolean)
+          .join(" ")
+        const customerPhone =
+          cart.billing_address?.phone || cart.shipping_address?.phone
+
+        const sessionData = isSslcommerz(selectedPaymentMethod)
+          ? {
+              cart_id: cart.id,
+              ...(countryCode ? { country_code: countryCode } : {}),
+              ...(cart.email ? { customer_email: cart.email } : {}),
+              ...(customerName ? { customer_name: customerName } : {}),
+              ...(customerPhone ? { customer_phone: customerPhone } : {}),
+            }
+          : undefined
+
         await initiatePaymentSession(cart, {
           provider_id: selectedPaymentMethod,
+          ...(sessionData ? { data: sessionData } : {}),
         })
       }
 
@@ -111,8 +139,23 @@ const Payment = ({
   }
 
   useEffect(() => {
-    setError(null)
-  }, [isOpen])
+    if (!isOpen) {
+      setError(null)
+      return
+    }
+    const returnError = searchParams.get("error")
+    if (returnError === "payment_canceled") {
+      setError("Payment was canceled. Please try again.")
+    } else if (returnError === "payment_failed") {
+      setError("Payment could not be completed. Please try again.")
+    } else if (returnError === "order_failed") {
+      setError(
+        "Payment verification could not complete your order. Please try again."
+      )
+    } else {
+      setError(null)
+    }
+  }, [isOpen, searchParams])
 
   return (
     <div className="bg-white">
