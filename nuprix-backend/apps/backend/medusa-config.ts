@@ -150,7 +150,14 @@ module.exports = defineConfig({
               return null
             }
 
-            return `@config "../../tailwind.config.js";\n${code}`
+            if (code.includes("@tailwind base;")) {
+              return code.replace(
+                "@tailwind base;",
+                '@config "../../tailwind.config.js";\n@tailwind base;'
+              )
+            }
+
+            return `${code}\n@config "../../tailwind.config.js";`
           },
         },
       ],
