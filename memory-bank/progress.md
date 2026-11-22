@@ -137,7 +137,7 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
 - **Verification**: Storefront lint passed; backend lint passed with existing warnings; the SSLCommerz unit suite was invoked directly with PowerShell environment variables and exited successfully; Next.js storefront build exited successfully. The package test script itself remains incompatible with Windows because it embeds Unix `TEST_TYPE=unit` syntax.
 
 ### Phase 3 — Marketplace Core & Operator Workflows
-- **Status**: **Vendor Portal and Catalog Approval Implemented** (Branch `feat/phase-3-vendor-portal`).
+- **Status**: **Completed** (Branch `feat/phase-3-vendor-portal`).
 - **Vendor Portal Implementation**:
   1. `/account/vendor` now uses a responsive botanical tabbed dashboard for Overview, Products, and Payouts.
   2. Onboarding and verification banners cover verified, pending, and suspended vendor states.
@@ -151,11 +151,17 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   3. Operators must provide a structured rejection reason before rejecting a submission.
   4. Approval and rejection decisions record admin audit context and send vendor Resend notifications.
   5. Vendor product email templates escape dynamic HTML values against XSS.
+- **Vendor Staff Management**:
+  1. Owner-only `/store/vendors/me/members` GET/POST endpoints now list and invite existing Nuprix customer accounts.
+  2. Owner-only member PATCH/DELETE endpoints enforce `vendor_id` isolation and validated `owner|staff` roles.
+  3. Demoting or removing the final vendor owner is blocked.
+  4. The Vendor Portal includes an owner-only Team tab with invite, role-change, remove, loading, empty, and error states.
 - **Verification**:
   1. Storefront lint completed with no touched-file diagnostics; existing repository warnings remain.
   2. Storefront production build completed successfully.
   3. Focused vendor and Resend unit suites were invoked directly with PowerShell `$env:TEST_TYPE="unit"`: 4 suites and 11 tests passed.
   4. Backend lint and production build completed successfully, with existing Medusa route-mutation warnings.
+  5. Staff management Zod unit suite passed: 1 suite, 2 tests.
 - **Scope**:
   1. Vendor Portal Frontend in Storefront: dedicated `/account/vendor` dashboard for onboarding status, sales analytics, product submissions, and payout requests.
   2. Operator Catalog Approval Workflow: Admin UI for reviewing pending vendor products, approving with commission overrides, or rejecting with structured reasons.

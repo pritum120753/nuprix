@@ -20,7 +20,9 @@ import {
 import { CreateSupportTicketSchema } from './store/support-tickets/validators'
 import {
   ApplyVendorSchema,
+  InviteVendorMemberSchema,
   RequestVendorPayoutSchema,
+  UpdateVendorMemberSchema,
   SubmitVendorProductSchema,
 } from './store/vendors/validators'
 
@@ -103,6 +105,16 @@ export default defineMiddlewares({
       method: ['POST'],
       matcher: '/store/vendors/me/products',
       middlewares: [validateAndTransformBody(SubmitVendorProductSchema)],
+    },
+    {
+      method: ['POST'],
+      matcher: '/store/vendors/me/members',
+      middlewares: [validateAndTransformBody(InviteVendorMemberSchema)],
+    },
+    {
+      method: ['PATCH'],
+      matcher: '/store/vendors/me/members/*',
+      middlewares: [validateAndTransformBody(UpdateVendorMemberSchema)],
     },
     {
       method: ['POST'],

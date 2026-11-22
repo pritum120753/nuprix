@@ -53,6 +53,14 @@ export type VendorPayoutItem = {
   created_at: string
 }
 
+export type VendorMemberItem = {
+  id: string
+  user_id: string
+  email: string
+  role: "owner" | "staff"
+  created_at: string
+}
+
 export type VendorEarningsResponse = {
   balance: VendorBalance
   payouts: VendorPayoutItem[]
@@ -129,6 +137,100 @@ export const retrieveMyVendorPayouts = async (): Promise<
     })
     .then((res) => res.payouts ?? [])
     .catch(() => [])
+}
+
+export const retrieveMyVendorMembers = async (): Promise<
+  VendorMemberItem[]
+> => {
+  const headers = await getAuthHeaders()
+  if (!("authorization" in headers)) {
+    return []
+  }
+
+  return sdk.client
+    .fetch<{ members: VendorMemberItem[] }>("/store/vendors/me/members", {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    })
+    .then((res) => res.members ?? [])
+    .catch(() => [])
+}
+
+export async function inviteVendorMember(
+  _currentState: { success: boolean; error?: string | null } | null,
+  formData: FormData
+): Promise<{ success: boolean; error?: string | null }> {
+  const email = (formData.get("email") as string | null)?.trim().toLowerCase()
+  const role = (formData.get("role") as string | null)?.trim()
+  if (!email) {
+    return { success: false, error: "Member email is required." }
+  }
+  if (role !== "owner" && role !== "staff") {
+    return { success: false, error: "Select a valid team role." }
+  }
+
+  const headers = await getAuthHeaders()
+  try {
+    await sdk.client.fetch("/store/vendors/me/members", {
+      method: "POST",
+      headers,
+      body: { email, role },
+      cache: "no-store",
+    })
+    return { success: true, error: null }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Could not invite member.",
+    }
+  }
+}
+
+export async function updateVendorMemberRole(
+  memberId: string,
+  role: "owner" | "staff"
+): Promise<{ success: boolean; error?: string | null }> {
+  const headers = await getAuthHeaders()
+  try {
+    await sdk.client.fetch(
+      `/store/vendors/me/members/${encodeURIComponent(memberId)}`,
+      {
+        method: "PATCH",
+        headers,
+        body: { role },
+        cache: "no-store",
+      }
+    )
+    return { success: true, error: null }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Could not update member role.",
+    }
+  }
+}
+
+export async function removeVendorMember(
+  memberId: string
+): Promise<{ success: boolean; error?: string | null }> {
+  const headers = await getAuthHeaders()
+  try {
+    await sdk.client.fetch(
+      `/store/vendors/me/members/${encodeURIComponent(memberId)}`,
+      {
+        method: "DELETE",
+        headers,
+        cache: "no-store",
+      }
+    )
+    return { success: true, error: null }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Could not remove member.",
+    }
+  }
 }
 
 export const retrieveMyVendorEarnings = async (

@@ -2,10 +2,14 @@
 
 import {
   applyAsVendor,
+  inviteVendorMember,
+  removeVendorMember,
   requestVendorPayout,
   submitVendorProduct,
+  updateVendorMemberRole,
   type MyVendorProfile,
   type VendorEarningsResponse,
+  type VendorMemberItem,
   type VendorPayoutItem,
   type VendorProductItem,
 } from "@lib/data/vendors"
@@ -24,10 +28,11 @@ type DashboardProps = {
   products: VendorProductItem[]
   earnings: VendorEarningsResponse | null
   payouts: VendorPayoutItem[]
+  members: VendorMemberItem[]
   customerEmail?: string | null
 }
 
-type Tab = "overview" | "products" | "payouts"
+type Tab = "overview" | "products" | "payouts" | "team"
 
 const statusCopy = {
   pending: "Your application is under review. Product submissions and payout requests unlock after verification.",
@@ -53,6 +58,7 @@ export default function VendorDashboard({
   products,
   earnings,
   payouts,
+  members,
   customerEmail,
 }: DashboardProps) {
   const router = useRouter()
@@ -60,15 +66,18 @@ export default function VendorDashboard({
   const [applyState, applyAction] = useActionState(applyAsVendor, null)
   const [productState, productAction] = useActionState(submitVendorProduct, null)
   const [payoutState, payoutAction] = useActionState(requestVendorPayout, null)
+  const [inviteState, inviteAction] = useActionState(inviteVendorMember, null)
+  const [teamError, setTeamError] = useState<string | null>(null)
+  const [teamBusyId, setTeamBusyId] = useState<string | null>(null)
   const { state: payoutModalOpen, open: openPayoutModal, close: closePayoutModal } =
     useToggleState(false)
   const productFormRef = useRef<HTMLFormElement>(null)
 
   useEffect(() => {
-    if (applyState?.success || productState?.success || payoutState?.success) {
+    if (applyState?.success || productState?.success || payoutState?.success || inviteState?.success) {
       router.refresh()
     }
-  }, [applyState?.success, productState?.success, payoutState?.success, router])
+  }, [applyState?.success, productState?.success, payoutState?.success, inviteState?.success, router])
 
   useEffect(() => {
     if (productState?.success) {
@@ -125,10 +134,43 @@ export default function VendorDashboard({
   const isVerified = vendor.status === "verified"
   const currencyCode = earnings?.balance.currency_code ?? "bdt"
 
+  const changeMemberRole = async (
+    memberId: string,
+    role: "owner" | "staff"
+  ) => {
+    setTeamBusyId(memberId)
+    setTeamError(null)
+    const result = await updateVendorMemberRole(memberId, role)
+    if (result.success) {
+      router.refresh()
+    } else {
+      setTeamError(result.error ?? "Could not update team member.")
+    }
+    setTeamBusyId(null)
+  }
+
+  const removeMember = async (member: VendorMemberItem) => {
+    if (!window.confirm(`Remove ${member.email} from the vendor team?`)) {
+      return
+    }
+    setTeamBusyId(member.id)
+    setTeamError(null)
+    const result = await removeVendorMember(member.id)
+    if (result.success) {
+      router.refresh()
+    } else {
+      setTeamError(result.error ?? "Could not remove team member.")
+    }
+    setTeamBusyId(null)
+  }
+
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
     { id: "products", label: `Products (${products.length})` },
     { id: "payouts", label: `Payouts (${payouts.length})` },
+    ...(profile.role === "owner"
+      ? [{ id: "team" as Tab, label: `Team (${members.length})` }]
+      : []),
   ]
 
   return (
@@ -307,6 +349,90 @@ export default function VendorDashboard({
                             <td className="px-4 py-4"><Badge color={payoutColors[item.status]}>{item.status}</Badge></td>
                             <td className="px-4 py-4 font-mono text-xs text-nuprix-muted">{item.reference || "—"}</td>
                             <td className="px-4 py-4 text-nuprix-muted">{formatDate(item.created_at)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "team" && profile.role === "owner" && (
+            <div className="space-y-5">
+              <div>
+                <h2 className="font-display text-xl text-nuprix-forest">Team & staff</h2>
+                <p className="mt-1 text-xs text-nuprix-muted">Only vendor owners can invite, change roles, or remove team members.</p>
+              </div>
+
+              <form action={inviteAction} className="rounded-lg border border-nuprix-line bg-nuprix-paper p-4">
+                <div className="grid gap-3 small:grid-cols-[1fr_140px_auto] small:items-end">
+                  <Field label="Customer email" htmlFor="vendor-member-email">
+                    <input id="vendor-member-email" name="email" type="email" required placeholder="staff@example.com" className="portal-input" />
+                  </Field>
+                  <Field label="Role" htmlFor="vendor-member-role">
+                    <select id="vendor-member-role" name="role" defaultValue="staff" className="portal-input">
+                      <option value="staff">Staff</option>
+                      <option value="owner">Owner</option>
+                    </select>
+                  </Field>
+                  <SubmitButton className="min-h-[44px] px-5">Invite member</SubmitButton>
+                </div>
+                <ErrorMessage error={inviteState?.error} />
+                {inviteState?.success && (
+                  <p className="mt-3 text-sm text-nuprix-moss">Team member added.</p>
+                )}
+              </form>
+
+              {teamError && <ErrorMessage error={teamError} />}
+
+              {members.length === 0 ? (
+                <EmptyState title="No team members" description="Invite an existing Nuprix customer to join this vendor team." />
+              ) : (
+                <div className="overflow-hidden rounded-lg border border-nuprix-line">
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[620px] text-left text-sm">
+                      <thead className="bg-nuprix-mist text-xs text-nuprix-muted">
+                        <tr>
+                          <th className="px-4 py-3 font-semibold">Member</th>
+                          <th className="px-4 py-3 font-semibold">Role</th>
+                          <th className="px-4 py-3 font-semibold">Added</th>
+                          <th className="px-4 py-3 text-right font-semibold">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-nuprix-line bg-white">
+                        {members.map((member) => (
+                          <tr key={member.id}>
+                            <td className="px-4 py-4 text-nuprix-ink">{member.email}</td>
+                            <td className="px-4 py-4">
+                              <select
+                                aria-label={`Role for ${member.email}`}
+                                value={member.role}
+                                disabled={teamBusyId === member.id}
+                                onChange={(event) =>
+                                  void changeMemberRole(
+                                    member.id,
+                                    event.target.value as "owner" | "staff"
+                                  )
+                                }
+                                className="min-h-[44px] rounded-md border border-nuprix-line bg-white px-3 text-sm"
+                              >
+                                <option value="staff">Staff</option>
+                                <option value="owner">Owner</option>
+                              </select>
+                            </td>
+                            <td className="px-4 py-4 text-nuprix-muted">{formatDate(member.created_at)}</td>
+                            <td className="px-4 py-4 text-right">
+                              <button
+                                type="button"
+                                disabled={teamBusyId === member.id}
+                                onClick={() => void removeMember(member)}
+                                className="min-h-[44px] text-sm font-semibold text-nuprix-danger hover:underline"
+                              >
+                                Remove
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>

@@ -13,6 +13,17 @@ export const SubmitVendorProductSchema = z.object({
 })
 export type SubmitVendorProductBody = z.infer<typeof SubmitVendorProductSchema>
 
+export const InviteVendorMemberSchema = z.object({
+  email: z.string().trim().email().max(200),
+  role: z.enum(["owner", "staff"]),
+})
+export type InviteVendorMemberBody = z.infer<typeof InviteVendorMemberSchema>
+
+export const UpdateVendorMemberSchema = z.object({
+  role: z.enum(["owner", "staff"]),
+})
+export type UpdateVendorMemberBody = z.infer<typeof UpdateVendorMemberSchema>
+
 export const RequestVendorPayoutSchema = z.object({
   amount: z.number().int().positive(),
   currency_code: z.string().min(3).max(3),
