@@ -36,6 +36,11 @@ type PayoutRow = {
   currency_code: string
   status: "requested" | "approved" | "paid" | "rejected"
   reference: string | null
+  payout_method: "bank_transfer" | "bkash" | "nagad" | "rocket" | null
+  bank_name: string | null
+  account_name: string | null
+  account_number: string | null
+  mobile_number: string | null
 }
 
 type SupportRow = {
@@ -68,6 +73,7 @@ const MarketplaceAdminPage = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [exportingPayouts, setExportingPayouts] = useState(false)
   const [payoutRef, setPayoutRef] = useState<Record<string, string>>({})
   const [ticketNote, setTicketNote] = useState<Record<string, string>>({})
   const [commissionOverride, setCommissionOverride] = useState<Record<string, string>>({})
@@ -227,6 +233,36 @@ const MarketplaceAdminPage = () => {
       setError(err instanceof Error ? err.message : "Update failed.")
     } finally {
       setBusyId(null)
+    }
+  }
+
+  const exportApprovedPayouts = async () => {
+    setExportingPayouts(true)
+    setError(null)
+    try {
+      const res = await fetch("/admin/payouts/export", {
+        credentials: "include",
+      })
+      if (!res.ok) {
+        throw new Error("Failed to export approved payouts.")
+      }
+
+      const url = window.URL.createObjectURL(await res.blob())
+      const link = document.createElement("a")
+      link.href = url
+      link.download = "marketplace-payouts.csv"
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.setTimeout(() => window.URL.revokeObjectURL(url), 1000)
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to export approved payouts."
+      )
+    } finally {
+      setExportingPayouts(false)
     }
   }
 
@@ -446,62 +482,89 @@ const MarketplaceAdminPage = () => {
             </div>
           )
         ) : tab === "payouts" ? (
-          payouts.length === 0 ? (
-            <Text size="small" className="text-ui-fg-subtle">
-              No payout requests yet.
-            </Text>
-          ) : (
-            <div className="divide-y rounded-md border border-ui-border-base">
-              {payouts.map((p) => (
-                <div
-                  key={p.id}
-                  className="flex flex-wrap items-center justify-between gap-3 p-3"
-                >
-                  <div>
-                    <Text size="small" weight="plus">
-                      {p.amount} {p.currency_code.toUpperCase()}
-                    </Text>
-                    <Text size="xsmall" className="text-ui-fg-subtle">
-                      Vendor: {p.vendor_id} · Ref: {p.reference || "None"}
-                    </Text>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Input
-                      size="small"
-                      placeholder="Payout reference"
-                      value={payoutRef[p.id] ?? p.reference ?? ""}
-                      onChange={(e) =>
-                        setPayoutRef((prev) => ({
-                          ...prev,
-                          [p.id]: e.target.value,
-                        }))
-                      }
-                    />
-                    <Badge color={p.status === "paid" ? "green" : "blue"}>
-                      {p.status}
-                    </Badge>
-                    <select
-                      aria-label={`Status for payout ${p.id}`}
-                      value={p.status}
-                      disabled={busyId === p.id}
-                      onChange={(e) =>
-                        void updatePayout(
-                          p.id,
-                          e.target.value as PayoutRow["status"]
-                        )
-                      }
-                      className="h-8 rounded-md border border-ui-border-base bg-ui-bg-field px-2 text-xs"
-                    >
-                      <option value="requested">Requested</option>
-                      <option value="approved">Approved</option>
-                      <option value="paid">Paid</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
-                  </div>
-                </div>
-              ))}
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <Text size="small" className="text-ui-fg-subtle">
+                Export approved payouts for disbursement.
+              </Text>
+              <Button
+                size="small"
+                disabled={exportingPayouts}
+                onClick={() => void exportApprovedPayouts()}
+              >
+                {exportingPayouts ? "Preparing CSV..." : "Export approved payouts"}
+              </Button>
             </div>
-          )
+            {payouts.length === 0 ? (
+              <Text size="small" className="text-ui-fg-subtle">
+                No payout requests yet.
+              </Text>
+            ) : (
+              <div className="divide-y rounded-md border border-ui-border-base">
+                {payouts.map((p) => {
+                  const destination =
+                    p.payout_method === "bank_transfer"
+                      ? [p.bank_name, p.account_name, p.account_number]
+                          .filter(Boolean)
+                          .join(" · ")
+                      : p.mobile_number ?? ""
+
+                  return (
+                    <div
+                      key={p.id}
+                      className="flex flex-wrap items-center justify-between gap-3 p-3"
+                    >
+                      <div>
+                        <Text size="small" weight="plus">
+                          {p.amount} {p.currency_code.toUpperCase()}
+                        </Text>
+                        <Text size="xsmall" className="text-ui-fg-subtle">
+                          Vendor: {p.vendor_id} · Ref: {p.reference || "None"}
+                        </Text>
+                        <Text size="xsmall" className="text-ui-fg-subtle">
+                          Method: {p.payout_method ?? "Not recorded"} ·
+                          Destination: {destination || "Not recorded"}
+                        </Text>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Input
+                          size="small"
+                          placeholder="Payout reference"
+                          value={payoutRef[p.id] ?? p.reference ?? ""}
+                          onChange={(e) =>
+                            setPayoutRef((prev) => ({
+                              ...prev,
+                              [p.id]: e.target.value,
+                            }))
+                          }
+                        />
+                        <Badge color={p.status === "paid" ? "green" : "blue"}>
+                          {p.status}
+                        </Badge>
+                        <select
+                          aria-label={`Status for payout ${p.id}`}
+                          value={p.status}
+                          disabled={busyId === p.id}
+                          onChange={(e) =>
+                            void updatePayout(
+                              p.id,
+                              e.target.value as PayoutRow["status"]
+                            )
+                          }
+                          className="h-8 rounded-md border border-ui-border-base bg-ui-bg-field px-2 text-xs"
+                        >
+                          <option value="requested">Requested</option>
+                          <option value="approved">Approved</option>
+                          <option value="paid">Paid</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         ) : tab === "support" ? (
           tickets.length === 0 ? (
             <Text size="small" className="text-ui-fg-subtle">

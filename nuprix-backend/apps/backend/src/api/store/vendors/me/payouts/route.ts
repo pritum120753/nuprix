@@ -21,9 +21,21 @@ export async function GET(
     return res.status(404).json({ message: "No vendor store found." })
   }
 
-  const payouts = await vendorService.listVendorPayouts(
+  const payoutRecords = await vendorService.listVendorPayouts(
     { vendor_id: membership.vendor.id },
     { order: { created_at: "DESC" }, take: 200 }
+  )
+
+  const payouts = payoutRecords.map(
+    ({ id, amount, currency_code, payout_method, status, reference, created_at }) => ({
+      id,
+      amount,
+      currency_code,
+      payout_method,
+      status,
+      reference,
+      created_at,
+    })
   )
 
   return res.json({ payouts })
@@ -51,11 +63,26 @@ export async function POST(
   }
 
   try {
-    const payout = await vendorService.requestPayout({
+    const body = req.validatedBody
+    const payoutInput = {
       vendorId: membership.vendor.id,
-      amount: req.validatedBody.amount,
-      currencyCode: req.validatedBody.currency_code,
-    })
+      amount: body.amount,
+      currencyCode: body.currency_code,
+    }
+    const payout =
+      body.payout_method === "bank_transfer"
+        ? await vendorService.requestPayout({
+            ...payoutInput,
+            payoutMethod: "bank_transfer",
+            bankName: body.bank_name,
+            accountName: body.account_name,
+            accountNumber: body.account_number,
+          })
+        : await vendorService.requestPayout({
+            ...payoutInput,
+            payoutMethod: body.payout_method,
+            mobileNumber: body.mobile_number,
+          })
     return res.status(201).json({ payout })
   } catch (error) {
     return res.status(400).json({

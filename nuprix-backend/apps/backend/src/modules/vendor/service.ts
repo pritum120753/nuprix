@@ -26,6 +26,18 @@ function toNumericAmount(value: unknown): number {
   return Number(value)
 }
 
+type PayoutDestination =
+  | {
+      payoutMethod: "bank_transfer"
+      bankName: string
+      accountName: string
+      accountNumber: string
+    }
+  | {
+      payoutMethod: "bkash" | "nagad" | "rocket"
+      mobileNumber: string
+    }
+
 class VendorModuleService extends MedusaService({
   Vendor,
   VendorMember,
@@ -120,12 +132,22 @@ class VendorModuleService extends MedusaService({
     vendorId: string
     amount: number
     currencyCode: string
-  }) {
+  } & PayoutDestination) {
     const amount = Math.round(input.amount)
     if (!Number.isFinite(amount) || amount <= 0) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
         "Payout amount must be positive."
+      )
+    }
+
+    if (
+      input.payoutMethod !== "bank_transfer" &&
+      input.currencyCode.toLowerCase() !== "bdt"
+    ) {
+      throw new MedusaError(
+        MedusaError.Types.INVALID_DATA,
+        "MFS payouts must be requested in BDT."
       )
     }
 
@@ -141,10 +163,27 @@ class VendorModuleService extends MedusaService({
       )
     }
 
+    const destination =
+      input.payoutMethod === "bank_transfer"
+        ? {
+            bank_name: input.bankName ?? null,
+            account_name: input.accountName ?? null,
+            account_number: input.accountNumber ?? null,
+            mobile_number: null,
+          }
+        : {
+            bank_name: null,
+            account_name: null,
+            account_number: null,
+            mobile_number: input.mobileNumber ?? null,
+          }
+
     return this.createVendorPayouts({
       vendor_id: input.vendorId,
       amount,
       currency_code: input.currencyCode.toLowerCase(),
+      payout_method: input.payoutMethod,
+      ...destination,
       status: "requested",
     })
   }

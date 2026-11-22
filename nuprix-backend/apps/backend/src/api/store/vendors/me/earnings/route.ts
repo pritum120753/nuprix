@@ -30,5 +30,26 @@ export async function GET(
     currency
   )
 
-  return res.json(summary)
+  return res.json({
+    ...summary,
+    payouts: summary.payouts.map(
+      ({
+        id,
+        amount,
+        currency_code,
+        payout_method,
+        status,
+        reference,
+        created_at,
+      }) => ({
+        id,
+        amount,
+        currency_code,
+        payout_method,
+        status,
+        reference,
+        created_at,
+      })
+    ),
+  })
 }

@@ -6,6 +6,13 @@ const VendorPayout = model
     vendor_id: model.text(),
     amount: model.number(),
     currency_code: model.text(),
+    payout_method: model
+      .enum(["bank_transfer", "bkash", "nagad", "rocket"])
+      .nullable(),
+    bank_name: model.text().nullable(),
+    account_name: model.text().nullable(),
+    account_number: model.text().nullable(),
+    mobile_number: model.text().nullable(),
     status: model
       .enum(["requested", "approved", "paid", "rejected"])
       .default("requested"),

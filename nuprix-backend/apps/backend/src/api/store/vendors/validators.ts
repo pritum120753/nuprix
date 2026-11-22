@@ -58,8 +58,46 @@ export const UpdateVendorFulfillmentSchema = z
   })
 export type UpdateVendorFulfillmentBody = z.infer<typeof UpdateVendorFulfillmentSchema>
 
-export const RequestVendorPayoutSchema = z.object({
+const PayoutRequestBaseSchema = z.object({
   amount: z.number().int().positive(),
-  currency_code: z.string().min(3).max(3),
+  currency_code: z.string().trim().regex(/^[a-z]{3}$/i),
 })
+
+const createMfsPayoutSchema = <
+  TPayoutMethod extends "bkash" | "nagad" | "rocket",
+>(
+  payout_method: TPayoutMethod
+) =>
+  PayoutRequestBaseSchema.extend({
+    payout_method: z.literal(payout_method),
+    mobile_number: z
+      .string()
+      .trim()
+      .regex(/^01[3-9]\d{8}$/, "Enter a valid Bangladesh MFS number."),
+  })
+
+export const RequestVendorPayoutSchema = z
+  .discriminatedUnion("payout_method", [
+    PayoutRequestBaseSchema.extend({
+      payout_method: z.literal("bank_transfer"),
+      bank_name: z.string().trim().min(1).max(120),
+      account_name: z.string().trim().min(1).max(120),
+      account_number: z.string().trim().min(1).max(120),
+    }),
+    createMfsPayoutSchema("bkash"),
+    createMfsPayoutSchema("nagad"),
+    createMfsPayoutSchema("rocket"),
+  ])
+  .superRefine((value, ctx) => {
+    if (
+      value.payout_method !== "bank_transfer" &&
+      value.currency_code.toLowerCase() !== "bdt"
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["currency_code"],
+        message: "MFS payouts must be requested in BDT.",
+      })
+    }
+  })
 export type RequestVendorPayoutBody = z.infer<typeof RequestVendorPayoutSchema>
