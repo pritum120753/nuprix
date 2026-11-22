@@ -115,9 +115,77 @@ function passwordReset(data: PasswordResetData): RenderedEmail {
   }
 }
 
+type VendorProductData = {
+  vendor_name?: string
+  product_id?: string
+  rejection_reason?: string
+  commission_rate_bps?: number
+}
+
+function vendorProductApproved(data: VendorProductData): RenderedEmail {
+  const vendorName = escapeHtml(data.vendor_name || "Seller")
+  const productId = escapeHtml(data.product_id || "")
+  const commission =
+    typeof data.commission_rate_bps === "number"
+      ? `${escapeHtml((data.commission_rate_bps / 100).toFixed(2))}%`
+      : null
+
+  const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#17211b">
+<h2 style="color:#172b20">Your product has been approved</h2>
+<p>Hello ${vendorName},</p>
+<p>Your submitted product <strong>${productId}</strong> has been approved and is now eligible for the Nuprix marketplace.</p>
+${commission ? `<p>Commission override: <strong>${commission}</strong>.</p>` : ""}
+<p style="color:#66736a;font-size:12px;margin-top:24px">You can review your submissions in the Nuprix Seller Portal.</p>
+</div>`
+
+  const text = [
+    "Your product has been approved",
+    "",
+    `Hello ${data.vendor_name || "Seller"},`,
+    `Your submitted product ${data.product_id || ""} has been approved and is now eligible for the Nuprix marketplace.`,
+    commission ? `Commission override: ${(data.commission_rate_bps || 0) / 100}%` : "",
+  ].filter(Boolean).join("\n")
+
+  return {
+    subject: "Nuprix product approved",
+    html,
+    text,
+  }
+}
+
+function vendorProductRejected(data: VendorProductData): RenderedEmail {
+  const vendorName = escapeHtml(data.vendor_name || "Seller")
+  const productId = escapeHtml(data.product_id || "")
+  const reason = escapeHtml(data.rejection_reason || "No reason was provided.")
+
+  const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#17211b">
+<h2 style="color:#172b20">Your product needs changes</h2>
+<p>Hello ${vendorName},</p>
+<p>Your submitted product <strong>${productId}</strong> was not approved.</p>
+<p><strong>Reason:</strong> ${reason}</p>
+<p style="color:#66736a;font-size:12px;margin-top:24px">You can update the submission and resubmit it through the Nuprix Seller Portal.</p>
+</div>`
+
+  const text = [
+    "Your product needs changes",
+    "",
+    `Hello ${data.vendor_name || "Seller"},`,
+    `Your submitted product ${data.product_id || ""} was not approved.`,
+    `Reason: ${data.rejection_reason || "No reason was provided."}`,
+  ].join("\n")
+
+  return {
+    subject: "Nuprix product review update",
+    html,
+    text,
+  }
+}
+
 const RENDERERS: Record<string, (data: never) => RenderedEmail> = {
   "digital-download": digitalDownload as (data: never) => RenderedEmail,
   "password-reset": passwordReset as (data: never) => RenderedEmail,
+  "vendor-product-approved": vendorProductApproved as (data: never) => RenderedEmail,
+  "vendor-product-rejected": vendorProductRejected as (data: never) => RenderedEmail,
 }
 
 export function renderTemplate(

@@ -9,7 +9,7 @@ import {
 } from "@medusajs/ui"
 import { useCallback, useEffect, useState } from "react"
 
-type TabKey = "vendors" | "payouts" | "support" | "audit"
+type TabKey = "vendors" | "products" | "payouts" | "support" | "audit"
 
 type VendorRow = {
   id: string
@@ -18,6 +18,15 @@ type VendorRow = {
   contact_email: string
   status: "pending" | "verified" | "suspended"
   commission_rate_bps: number | null
+}
+
+type ProductRow = {
+  id: string
+  vendor_id: string
+  product_id: string
+  approval_status: "draft" | "pending_review" | "approved" | "rejected"
+  rejection_reason: string | null
+  created_at: string
 }
 
 type PayoutRow = {
@@ -52,6 +61,7 @@ type AuditRow = {
 const MarketplaceAdminPage = () => {
   const [tab, setTab] = useState<TabKey>("vendors")
   const [vendors, setVendors] = useState<VendorRow[]>([])
+  const [products, setProducts] = useState<(ProductRow & { vendor_name: string })[]>([])
   const [payouts, setPayouts] = useState<PayoutRow[]>([])
   const [tickets, setTickets] = useState<SupportRow[]>([])
   const [audits, setAudits] = useState<AuditRow[]>([])
@@ -60,6 +70,8 @@ const MarketplaceAdminPage = () => {
   const [busyId, setBusyId] = useState<string | null>(null)
   const [payoutRef, setPayoutRef] = useState<Record<string, string>>({})
   const [ticketNote, setTicketNote] = useState<Record<string, string>>({})
+  const [commissionOverride, setCommissionOverride] = useState<Record<string, string>>({})
+  const [rejectionReason, setRejectionReason] = useState<Record<string, string>>({})
 
   const loadAll = useCallback(async () => {
     setLoading(true)
@@ -83,7 +95,26 @@ const MarketplaceAdminPage = () => {
         aRes.json() as Promise<{ audit_logs?: AuditRow[] }>,
       ])
 
-      setVendors(vJson.vendors ?? [])
+      const vendorRows = vJson.vendors ?? []
+      const vendorProducts = await Promise.all(
+        vendorRows.map(async (vendor) => {
+          const res = await fetch(
+            `/admin/vendors/${encodeURIComponent(vendor.id)}/products`,
+            { credentials: "include" }
+          )
+          if (!res.ok) return []
+          const json = (await res.json()) as {
+            vendor_products?: ProductRow[]
+          }
+          return (json.vendor_products ?? []).map((product) => ({
+            ...product,
+            vendor_name: vendor.name,
+          }))
+        })
+      )
+
+      setVendors(vendorRows)
+      setProducts(vendorProducts.flat())
       setPayouts(pJson.payouts ?? [])
       setTickets(sJson.support_tickets ?? [])
       setAudits(aJson.audit_logs ?? [])
@@ -117,6 +148,59 @@ const MarketplaceAdminPage = () => {
       await loadAll()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Update failed.")
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const updateVendorProduct = async (
+    vendorId: string,
+    productId: string,
+    approvalStatus: "approved" | "rejected"
+  ) => {
+    setBusyId(productId)
+    setError(null)
+
+    const commission = commissionOverride[productId]?.trim()
+    const reason = rejectionReason[productId]?.trim()
+    if (approvalStatus === "rejected" && !reason) {
+      setError("A rejection reason is required.")
+      setBusyId(null)
+      return
+    }
+
+    try {
+      const body: Record<string, unknown> = {
+        product_id: productId,
+        approval_status: approvalStatus,
+      }
+      if (approvalStatus === "approved" && commission) {
+        const commissionBps = Number(commission)
+        if (!Number.isInteger(commissionBps) || commissionBps < 0 || commissionBps > 10000) {
+          throw new Error("Commission override must be between 0 and 10000 bps.")
+        }
+        body.commission_rate_bps = commissionBps
+      }
+      if (approvalStatus === "rejected") {
+        body.rejection_reason = reason
+      }
+
+      const res = await fetch(
+        `/admin/vendors/${encodeURIComponent(vendorId)}/products`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      )
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null)
+        throw new Error(payload?.message || "Failed to review vendor product.")
+      }
+      await loadAll()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Product review failed.")
     } finally {
       setBusyId(null)
     }
@@ -187,6 +271,7 @@ const MarketplaceAdminPage = () => {
           {(
             [
               ["vendors", `Vendors (${vendors.length})`],
+              ["products", `Products (${products.filter((p) => p.approval_status === "pending_review").length})`],
               ["payouts", `Payouts (${payouts.length})`],
               ["support", `Support (${tickets.length})`],
               ["audit", `Audit Log (${audits.length})`],
@@ -260,6 +345,104 @@ const MarketplaceAdminPage = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          )
+        ) : tab === "products" ? (
+          products.filter((p) => p.approval_status === "pending_review").length === 0 ? (
+            <Text size="small" className="text-ui-fg-subtle">
+              No pending vendor products to review.
+            </Text>
+          ) : (
+            <div className="divide-y rounded-md border border-ui-border-base">
+              {products
+                .filter((p) => p.approval_status === "pending_review")
+                .map((product) => (
+                  <div key={product.id} className="space-y-3 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <Text size="small" weight="plus">
+                          {product.vendor_name}
+                        </Text>
+                        <Text size="xsmall" className="text-ui-fg-subtle">
+                          Product: {product.product_id}
+                        </Text>
+                        <Text size="xsmall" className="text-ui-fg-subtle">
+                          Submitted: {product.created_at
+                            ? new Date(product.created_at).toLocaleDateString()
+                            : "Unknown"}
+                        </Text>
+                      </div>
+                      <Badge color="orange">Pending review</Badge>
+                    </div>
+
+                    <div className="grid gap-3 small:grid-cols-2">
+                      <div>
+                        <Text size="xsmall" weight="plus" className="mb-1 block">
+                          Commission override (basis points)
+                        </Text>
+                        <Input
+                          size="small"
+                          type="number"
+                          placeholder="Optional, e.g. 1500"
+                          value={commissionOverride[product.product_id] ?? ""}
+                          onChange={(e) =>
+                            setCommissionOverride((prev) => ({
+                              ...prev,
+                              [product.product_id]: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                      <div>
+                        <Text size="xsmall" weight="plus" className="mb-1 block">
+                          Rejection reason
+                        </Text>
+                        <Input
+                          size="small"
+                          placeholder="Required for rejection"
+                          value={rejectionReason[product.product_id] ?? ""}
+                          onChange={(e) =>
+                            setRejectionReason((prev) => ({
+                              ...prev,
+                              [product.product_id]: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <Button
+                        size="small"
+                        variant="danger"
+                        disabled={busyId === product.product_id}
+                        onClick={() =>
+                          void updateVendorProduct(
+                            product.vendor_id,
+                            product.product_id,
+                            "rejected"
+                          )
+                        }
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="primary"
+                        disabled={busyId === product.product_id}
+                        onClick={() =>
+                          void updateVendorProduct(
+                            product.vendor_id,
+                            product.product_id,
+                            "approved"
+                          )
+                        }
+                      >
+                        Approve
+                      </Button>
+                    </div>
+                  </div>
+                ))}
             </div>
           )
         ) : tab === "payouts" ? (
