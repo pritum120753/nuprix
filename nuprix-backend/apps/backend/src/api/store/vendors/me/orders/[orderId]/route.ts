@@ -4,6 +4,7 @@ import type {
 } from "@medusajs/framework/http"
 import { VENDOR_MODULE } from "../../../../../../modules/vendor"
 import type VendorModuleService from "../../../../../../modules/vendor/service"
+import { VendorOrderParamSchema } from "../../../validators"
 
 export async function GET(
   req: AuthenticatedMedusaRequest,
@@ -20,10 +21,15 @@ export async function GET(
     return res.status(404).json({ message: "No vendor store found." })
   }
 
+  const params = VendorOrderParamSchema.safeParse(req.params)
+  if (!params.success) {
+    return res.status(400).json({ message: "Invalid order ID." })
+  }
+
   const [group] = await vendorService.listVendorFulfillmentGroups(
     {
       vendor_id: membership.vendor.id,
-      order_id: req.params.orderId,
+      order_id: params.data.orderId,
     },
     { take: 1 }
   )
@@ -34,7 +40,7 @@ export async function GET(
   const items = await vendorService.listVendorFulfillmentItems(
     {
       vendor_id: membership.vendor.id,
-      order_id: req.params.orderId,
+      order_id: params.data.orderId,
       group_id: group.id,
     },
     { take: 1000 }

@@ -5,6 +5,7 @@ import type {
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { VENDOR_MODULE } from "../../../../../modules/vendor"
 import type VendorModuleService from "../../../../../modules/vendor/service"
+import { VendorOrderParamSchema } from "../../../vendors/validators"
 
 export async function GET(
   req: AuthenticatedMedusaRequest,
@@ -15,11 +16,16 @@ export async function GET(
     return res.status(401).json({ message: "Authentication required." })
   }
 
+  const params = VendorOrderParamSchema.safeParse(req.params)
+  if (!params.success) {
+    return res.status(400).json({ message: "Invalid order ID." })
+  }
+
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
   const { data: orders } = await query.graph({
     entity: "order",
     fields: ["id", "customer_id"],
-    filters: { id: req.params.orderId },
+    filters: { id: params.data.orderId },
   })
 
   const order = orders[0] as { id: string; customer_id?: string | null } | undefined
@@ -53,11 +59,15 @@ export async function GET(
       status: group.status,
       carrier: group.carrier,
       tracking_number: group.tracking_number,
-      tracking_url:
-        typeof group.tracking_url === "string" &&
-        group.tracking_url.startsWith("https://")
-          ? group.tracking_url
-          : null,
+      tracking_url: (() => {
+        if (typeof group.tracking_url !== "string") return null
+        try {
+          const url = new URL(group.tracking_url)
+          return url.protocol === "https:" ? url.toString() : null
+        } catch {
+          return null
+        }
+      })(),
       shipped_at: group.shipped_at,
       delivered_at: group.delivered_at,
       canceled_at: group.canceled_at,

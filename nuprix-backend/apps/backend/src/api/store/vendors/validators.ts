@@ -1,5 +1,10 @@
 import { z } from "@medusajs/framework/zod"
 
+export const VendorOrderParamSchema = z.object({
+  orderId: z.string().trim().min(1).max(255),
+})
+export type VendorOrderParam = z.infer<typeof VendorOrderParamSchema>
+
 export const ApplyVendorSchema = z.object({
   name: z.string().min(2).max(160),
   handle: z.string().min(2).max(80).optional(),

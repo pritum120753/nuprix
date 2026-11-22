@@ -6,6 +6,7 @@ import { VENDOR_MODULE } from "../../../../../../../modules/vendor"
 import type VendorModuleService from "../../../../../../../modules/vendor/service"
 import { recordAdminAudit } from "../../../../../../../lib/admin-audit"
 import type { UpdateVendorFulfillmentBody } from "../../../../validators"
+import { VendorOrderParamSchema } from "../../../../validators"
 
 function safeHttpsUrl(raw: string | null | undefined): string | null {
   if (!raw) return null
@@ -26,6 +27,11 @@ export async function PATCH(
     return res.status(401).json({ message: "Authentication required." })
   }
 
+  const params = VendorOrderParamSchema.safeParse(req.params)
+  if (!params.success) {
+    return res.status(400).json({ message: "Invalid order ID." })
+  }
+
   const vendorService: VendorModuleService = req.scope.resolve(VENDOR_MODULE)
   const membership = await vendorService.getVendorForUser(actorId)
   if (!membership) {
@@ -35,7 +41,7 @@ export async function PATCH(
   const [existing] = await vendorService.listVendorFulfillmentGroups(
     {
       vendor_id: membership.vendor.id,
-      order_id: req.params.orderId,
+      order_id: params.data.orderId,
     },
     { take: 1 }
   )
@@ -81,13 +87,13 @@ export async function PATCH(
     resource_id: updated.id,
     before_state: {
       vendor_id: membership.vendor.id,
-      order_id: req.params.orderId,
+      order_id: params.data.orderId,
       status: existing.status,
       tracking_url: existing.tracking_url,
     },
     after_state: {
       vendor_id: membership.vendor.id,
-      order_id: req.params.orderId,
+      order_id: params.data.orderId,
       status: updated.status,
       tracking_url: updated.tracking_url,
     },

@@ -1,5 +1,8 @@
 import VendorModuleService from "../service"
-import { UpdateVendorFulfillmentSchema } from "../../../api/store/vendors/validators"
+import {
+  UpdateVendorFulfillmentSchema,
+  VendorOrderParamSchema,
+} from "../../../api/store/vendors/validators"
 
 describe("Vendor fulfillment groups", () => {
   it("groups multiple line items by vendor and is replay-safe", async () => {
@@ -49,6 +52,13 @@ describe("Vendor fulfillment groups", () => {
     expect(result).toEqual({ created_groups: 2, created_items: 3 })
     expect(createdGroups).toHaveLength(2)
     expect(createdItems).toHaveLength(3)
+  })
+
+  it("accepts only validated order route parameters", () => {
+    expect(VendorOrderParamSchema.parse({ orderId: "order_123" })).toEqual({
+      orderId: "order_123",
+    })
+    expect(() => VendorOrderParamSchema.parse({ orderId: "" })).toThrow()
   })
 
   it("allows only HTTPS tracking URLs", () => {

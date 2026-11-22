@@ -191,6 +191,7 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   3. Backend build and integrated frontend build completed successfully.
   4. Standalone storefront build completed under verification.
 - **Database Note**: The migration is created but not applied; production/database migration remains unchanged.
+- **Security Hardening**: Fulfillment route parameters now use Zod validation; tracking URLs are validated and revalidated with `https:` protocol checks in backend responses and storefront links; vendor and customer ownership filters are retained on every split-order route.
 - **Scope**:
   1. Multi-Vendor Order Splitting: Split mixed-vendor orders into discrete supplier fulfillment groups.
   2. Vendor Purchase Order Generation: Transmit line items to corresponding suppliers or notify vendors of items requiring dispatch.

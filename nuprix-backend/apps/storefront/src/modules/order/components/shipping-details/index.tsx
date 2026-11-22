@@ -143,9 +143,7 @@ const ShippingDetails = ({
                             ? "Canceled"
                             : "Preparing"
                 const safeUrl =
-                  group.tracking_url?.startsWith("https://")
-                    ? group.tracking_url
-                    : null
+                  safeTrackingUrl(group.tracking_url)
 
                 return (
                   <div
