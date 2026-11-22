@@ -817,10 +817,10 @@
     "semantic_hash": "86d752b2970883de1f50540c90d86480"
   },
   "nuprix-backend/apps/storefront/src/app/[countryCode]/(main)/account/@dashboard/vendor/page.tsx": {
-    "mtime": 1795008921.5521593,
-    "seen": 1795357765.2984557,
-    "ast_hash": "e9144ed1a9f527020ff41d894fe6c218",
-    "semantic_hash": "e9144ed1a9f527020ff41d894fe6c218"
+    "mtime": 1795365634.6738176,
+    "seen": 1795366503.7845342,
+    "ast_hash": "65d251588a2ca76c65db9d37b76ac354",
+    "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/src/app/[countryCode]/(main)/account/@login/default.tsx": {
     "mtime": 1794605700.9196746,
@@ -1261,10 +1261,10 @@
     "semantic_hash": "97e2b7a97ba331bb83d59b8917035c15"
   },
   "nuprix-backend/apps/storefront/src/lib/data/vendors.ts": {
-    "mtime": 1795008916.7458215,
-    "seen": 1795357765.3204072,
-    "ast_hash": "76da98b5e8cda6b6c3a2be8aced2f733",
-    "semantic_hash": "76da98b5e8cda6b6c3a2be8aced2f733"
+    "mtime": 1795365634.6728175,
+    "seen": 1795366503.7845342,
+    "ast_hash": "c00394d8171bca0bcaba87e838731ebe",
+    "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/src/lib/hooks/use-in-view.tsx": {
     "mtime": 1794605700.954079,
@@ -2491,9 +2491,9 @@
     "semantic_hash": ""
   },
   "memory-bank/progress.md": {
-    "mtime": 1795363791.36776,
-    "seen": 1795364755.6702192,
-    "ast_hash": "0d8f21c7a00ea2a73f33c69cd1fb5afd",
+    "mtime": 1795366015.3065145,
+    "seen": 1795366503.7845342,
+    "ast_hash": "adf6dce656b6340c44e489709180f719",
     "semantic_hash": ""
   },
   "memory-bank/projectbrief.md": {
@@ -2614,6 +2614,18 @@
     "mtime": 1795361661.257729,
     "seen": 1795364755.6702192,
     "ast_hash": "588e2ac7b4d4b71c0ba1acc56db789ce",
+    "semantic_hash": ""
+  },
+  "nuprix-backend/apps/storefront/src/app/[countryCode]/(main)/account/@dashboard/vendor/loading.tsx": {
+    "mtime": 1795365634.7318642,
+    "seen": 1795366503.7845342,
+    "ast_hash": "2ae988590d454aa429a5b84ef3a1c5bb",
+    "semantic_hash": ""
+  },
+  "nuprix-backend/apps/storefront/src/modules/account/components/vendor-portal/dashboard.tsx": {
+    "mtime": 1795365634.6748185,
+    "seen": 1795366503.7845342,
+    "ast_hash": "b88fa44a6dda7f2806b05f27c7ca00f2",
     "semantic_hash": ""
   },
   "nuprix-backend/package-lock.json": {
