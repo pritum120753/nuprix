@@ -1,0 +1,2534 @@
+﻿diff --git a/nuprix-backend/apps/backend/medusa-config.ts b/nuprix-backend/apps/backend/medusa-config.ts
+index a35218f..65d9342 100644
+--- a/nuprix-backend/apps/backend/medusa-config.ts
++++ b/nuprix-backend/apps/backend/medusa-config.ts
+@@ -1,10 +1,22 @@
+ import { loadEnv, defineConfig } from '@medusajs/framework/utils'
++import { readFileSync } from 'node:fs'
+ 
+ loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+ 
++const databaseUrl = process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL) : undefined
++databaseUrl?.searchParams.delete('sslmode')
++
+ module.exports = defineConfig({
+   projectConfig: {
+-    databaseUrl: process.env.DATABASE_URL,
++    databaseUrl: databaseUrl?.toString(),
++    databaseDriverOptions: {
++      connection: {
++        ssl: {
++          ca: readFileSync('I:/OneDrive/Documents/prod-ca-2021.crt', 'utf8'),
++          rejectUnauthorized: true,
++        },
++      },
++    },
+     http: {
+       storeCors: process.env.STORE_CORS!,
+       adminCors: process.env.ADMIN_CORS!,
+@@ -38,4 +50,26 @@ module.exports = defineConfig({
+         ]
+       : []),
+   ],
++  admin: {
++    vite: () => ({
++      plugins: [
++        {
++          name: "nuprix-admin-tailwind-config",
++          enforce: "pre",
++          transform(code, id) {
++            const cssPath = id.split("?")[0].replace(/\\/g, "/")
++
++            if (
++              !cssPath.endsWith("/.medusa/client/index.css") ||
++              code.includes("@config")
++            ) {
++              return null
++            }
++
++            return `@config "../../tailwind.config.js";\n${code}`
++          },
++        },
++      ],
++    }),
++  },
+ })
+diff --git a/nuprix-backend/apps/storefront/next-env.d.ts b/nuprix-backend/apps/storefront/next-env.d.ts
+index ce4e94a..a419cbe 100644
+--- a/nuprix-backend/apps/storefront/next-env.d.ts
++++ b/nuprix-backend/apps/storefront/next-env.d.ts
+@@ -1,7 +1,7 @@
+ /// <reference types="next" />
+ /// <reference types="next/image-types/global" />
+-import "./.next/types/routes.d.ts";
+-import "./.next/types/root-params.d.ts";
++import "./.next/dev/types/routes.d.ts";
++import "./.next/dev/types/root-params.d.ts";
+ 
+ // NOTE: This file should not be edited
+ // see https://nextjs.org/docs/app/api-reference/config/typescript for more information.
+diff --git a/nuprix-backend/apps/storefront/src/app/[countryCode]/(checkout)/layout.tsx b/nuprix-backend/apps/storefront/src/app/[countryCode]/(checkout)/layout.tsx
+index 53793db..34395c6 100644
+--- a/nuprix-backend/apps/storefront/src/app/[countryCode]/(checkout)/layout.tsx
++++ b/nuprix-backend/apps/storefront/src/app/[countryCode]/(checkout)/layout.tsx
+@@ -1,6 +1,5 @@
+ import LocalizedClientLink from "@modules/common/components/localized-client-link"
+ import ChevronDown from "@modules/common/icons/chevron-down"
+-import MedusaCTA from "@modules/layout/components/medusa-cta"
+ 
+ export default function CheckoutLayout({
+   children,
+@@ -8,35 +7,38 @@ export default function CheckoutLayout({
+   children: React.ReactNode
+ }) {
+   return (
+-    <div className="w-full bg-white relative small:min-h-screen">
+-      <div className="h-16 bg-white border-b ">
++    <div className="w-full bg-nuprix-ivory relative small:min-h-screen">
++      <div className="h-16 bg-white/80 backdrop-blur-md border-b border-nuprix-line">
+         <nav className="flex h-full items-center content-container justify-between">
+           <LocalizedClientLink
+             href="/cart"
+-            className="text-small-semi text-ui-fg-base flex items-center gap-x-2 uppercase flex-1 basis-0"
++            className="text-small-semi text-nuprix-muted hover:text-nuprix-forest transition-colors flex items-center gap-x-2 flex-1 basis-0"
+             data-testid="back-to-cart-link"
+           >
+             <ChevronDown className="rotate-90" size={16} />
+-            <span className="mt-px hidden small:block txt-compact-plus text-ui-fg-subtle hover:text-ui-fg-base ">
+-              Back to shopping cart
++            <span className="mt-px hidden small:block text-xs font-semibold uppercase tracking-wider">
++              Back to cart
+             </span>
+-            <span className="mt-px block small:hidden txt-compact-plus text-ui-fg-subtle hover:text-ui-fg-base">
++            <span className="mt-px block small:hidden text-xs font-semibold uppercase tracking-wider">
+               Back
+             </span>
+           </LocalizedClientLink>
+           <LocalizedClientLink
+             href="/"
+-            className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
++            className="flex items-center gap-2 text-xl font-bold tracking-tight text-nuprix-forest"
+             data-testid="store-link"
+           >
+-            Medusa Store
++            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-nuprix-forest text-xs font-bold text-nuprix-ivory">
++              N
++            </span>
++            <span className="font-display tracking-tight text-xl lowercase">nuprix</span>
+           </LocalizedClientLink>
+           <div className="flex-1 basis-0" />
+         </nav>
+       </div>
+-      <div className="relative" data-testid="checkout-container">{children}</div>
+-      <div className="py-4 w-full flex items-center justify-center">
+-        <MedusaCTA />
++      <div className="relative py-8" data-testid="checkout-container">{children}</div>
++      <div className="py-8 w-full flex flex-col items-center justify-center border-t border-nuprix-line text-xs text-nuprix-muted gap-1">
++        <p>┬⌐ {new Date().getFullYear()} Nuprix. Secure Checkout</p>
+       </div>
+     </div>
+   )
+diff --git a/nuprix-backend/apps/storefront/src/app/layout.tsx b/nuprix-backend/apps/storefront/src/app/layout.tsx
+index 98edef3..ed6df9a 100644
+--- a/nuprix-backend/apps/storefront/src/app/layout.tsx
++++ b/nuprix-backend/apps/storefront/src/app/layout.tsx
+@@ -1,18 +1,43 @@
+ import { getBaseURL } from "@lib/util/env"
+-import { Metadata } from "next"
++import { Metadata, Viewport } from "next"
++import { Fraunces, Inter } from "next/font/google"
+ import "styles/globals.css"
+ 
++// Self-hosted by next/font, so pages don't depend on fonts installed locally.
++const inter = Inter({
++  subsets: ["latin"],
++  display: "swap",
++  variable: "--font-sans",
++})
++
++const fraunces = Fraunces({
++  subsets: ["latin"],
++  display: "swap",
++  variable: "--font-display",
++})
++
+ export const metadata: Metadata = {
+   metadataBase: new URL(getBaseURL()),
+ }
+ 
++export const viewport: Viewport = {
++  themeColor: "#f7f7f2",
++}
++
+ export default function RootLayout(props: { children: React.ReactNode }) {
+   return (
+-    <html lang="en" data-mode="light">
++    <html
++      lang="en"
++      data-mode="light"
++      className={`${inter.variable} ${fraunces.variable}`}
++    >
+       <head>
+         <link rel="ucp" href="/.well-known/ucp" />
+       </head>
+-      <body>
++      <body className="bg-nuprix-ivory font-sans text-nuprix-ink antialiased">
++        <a href="#main-content" className="skip-link">
++          Skip to main content
++        </a>
+         <main className="relative">{props.children}</main>
+       </body>
+     </html>
+diff --git a/nuprix-backend/apps/storefront/src/modules/account/components/overview/index.tsx b/nuprix-backend/apps/storefront/src/modules/account/components/overview/index.tsx
+index eb21f77..a8f07f8 100644
+--- a/nuprix-backend/apps/storefront/src/modules/account/components/overview/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/account/components/overview/index.tsx
+@@ -1,5 +1,3 @@
+-import { Container } from "@modules/common/components/ui"
+-
+ import ChevronDown from "@modules/common/icons/chevron-down"
+ import LocalizedClientLink from "@modules/common/components/localized-client-link"
+ import { convertToLocale } from "@lib/util/money"
+@@ -12,16 +10,16 @@ type OverviewProps = {
+ 
+ const Overview = ({ customer, orders }: OverviewProps) => {
+   return (
+-    <div data-testid="overview-page-wrapper">
+-      <div className="hidden small:block">
+-        <div className="text-xl-semi flex justify-between items-center mb-4">
+-          <span data-testid="welcome-message" data-value={customer?.first_name}>
+-            Hello {customer?.first_name}
+-          </span>
+-          <span className="text-small-regular text-ui-fg-base">
++    <div data-testid="overview-page-wrapper" className="w-full">
++      <div>
++        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-6 pb-4 border-b border-nuprix-line">
++          <h1 className="text-2xl font-display font-medium text-nuprix-forest" data-testid="welcome-message">
++            Welcome back, {customer?.first_name || "Customer"}
++          </h1>
++          <span className="text-xs text-nuprix-muted">
+             Signed in as:{" "}
+             <span
+-              className="font-semibold"
++              className="font-medium text-nuprix-forest"
+               data-testid="customer-email"
+               data-value={customer?.email}
+             >
+@@ -29,105 +27,105 @@ const Overview = ({ customer, orders }: OverviewProps) => {
+             </span>
+           </span>
+         </div>
+-        <div className="flex flex-col py-8 border-t border-gray-200">
+-          <div className="flex flex-col gap-y-4 h-full col-span-1 row-span-2 flex-1">
+-            <div className="flex items-start gap-x-16 mb-6">
+-              <div className="flex flex-col gap-y-4">
+-                <h3 className="text-large-semi">Profile</h3>
+-                <div className="flex items-end gap-x-2">
+-                  <span
+-                    className="text-3xl-semi leading-none"
+-                    data-testid="customer-profile-completion"
+-                    data-value={getProfileCompletion(customer)}
+-                  >
+-                    {getProfileCompletion(customer)}%
+-                  </span>
+-                  <span className="uppercase text-base-regular text-ui-fg-subtle">
+-                    Completed
+-                  </span>
+-                </div>
+-              </div>
+ 
+-              <div className="flex flex-col gap-y-4">
+-                <h3 className="text-large-semi">Addresses</h3>
+-                <div className="flex items-end gap-x-2">
+-                  <span
+-                    className="text-3xl-semi leading-none"
+-                    data-testid="addresses-count"
+-                    data-value={customer?.addresses?.length || 0}
+-                  >
+-                    {customer?.addresses?.length || 0}
+-                  </span>
+-                  <span className="uppercase text-base-regular text-ui-fg-subtle">
+-                    Saved
+-                  </span>
+-                </div>
++        <div className="flex flex-col py-4">
++          <div className="grid grid-cols-2 gap-4 mb-8">
++            <div className="surface-card p-5">
++              <h3 className="text-xs font-semibold uppercase tracking-wider text-nuprix-leaf mb-2">
++                Profile
++              </h3>
++              <div className="flex items-baseline gap-x-2">
++                <span
++                  className="text-3xl font-bold text-nuprix-forest"
++                  data-testid="customer-profile-completion"
++                  data-value={getProfileCompletion(customer)}
++                >
++                  {getProfileCompletion(customer)}%
++                </span>
++                <span className="text-xs text-nuprix-muted uppercase tracking-wider">
++                  Complete
++                </span>
+               </div>
+             </div>
+ 
+-            <div className="flex flex-col gap-y-4">
+-              <div className="flex items-center gap-x-2">
+-                <h3 className="text-large-semi">Recent orders</h3>
++            <div className="surface-card p-5">
++              <h3 className="text-xs font-semibold uppercase tracking-wider text-nuprix-leaf mb-2">
++                Addresses
++              </h3>
++              <div className="flex items-baseline gap-x-2">
++                <span
++                  className="text-3xl font-bold text-nuprix-forest"
++                  data-testid="addresses-count"
++                  data-value={customer?.addresses?.length || 0}
++                >
++                  {customer?.addresses?.length || 0}
++                </span>
++                <span className="text-xs text-nuprix-muted uppercase tracking-wider">
++                  Saved
++                </span>
+               </div>
+-              <ul
+-                className="flex flex-col gap-y-4"
+-                data-testid="orders-wrapper"
+-              >
+-                {orders && orders.length > 0 ? (
+-                  orders.slice(0, 5).map((order) => {
+-                    return (
+-                      <li
+-                        key={order.id}
+-                        data-testid="order-wrapper"
+-                        data-value={order.id}
++            </div>
++          </div>
++
++          <div className="flex flex-col gap-y-4">
++            <h3 className="text-lg font-semibold text-nuprix-forest">Recent Orders</h3>
++            <ul
++              className="flex flex-col gap-y-3"
++              data-testid="orders-wrapper"
++            >
++              {orders && orders.length > 0 ? (
++                orders.slice(0, 5).map((order) => {
++                  return (
++                    <li
++                      key={order.id}
++                      data-testid="order-wrapper"
++                      data-value={order.id}
++                    >
++                      {/* Fixed: Valid HTML without interactive <button> nested inside <a> */}
++                      <LocalizedClientLink
++                        href={`/account/orders/details/${order.id}`}
++                        className="surface-card flex justify-between items-center p-4 hover:border-nuprix-moss/40 transition-colors group"
+                       >
+-                        <LocalizedClientLink
+-                          href={`/account/orders/details/${order.id}`}
+-                        >
+-                          <Container className="bg-gray-50 flex justify-between items-center p-4">
+-                            <div className="grid grid-cols-3 grid-rows-2 text-small-regular gap-x-4 flex-1">
+-                              <span className="font-semibold">Date placed</span>
+-                              <span className="font-semibold">
+-                                Order number
+-                              </span>
+-                              <span className="font-semibold">
+-                                Total amount
+-                              </span>
+-                              <span data-testid="order-created-date">
+-                                {new Date(order.created_at).toDateString()}
+-                              </span>
+-                              <span
+-                                data-testid="order-id"
+-                                data-value={order.display_id}
+-                              >
+-                                #{order.display_id}
+-                              </span>
+-                              <span data-testid="order-amount">
+-                                {convertToLocale({
+-                                  amount: order.total,
+-                                  currency_code: order.currency_code,
+-                                })}
+-                              </span>
+-                            </div>
+-                            <button
+-                              className="flex items-center justify-between"
+-                              data-testid="open-order-button"
++                        <div className="grid grid-cols-3 text-xs gap-x-4 flex-1">
++                          <div>
++                            <span className="block text-nuprix-muted">Date</span>
++                            <span className="font-medium text-nuprix-forest mt-0.5 block" data-testid="order-created-date">
++                              {new Date(order.created_at).toLocaleDateString()}
++                            </span>
++                          </div>
++                          <div>
++                            <span className="block text-nuprix-muted">Order</span>
++                            <span
++                              className="font-medium text-nuprix-forest mt-0.5 block"
++                              data-testid="order-id"
++                              data-value={order.display_id}
+                             >
+-                              <span className="sr-only">
+-                                Go to order #{order.display_id}
+-                              </span>
+-                              <ChevronDown className="-rotate-90" />
+-                            </button>
+-                          </Container>
+-                        </LocalizedClientLink>
+-                      </li>
+-                    )
+-                  })
+-                ) : (
+-                  <span data-testid="no-orders-message">No recent orders</span>
+-                )}
+-              </ul>
+-            </div>
++                              #{order.display_id}
++                            </span>
++                          </div>
++                          <div>
++                            <span className="block text-nuprix-muted">Total</span>
++                            <span className="font-semibold text-nuprix-forest mt-0.5 block" data-testid="order-amount">
++                              {convertToLocale({
++                                amount: order.total,
++                                currency_code: order.currency_code,
++                              })}
++                            </span>
++                          </div>
++                        </div>
++                        <div className="ml-3 text-nuprix-muted group-hover:text-nuprix-forest transition-colors">
++                          <ChevronDown className="-rotate-90" size={16} />
++                        </div>
++                      </LocalizedClientLink>
++                    </li>
++                  )
++                })
++              ) : (
++                <div className="surface-card p-6 text-center text-sm text-nuprix-muted" data-testid="no-orders-message">
++                  No orders placed yet.
++                </div>
++              )}
++            </ul>
+           </div>
+         </div>
+       </div>
+@@ -137,31 +135,12 @@ const Overview = ({ customer, orders }: OverviewProps) => {
+ 
+ const getProfileCompletion = (customer: HttpTypes.StoreCustomer | null) => {
+   let count = 0
+-
+-  if (!customer) {
+-    return 0
+-  }
+-
+-  if (customer.email) {
+-    count++
+-  }
+-
+-  if (customer.first_name && customer.last_name) {
+-    count++
+-  }
+-
+-  if (customer.phone) {
+-    count++
+-  }
+-
+-  const billingAddress = customer.addresses?.find(
+-    (addr) => addr.is_default_billing
+-  )
+-
+-  if (billingAddress) {
+-    count++
+-  }
+-
++  if (!customer) return 0
++  if (customer.email) count++
++  if (customer.first_name && customer.last_name) count++
++  if (customer.phone) count++
++  const billingAddress = customer.addresses?.find((addr) => addr.is_default_billing)
++  if (billingAddress) count++
+   return (count / 4) * 100
+ }
+ 
+diff --git a/nuprix-backend/apps/storefront/src/modules/account/templates/account-layout.tsx b/nuprix-backend/apps/storefront/src/modules/account/templates/account-layout.tsx
+index 2d29490..941eca2 100644
+--- a/nuprix-backend/apps/storefront/src/modules/account/templates/account-layout.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/account/templates/account-layout.tsx
+@@ -1,7 +1,5 @@
+ import React from "react"
+-
+-import UnderlineLink from "@modules/common/components/interactive-link"
+-
++import LocalizedClientLink from "@modules/common/components/localized-client-link"
+ import AccountNav from "../components/account-nav"
+ import { HttpTypes } from "@medusajs/types"
+ 
+@@ -15,25 +13,28 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
+   children,
+ }) => {
+   return (
+-    <div className="flex-1 small:py-12" data-testid="account-page">
+-      <div className="flex-1 content-container h-full max-w-5xl mx-auto bg-white flex flex-col">
+-        <div className="grid grid-cols-1  small:grid-cols-[240px_1fr] py-12">
+-          <div>{customer && <AccountNav customer={customer} />}</div>
+-          <div className="flex-1">{children}</div>
++    <div className="flex-1 py-8 small:py-16 bg-nuprix-ivory min-h-[calc(100vh-64px)]" data-testid="account-page">
++      <div className="content-container max-w-6xl mx-auto flex flex-col gap-8">
++        <div className="grid grid-cols-1 small:grid-cols-[260px_1fr] gap-8">
++          <aside className="surface-card p-6 h-fit">
++            {customer && <AccountNav customer={customer} />}
++          </aside>
++          <main className="surface-card p-6 small:p-8">
++            {children}
++          </main>
+         </div>
+-        <div className="flex flex-col small:flex-row items-end justify-between small:border-t border-gray-200 py-12 gap-8">
+-          <div>
+-            <h3 className="text-xl-semi mb-4">Got questions?</h3>
+-            <span className="txt-medium">
+-              You can find frequently asked questions and answers on our
+-              customer service page.
+-            </span>
+-          </div>
++
++        <div className="surface-card p-6 flex flex-col small:flex-row items-start small:items-center justify-between gap-4 text-sm text-nuprix-muted">
+           <div>
+-            <UnderlineLink href="/customer-service">
+-              Customer Service
+-            </UnderlineLink>
++            <h4 className="font-semibold text-nuprix-forest">Need assistance with your orders or digital library?</h4>
++            <p className="mt-0.5 text-xs">Reach out to our customer care team or read our fulfillment guidelines.</p>
+           </div>
++          <LocalizedClientLink
++            href="/contact"
++            className="text-xs font-semibold text-nuprix-pine hover:text-nuprix-forest underline underline-offset-4"
++          >
++            Contact Customer Care ΓåÆ
++          </LocalizedClientLink>
+         </div>
+       </div>
+     </div>
+diff --git a/nuprix-backend/apps/storefront/src/modules/checkout/components/review/index.tsx b/nuprix-backend/apps/storefront/src/modules/checkout/components/review/index.tsx
+index 0d29def..5281dc1 100644
+--- a/nuprix-backend/apps/storefront/src/modules/checkout/components/review/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/checkout/components/review/index.tsx
+@@ -42,8 +42,8 @@ const Review = ({ cart }: { cart: HttpTypes.StoreCart }) => {
+               <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                 By clicking the Place Order button, you confirm that you have
+                 read, understand and accept our Terms of Use, Terms of Sale and
+-                Returns Policy and acknowledge that you have read Medusa
+-                Store&apos;s Privacy Policy.
++                Returns Policy and acknowledge that you have read Nuprix&apos;s
++                Privacy Policy.
+               </Text>
+             </div>
+           </div>
+diff --git a/nuprix-backend/apps/storefront/src/modules/checkout/components/shipping/index.tsx b/nuprix-backend/apps/storefront/src/modules/checkout/components/shipping/index.tsx
+index 560f030..33bb45b 100644
+--- a/nuprix-backend/apps/storefront/src/modules/checkout/components/shipping/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/checkout/components/shipping/index.tsx
+@@ -260,7 +260,7 @@ const Shipping: React.FC<ShippingProps> = ({
+                           {
+                             "border-ui-border-interactive":
+                               option.id === shippingMethodId,
+-                            "hover:shadow-brders-none cursor-not-allowed":
++                            "hover:shadow-borders-none cursor-not-allowed":
+                               isDisabled,
+                           }
+                         )}
+@@ -373,7 +373,7 @@ const Shipping: React.FC<ShippingProps> = ({
+             />
+             <Button
+               size="large"
+-              className="mt"
++              className="mt-6"
+               onClick={handleSubmit}
+               isLoading={isLoading}
+               disabled={!cart.shipping_methods?.[0]}
+diff --git a/nuprix-backend/apps/storefront/src/modules/common/components/ui/index.tsx b/nuprix-backend/apps/storefront/src/modules/common/components/ui/index.tsx
+index f35e4c7..c483dda 100644
+--- a/nuprix-backend/apps/storefront/src/modules/common/components/ui/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/common/components/ui/index.tsx
+@@ -59,11 +59,37 @@ Heading.displayName = "Heading"
+ 
+ // Button Component
+ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+-  variant?: "primary" | "secondary" | "transparent"
++  variant?: "primary" | "secondary" | "transparent" | "danger"
+   size?: "small" | "medium" | "large"
+   isLoading?: boolean
+ }
+ 
++/** Shared button styling, also usable on links that should look like buttons. */
++export const buttonClasses = ({
++  variant = "primary",
++  size = "medium",
++  className,
++}: {
++  variant?: ButtonProps["variant"]
++  size?: ButtonProps["size"]
++  className?: string
++} = {}) =>
++  clsx(
++    "inline-flex gap-2 items-center justify-center rounded-full font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nuprix-moss focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
++    variant === "primary" &&
++      "bg-nuprix-forest text-white hover:bg-nuprix-pine",
++    variant === "secondary" &&
++      "bg-white text-nuprix-forest border border-nuprix-line-strong hover:bg-nuprix-mist",
++    variant === "transparent" &&
++      "bg-transparent text-nuprix-pine hover:bg-nuprix-mist",
++    variant === "danger" &&
++      "bg-white text-nuprix-danger border border-nuprix-danger/40 hover:bg-red-50",
++    size === "small" && "min-h-9 px-4 text-sm",
++    size === "medium" && "min-h-11 px-5 text-sm",
++    size === "large" && "min-h-12 px-6 text-base",
++    className
++  )
++
+ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+   (
+     {
+@@ -81,20 +107,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+       <button
+         ref={ref}
+         disabled={disabled || isLoading}
+-        className={clsx(
+-          "inline-flex gap-2 items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+-          variant === "primary" && "bg-black text-white hover:bg-gray-800",
+-          variant === "secondary" &&
+-            "bg-white text-black border border-gray-200 hover:bg-gray-50",
+-          variant === "transparent" && "bg-transparent hover:bg-gray-100",
+-          size === "small" && "h-8 px-3 text-sm",
+-          size === "medium" && "h-10 px-4",
+-          size === "large" && "h-12 px-6 text-lg",
+-          className
+-        )}
++        aria-busy={isLoading || undefined}
++        className={buttonClasses({ variant, size, className })}
+         {...props}
+       >
+-        {isLoading ? "Loading..." : children}
++        {isLoading ? (
++          <>
++            <span
++              className="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
++              aria-hidden="true"
++            />
++            <span>Please waitΓÇª</span>
++          </>
++        ) : (
++          children
++        )}
+       </button>
+     )
+   }
+@@ -109,7 +136,10 @@ export const Container = forwardRef<HTMLDivElement, ContainerProps>(
+     return (
+       <div
+         ref={ref}
+-        className={clsx("bg-white rounded-lg p-4", className)}
++        className={clsx(
++          "bg-white rounded-2xl border border-nuprix-line p-4",
++          className
++        )}
+         {...props}
+       >
+         {children}
+@@ -130,13 +160,13 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
+       <span
+         ref={ref}
+         className={clsx(
+-          "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium",
+-          color === "green" && "bg-green-100 text-green-700",
+-          color === "red" && "bg-red-100 text-red-700",
+-          color === "blue" && "bg-blue-100 text-blue-700",
+-          color === "orange" && "bg-orange-100 text-orange-700",
+-          color === "grey" && "bg-gray-100 text-gray-700",
+-          color === "purple" && "bg-purple-100 text-purple-700",
++          "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
++          color === "green" && "bg-nuprix-sage text-nuprix-forest",
++          color === "red" && "bg-red-50 text-nuprix-danger",
++          color === "blue" && "bg-nuprix-sky text-[#29445f]",
++          color === "orange" && "bg-nuprix-sand text-[#68452e]",
++          color === "grey" && "bg-nuprix-mist text-nuprix-muted",
++          color === "purple" && "bg-nuprix-lilac text-[#39304f]",
+           className
+         )}
+         {...props}
+diff --git a/nuprix-backend/apps/storefront/src/modules/layout/components/cart-dropdown/index.tsx b/nuprix-backend/apps/storefront/src/modules/layout/components/cart-dropdown/index.tsx
+index 8c8d9ba..dd3b2f4 100644
+--- a/nuprix-backend/apps/storefront/src/modules/layout/components/cart-dropdown/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/layout/components/cart-dropdown/index.tsx
+@@ -10,9 +10,8 @@ import { retrieveCart } from "@lib/data/cart"
+ import { CART_UPDATED_EVENT } from "@lib/util/cart-events"
+ import { convertToLocale } from "@lib/util/money"
+ import { HttpTypes } from "@medusajs/types"
+-import { Button } from "@modules/common/components/ui"
++import { buttonClasses } from "@modules/common/components/ui"
+ import DeleteButton from "@modules/common/components/delete-button"
+-import LineItemOptions from "@modules/common/components/line-item-options"
+ import LineItemPrice from "@modules/common/components/line-item-price"
+ import LocalizedClientLink from "@modules/common/components/localized-client-link"
+ import Thumbnail from "@modules/products/components/thumbnail"
+@@ -27,7 +26,6 @@ const CartDropdown = ({
+ }: {
+   cart?: HttpTypes.StoreCart | null
+ }) => {
+-  // Statically rendered pages can't read the cart cookie, so the cart is loaded in the browser.
+   const [clientCart, setClientCart] = useState<HttpTypes.StoreCart | null>(null)
+   const cartState = serverCart ?? clientCart
+   const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
+@@ -39,7 +37,6 @@ const CartDropdown = ({
+   const close = () => setCartDropdownOpen(false)
+ 
+   const totalItems = countItems(cartState)
+-
+   const subtotal = cartState?.subtotal ?? 0
+   const itemRef = useRef<number>(totalItems || 0)
+ 
+@@ -53,7 +50,6 @@ const CartDropdown = ({
+       retrieveCart()
+         .then((cart) => {
+           if (isInitialLoad) {
+-            // Don't auto-open the dropdown for items that were already in the cart.
+             itemRef.current = countItems(cart)
+             isInitialLoad = false
+           }
+@@ -68,9 +64,7 @@ const CartDropdown = ({
+ 
+   const timedOpen = () => {
+     open()
+-
+     const timer = setTimeout(close, 5000)
+-
+     setActiveTimer(timer)
+   }
+ 
+@@ -78,11 +72,9 @@ const CartDropdown = ({
+     if (activeTimer) {
+       clearTimeout(activeTimer)
+     }
+-
+     open()
+   }
+ 
+-  // Clean up the timer when the component unmounts
+   useEffect(() => {
+     return () => {
+       if (activeTimer) {
+@@ -93,12 +85,10 @@ const CartDropdown = ({
+ 
+   const pathname = usePathname()
+ 
+-  // open cart dropdown when modifying the cart items, but only if we're not on the cart page
+   useEffect(() => {
+     if (itemRef.current !== totalItems && !pathname.includes("/cart")) {
+       timedOpen()
+     }
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [totalItems, itemRef.current])
+ 
+   return (
+@@ -107,13 +97,13 @@ const CartDropdown = ({
+       onMouseEnter={openAndCancel}
+       onMouseLeave={close}
+     >
+-      <Popover className="relative h-full">
+-        <PopoverButton className="h-full">
+-          <LocalizedClientLink
+-            className="hover:text-ui-fg-base"
+-            href="/cart"
+-            data-testid="nav-cart-link"
+-          >{`Cart (${totalItems})`}</LocalizedClientLink>
++      <Popover className="relative h-full flex items-center">
++        {/* Valid HTML: PopoverButton without nested <a> */}
++        <PopoverButton
++          className="h-full flex items-center text-sm font-medium text-nuprix-muted hover:text-nuprix-forest transition-colors focus:outline-none"
++          data-testid="nav-cart-link"
++        >
++          <span>Cart ({totalItems})</span>
+         </PopoverButton>
+         <Transition
+           show={cartDropdownOpen}
+@@ -127,15 +117,16 @@ const CartDropdown = ({
+         >
+           <PopoverPanel
+             static
+-            className="hidden small:block absolute top-[calc(100%+1px)] right-0 bg-white border-x border-b border-gray-200 w-[420px] text-ui-fg-base"
++            className="hidden small:block absolute top-[calc(100%+1px)] right-0 bg-white border border-nuprix-line rounded-2xl shadow-xl w-[380px] text-nuprix-ink p-5 z-50"
+             data-testid="nav-cart-dropdown"
+           >
+-            <div className="p-4 flex items-center justify-center">
+-              <h3 className="text-large-semi">Cart</h3>
++            <div className="flex items-center justify-between pb-3 border-b border-nuprix-line">
++              <h3 className="font-semibold text-nuprix-forest">Shopping Cart</h3>
++              <span className="text-xs text-nuprix-muted">{totalItems} {totalItems === 1 ? 'item' : 'items'}</span>
+             </div>
+             {cartState && cartState.items?.length ? (
+               <>
+-                <div className="overflow-y-scroll max-h-[402px] px-4 grid grid-cols-1 gap-y-8 no-scrollbar p-px">
++                <div className="overflow-y-auto max-h-[320px] py-3 space-y-4 no-scrollbar">
+                   {cartState.items
+                     .sort((a, b) => {
+                       return (a.created_at ?? "") > (b.created_at ?? "")
+@@ -144,13 +135,13 @@ const CartDropdown = ({
+                     })
+                     .map((item) => (
+                       <div
+-                        className="grid grid-cols-[122px_1fr] gap-x-4"
++                        className="grid grid-cols-[72px_1fr] gap-x-3 items-center"
+                         key={item.id}
+                         data-testid="cart-item"
+                       >
+                         <LocalizedClientLink
+                           href={`/products/${item.product_handle}`}
+-                          className="w-24"
++                          className="w-18 rounded-lg overflow-hidden border border-nuprix-line"
+                         >
+                           <Thumbnail
+                             thumbnail={item.thumbnail}
+@@ -158,58 +149,41 @@ const CartDropdown = ({
+                             size="square"
+                           />
+                         </LocalizedClientLink>
+-                        <div className="flex flex-col justify-between flex-1">
+-                          <div className="flex flex-col flex-1">
+-                            <div className="flex items-start justify-between">
+-                              <div className="flex flex-col overflow-ellipsis whitespace-nowrap mr-4 w-[180px]">
+-                                <h3 className="text-base-regular overflow-hidden text-ellipsis">
+-                                  <LocalizedClientLink
+-                                    href={`/products/${item.product_handle}`}
+-                                    data-testid="product-link"
+-                                  >
+-                                    {item.title}
+-                                  </LocalizedClientLink>
+-                                </h3>
+-                                <LineItemOptions
+-                                  variant={item.variant}
+-                                  data-testid="cart-item-variant"
+-                                  data-value={item.variant}
+-                                />
+-                                <span
+-                                  data-testid="cart-item-quantity"
+-                                  data-value={item.quantity}
+-                                >
+-                                  Quantity: {item.quantity}
+-                                </span>
+-                              </div>
+-                              <div className="flex justify-end">
+-                                <LineItemPrice
+-                                  item={item}
+-                                  style="tight"
+-                                  currencyCode={cartState.currency_code}
+-                                />
+-                              </div>
+-                            </div>
++                        <div className="flex flex-col justify-between flex-1 min-w-0">
++                          <div className="flex items-start justify-between gap-2">
++                            <h4 className="text-sm font-medium text-nuprix-forest truncate">
++                              <LocalizedClientLink
++                                href={`/products/${item.product_handle}`}
++                                data-testid="product-link"
++                              >
++                                {item.title}
++                              </LocalizedClientLink>
++                            </h4>
++                            <LineItemPrice
++                              item={item}
++                              style="tight"
++                              currencyCode={cartState.currency_code}
++                            />
++                          </div>
++                          <div className="mt-1 flex items-center justify-between text-xs text-nuprix-muted">
++                            <span>Qty: {item.quantity}</span>
++                            <DeleteButton
++                              id={item.id}
++                              className="text-xs text-nuprix-muted hover:text-nuprix-danger transition-colors"
++                              data-testid="cart-item-remove-button"
++                            >
++                              Remove
++                            </DeleteButton>
+                           </div>
+-                          <DeleteButton
+-                            id={item.id}
+-                            className="mt-1"
+-                            data-testid="cart-item-remove-button"
+-                          >
+-                            Remove
+-                          </DeleteButton>
+                         </div>
+                       </div>
+                     ))}
+                 </div>
+-                <div className="p-4 flex flex-col gap-y-4 text-small-regular">
+-                  <div className="flex items-center justify-between">
+-                    <span className="text-ui-fg-base font-semibold">
+-                      Subtotal{" "}
+-                      <span className="font-normal">(excl. taxes)</span>
+-                    </span>
++                <div className="pt-4 border-t border-nuprix-line space-y-3">
++                  <div className="flex items-center justify-between text-sm">
++                    <span className="text-nuprix-muted">Subtotal</span>
+                     <span
+-                      className="text-large-semi"
++                      className="font-semibold text-nuprix-forest"
+                       data-testid="cart-subtotal"
+                       data-value={subtotal}
+                     >
+@@ -219,33 +193,30 @@ const CartDropdown = ({
+                       })}
+                     </span>
+                   </div>
+-                  <LocalizedClientLink href="/cart" passHref>
+-                    <Button
+-                      className="w-full"
+-                      size="large"
+-                      data-testid="go-to-cart-button"
+-                    >
+-                      Go to cart
+-                    </Button>
++                  {/* Clean button-styled links with no invalid button nesting */}
++                  <LocalizedClientLink
++                    href="/cart"
++                    className={buttonClasses({ variant: "secondary", size: "small", className: "w-full" })}
++                    data-testid="go-to-cart-button"
++                    onClick={close}
++                  >
++                    View Cart
+                   </LocalizedClientLink>
+                 </div>
+               </>
+             ) : (
+-              <div>
+-                <div className="flex py-16 flex-col gap-y-4 items-center justify-center">
+-                  <div className="bg-gray-900 text-small-regular flex items-center justify-center w-6 h-6 rounded-full text-white">
+-                    <span>0</span>
+-                  </div>
+-                  <span>Your shopping bag is empty.</span>
+-                  <div>
+-                    <LocalizedClientLink href="/store">
+-                      <>
+-                        <span className="sr-only">Go to all products page</span>
+-                        <Button onClick={close}>Explore products</Button>
+-                      </>
+-                    </LocalizedClientLink>
+-                  </div>
+-                </div>
++              <div className="py-8 flex flex-col items-center justify-center text-center">
++                <span className="h-10 w-10 rounded-full bg-nuprix-mist flex items-center justify-center text-nuprix-muted text-sm font-semibold mb-2">
++                  0
++                </span>
++                <p className="text-sm text-nuprix-muted mb-4">Your bag is currently empty.</p>
++                <LocalizedClientLink
++                  href="/store"
++                  className={buttonClasses({ variant: "primary", size: "small" })}
++                  onClick={close}
++                >
++                  Explore Products
++                </LocalizedClientLink>
+               </div>
+             )}
+           </PopoverPanel>
+diff --git a/nuprix-backend/apps/storefront/src/modules/layout/components/side-menu/index.tsx b/nuprix-backend/apps/storefront/src/modules/layout/components/side-menu/index.tsx
+index f6a5f21..b278fc5 100644
+--- a/nuprix-backend/apps/storefront/src/modules/layout/components/side-menu/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/layout/components/side-menu/index.tsx
+@@ -11,7 +11,6 @@ import CountrySelect from "../country-select"
+ import LanguageSelect from "../language-select"
+ import { Locale } from "@lib/data/locales"
+ 
+-
+ const SideMenuItems = {
+   Home: "/",
+   Store: "/store",
+@@ -38,15 +37,19 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
+               <div className="relative flex h-full">
+                 <Popover.Button
+                   data-testid="nav-menu-button"
+-                  className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none hover:text-ui-fg-base"
++                  className="relative h-full flex items-center gap-1.5 transition-all ease-out duration-200 focus:outline-none text-nuprix-muted hover:text-nuprix-forest font-medium text-sm"
+                 >
+-                  Menu
++                  <span className="flex flex-col gap-1 w-4">
++                    <span className="h-0.5 w-full bg-current rounded-full" />
++                    <span className="h-0.5 w-full bg-current rounded-full" />
++                  </span>
++                  <span>Menu</span>
+                 </Popover.Button>
+               </div>
+ 
+               {open && (
+                 <div
+-                  className="fixed inset-0 z-[50] bg-black/0 pointer-events-auto"
++                  className="fixed inset-0 z-[50] bg-nuprix-forest/30 backdrop-blur-sm pointer-events-auto transition-opacity"
+                   onClick={close}
+                   data-testid="side-menu-backdrop"
+                 />
+@@ -55,34 +58,43 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
+               <Transition
+                 show={open}
+                 as={Fragment}
+-                enter="transition ease-out duration-150"
+-                enterFrom="opacity-0"
+-                enterTo="opacity-100 backdrop-blur-2xl"
++                enter="transition ease-out duration-200"
++                enterFrom="opacity-0 -translate-x-4"
++                enterTo="opacity-100 translate-x-0"
+                 leave="transition ease-in duration-150"
+-                leaveFrom="opacity-100 backdrop-blur-2xl"
+-                leaveTo="opacity-0"
++                leaveFrom="opacity-100 translate-x-0"
++                leaveTo="opacity-0 -translate-x-4"
+               >
+-                <PopoverPanel className="flex flex-col absolute w-full pr-4 sm:pr-0 sm:w-1/3 2xl:w-1/4 sm:min-w-min h-[calc(100vh-1rem)] z-[51] inset-x-0 text-sm text-ui-fg-on-color m-2 backdrop-blur-2xl">
+-                  <div
+-                    data-testid="nav-menu-popup"
+-                    className="flex flex-col h-full bg-[rgba(3,7,18,0.5)] rounded-rounded justify-between p-6"
+-                  >
+-                    <div className="flex justify-end" id="xmark">
++                <PopoverPanel className="flex flex-col fixed top-0 left-0 w-full sm:w-80 h-full z-[51] bg-nuprix-ivory border-r border-nuprix-line shadow-2xl p-6 justify-between">
++                  <div>
++                    <div className="flex items-center justify-between pb-6 border-b border-nuprix-line" id="xmark">
++                      <LocalizedClientLink
++                        href="/"
++                        className="flex items-center gap-2 text-xl font-bold tracking-tight text-nuprix-forest"
++                        onClick={close}
++                      >
++                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-nuprix-forest text-xs font-bold text-nuprix-ivory">
++                          N
++                        </span>
++                        <span className="font-display tracking-tight text-xl lowercase">nuprix</span>
++                      </LocalizedClientLink>
+                       <button
+                         data-testid="close-menu-button"
+                         onClick={close}
+                         aria-label="Close menu"
++                        className="p-1 rounded-full text-nuprix-muted hover:text-nuprix-forest hover:bg-nuprix-mist transition-colors"
+                       >
+                         <XMark />
+                       </button>
+                     </div>
+-                    <ul className="flex flex-col gap-6 items-start justify-start">
++
++                    <ul className="flex flex-col gap-5 mt-8">
+                       {Object.entries(SideMenuItems).map(([name, href]) => {
+                         return (
+                           <li key={name}>
+                             <LocalizedClientLink
+                               href={href}
+-                              className="text-3xl leading-10 hover:text-ui-fg-disabled"
++                              className="text-2xl font-display font-medium text-nuprix-forest hover:text-nuprix-pine transition-colors"
+                               onClick={close}
+                               data-testid={`${name.toLowerCase()}-link`}
+                             >
+@@ -92,49 +104,49 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
+                         )
+                       })}
+                     </ul>
+-                    <div className="flex flex-col gap-y-6">
+-                      {!!locales?.length && (
+-                        <div
+-                          className="flex justify-between"
+-                          onMouseEnter={languageToggleState.open}
+-                          onMouseLeave={languageToggleState.close}
+-                        >
+-                          <LanguageSelect
+-                            toggleState={languageToggleState}
+-                            locales={locales}
+-                            currentLocale={currentLocale}
+-                          />
+-                          <ArrowRightMini
+-                            className={clx(
+-                              "transition-transform duration-150",
+-                              languageToggleState.state ? "-rotate-90" : ""
+-                            )}
+-                          />
+-                        </div>
+-                      )}
++                  </div>
++
++                  <div className="flex flex-col gap-y-4 pt-6 border-t border-nuprix-line">
++                    {!!locales?.length && (
+                       <div
+-                        className="flex justify-between"
+-                        onMouseEnter={countryToggleState.open}
+-                        onMouseLeave={countryToggleState.close}
++                        className="flex justify-between items-center text-sm text-nuprix-muted"
++                        onMouseEnter={languageToggleState.open}
++                        onMouseLeave={languageToggleState.close}
+                       >
+-                        {regions && (
+-                          <CountrySelect
+-                            toggleState={countryToggleState}
+-                            regions={regions}
+-                          />
+-                        )}
++                        <LanguageSelect
++                          toggleState={languageToggleState}
++                          locales={locales}
++                          currentLocale={currentLocale}
++                        />
+                         <ArrowRightMini
+                           className={clx(
+                             "transition-transform duration-150",
+-                            countryToggleState.state ? "-rotate-90" : ""
++                            languageToggleState.state ? "-rotate-90" : ""
+                           )}
+                         />
+                       </div>
+-                      <Text className="flex justify-between txt-compact-small">
+-                        ┬⌐ {new Date().getFullYear()} Medusa Store. All rights
+-                        reserved.
+-                      </Text>
++                    )}
++                    <div
++                      className="flex justify-between items-center text-sm text-nuprix-muted"
++                      onMouseEnter={countryToggleState.open}
++                      onMouseLeave={countryToggleState.close}
++                    >
++                      {regions && (
++                        <CountrySelect
++                          toggleState={countryToggleState}
++                          regions={regions}
++                        />
++                      )}
++                      <ArrowRightMini
++                        className={clx(
++                          "transition-transform duration-150",
++                          countryToggleState.state ? "-rotate-90" : ""
++                        )}
++                      />
+                     </div>
++                    <Text className="text-xs text-nuprix-subtle pt-2">
++                      ┬⌐ {new Date().getFullYear()} Nuprix. All rights reserved.
++                    </Text>
+                   </div>
+                 </PopoverPanel>
+               </Transition>
+diff --git a/nuprix-backend/apps/storefront/src/modules/layout/templates/footer/index.tsx b/nuprix-backend/apps/storefront/src/modules/layout/templates/footer/index.tsx
+index e7db8c9..1b4a0c7 100644
+--- a/nuprix-backend/apps/storefront/src/modules/layout/templates/footer/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/layout/templates/footer/index.tsx
+@@ -1,8 +1,7 @@
+-import { listCategories } from "@lib/data/categories";
+-import { listCollections } from "@lib/data/collections";
+-import { Text, clx } from "@modules/common/components/ui";
+-
+-import LocalizedClientLink from "@modules/common/components/localized-client-link";
++import { listCategories } from "@lib/data/categories"
++import { listCollections } from "@lib/data/collections"
++import { Text } from "@modules/common/components/ui"
++import LocalizedClientLink from "@modules/common/components/localized-client-link"
+ 
+ export default async function Footer() {
+   const [{ collections }, productCategories] = await Promise.all([
+@@ -11,96 +10,62 @@ export default async function Footer() {
+       fields:
+         "id,name,handle,parent_category_id,category_children.id,category_children.name,category_children.handle",
+     }),
+-  ]);
++  ])
+ 
+   return (
+-    <footer className="border-t border-ui-border-base w-full">
++    <footer className="border-t border-nuprix-line bg-nuprix-paper w-full mt-24">
+       <div className="content-container flex flex-col w-full">
+-        <div className="flex flex-col gap-y-6 xsmall:flex-row items-start justify-between py-40">
+-          <div>
++        <div className="flex flex-col gap-y-12 xsmall:flex-row items-start justify-between py-16 small:py-24">
++          <div className="max-w-sm">
+             <LocalizedClientLink
+               href="/"
+-              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
++              className="flex items-center gap-2 text-2xl font-bold tracking-tight text-nuprix-forest"
+             >
+-              Nuprix
++              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-nuprix-forest text-xs font-bold text-nuprix-ivory">
++                N
++              </span>
++              <span className="font-display tracking-tight text-2xl lowercase">nuprix</span>
+             </LocalizedClientLink>
++            <p className="mt-4 text-sm leading-6 text-nuprix-muted">
++              Thoughtfully curated everyday essentials and instant digital downloads in a single unified catalog.
++            </p>
+           </div>
+-          <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
++
++          <div className="text-sm gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
+             {productCategories && productCategories?.length > 0 && (
+-              <div className="flex flex-col gap-y-2">
+-                <span className="txt-small-plus txt-ui-fg-base">
++              <div className="flex flex-col gap-y-3">
++                <span className="text-xs font-semibold uppercase tracking-wider text-nuprix-forest">
+                   Categories
+                 </span>
+-                <ul
+-                  className="grid grid-cols-1 gap-2"
+-                  data-testid="footer-categories"
+-                >
++                <ul className="grid grid-cols-1 gap-2.5" data-testid="footer-categories">
+                   {productCategories?.slice(0, 6).map((c) => {
+-                    if (c.parent_category_id) {
+-                      return;
+-                    }
+-
+-                    const children =
+-                      c.category_children?.map((child) => ({
+-                        name: child.name,
+-                        handle: child.handle,
+-                        id: child.id,
+-                      })) || null;
+-
++                    if (c.parent_category_id) return null
+                     return (
+-                      <li
+-                        className="flex flex-col gap-2 text-ui-fg-subtle txt-small"
+-                        key={c.id}
+-                      >
++                      <li key={c.id}>
+                         <LocalizedClientLink
+-                          className={clx(
+-                            "hover:text-ui-fg-base",
+-                            children && "txt-small-plus"
+-                          )}
++                          className="text-nuprix-muted hover:text-nuprix-forest transition-colors text-sm"
+                           href={`/categories/${c.handle}`}
+                           data-testid="category-link"
+                         >
+                           {c.name}
+                         </LocalizedClientLink>
+-                        {children && (
+-                          <ul className="grid grid-cols-1 ml-3 gap-2">
+-                            {children &&
+-                              children.map((child) => (
+-                                <li key={child.id}>
+-                                  <LocalizedClientLink
+-                                    className="hover:text-ui-fg-base"
+-                                    href={`/categories/${child.handle}`}
+-                                    data-testid="category-link"
+-                                  >
+-                                    {child.name}
+-                                  </LocalizedClientLink>
+-                                </li>
+-                              ))}
+-                          </ul>
+-                        )}
+                       </li>
+-                    );
++                    )
+                   })}
+                 </ul>
+               </div>
+             )}
++
+             {collections && collections.length > 0 && (
+-              <div className="flex flex-col gap-y-2">
+-                <span className="txt-small-plus txt-ui-fg-base">
++              <div className="flex flex-col gap-y-3">
++                <span className="text-xs font-semibold uppercase tracking-wider text-nuprix-forest">
+                   Collections
+                 </span>
+-                <ul
+-                  className={clx(
+-                    "grid grid-cols-1 gap-2 text-ui-fg-subtle txt-small",
+-                    {
+-                      "grid-cols-2": (collections?.length || 0) > 3,
+-                    }
+-                  )}
+-                >
++                <ul className="grid grid-cols-1 gap-2.5">
+                   {collections?.slice(0, 6).map((c) => (
+                     <li key={c.id}>
+                       <LocalizedClientLink
+-                        className="hover:text-ui-fg-base"
++                        className="text-nuprix-muted hover:text-nuprix-forest transition-colors text-sm"
+                         href={`/collections/${c.handle}`}
+                       >
+                         {c.title}
+@@ -110,76 +75,69 @@ export default async function Footer() {
+                 </ul>
+               </div>
+             )}
+-            <div className="flex flex-col gap-y-2">
+-              <span className="txt-small-plus txt-ui-fg-base">
+-                Help & support
++
++            <div className="flex flex-col gap-y-3">
++              <span className="text-xs font-semibold uppercase tracking-wider text-nuprix-forest">
++                Help & Information
+               </span>
+-              <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
++              <ul className="grid grid-cols-1 gap-2.5 text-sm">
+                 <li>
+                   <LocalizedClientLink
+-                    className="hover:text-ui-fg-base"
++                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                     href="/shipping"
+                   >
+-                    Shipping information
++                    Shipping Policy
+                   </LocalizedClientLink>
+                 </li>
+                 <li>
+                   <LocalizedClientLink
+-                    className="hover:text-ui-fg-base"
++                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                     href="/returns"
+                   >
+-                    Return policy
++                    Returns & Refunds
+                   </LocalizedClientLink>
+                 </li>
+                 <li>
+                   <LocalizedClientLink
+-                    className="hover:text-ui-fg-base"
++                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                     href="/terms"
+                   >
+-                    Terms of service
++                    Terms of Service
+                   </LocalizedClientLink>
+                 </li>
+                 <li>
+                   <LocalizedClientLink
+-                    className="hover:text-ui-fg-base"
++                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                     href="/privacy"
+                   >
+-                    Privacy policy
++                    Privacy Policy
+                   </LocalizedClientLink>
+                 </li>
+                 <li>
+                   <LocalizedClientLink
+-                    className="hover:text-ui-fg-base"
++                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                     href="/contact"
+                   >
+-                    Contact
+-                  </LocalizedClientLink>
+-                </li>
+-                <li>
+-                  <LocalizedClientLink
+-                    className="hover:text-ui-fg-base"
+-                    href="/search"
+-                  >
+-                    Search
++                    Contact Us
+                   </LocalizedClientLink>
+                 </li>
+               </ul>
+             </div>
+-            <div className="flex max-w-xs flex-col gap-y-2">
+-              <span className="txt-small-plus txt-ui-fg-base">Discover Nuprix</span>
+-              <p className="text-ui-fg-subtle txt-small">
+-                A thoughtful mix of digital finds and physical products for
+-                everyday life.
+-              </p>
+-            </div>
+           </div>
+         </div>
+-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
+-          <Text className="txt-compact-small">
++
++        <div className="flex w-full py-8 border-t border-nuprix-line flex-col sm:flex-row items-center justify-between text-xs text-nuprix-muted gap-4">
++          <Text className="text-xs text-nuprix-muted">
+             ┬⌐ {new Date().getFullYear()} Nuprix. All rights reserved.
+           </Text>
++          <div className="flex items-center gap-6">
++            <span className="inline-flex items-center gap-1.5">
++              <span className="h-1.5 w-1.5 rounded-full bg-nuprix-moss" />
++              Verified Digital & Physical Delivery
++            </span>
++          </div>
+         </div>
+       </div>
+     </footer>
+-  );
++  )
+ }
+diff --git a/nuprix-backend/apps/storefront/src/modules/layout/templates/nav/index.tsx b/nuprix-backend/apps/storefront/src/modules/layout/templates/nav/index.tsx
+index 9e71a4c..3e5e0db 100644
+--- a/nuprix-backend/apps/storefront/src/modules/layout/templates/nav/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/layout/templates/nav/index.tsx
+@@ -1,5 +1,4 @@
+ import { Suspense } from "react"
+-
+ import { listLocales } from "@lib/data/locales"
+ import { getLocale } from "@lib/data/locale-actions"
+ import { listRegions } from "@lib/data/regions"
+@@ -18,27 +17,63 @@ export default async function Nav() {
+ 
+   return (
+     <div className="sticky top-0 inset-x-0 z-50 group">
+-      <header className="relative h-16 mx-auto border-b duration-200 bg-white border-ui-border-base">
+-        <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
++      <header className="relative h-16 mx-auto border-b transition-colors duration-200 bg-white/90 backdrop-blur-md border-nuprix-line">
++        <nav className="content-container flex items-center justify-between w-full h-full text-small-regular text-nuprix-subtle">
+           <div className="flex-1 basis-0 h-full flex items-center">
+             <div className="h-full">
+               <SideMenu regions={regions} locales={locales} currentLocale={currentLocale} />
+             </div>
++            <div className="hidden medium:flex items-center gap-x-6 ml-6">
++              <LocalizedClientLink
++                href="/store"
++                className="text-sm font-medium text-nuprix-muted hover:text-nuprix-forest transition-colors"
++              >
++                Catalog
++              </LocalizedClientLink>
++              <LocalizedClientLink
++                href="/search"
++                className="text-sm font-medium text-nuprix-muted hover:text-nuprix-forest transition-colors"
++              >
++                Search
++              </LocalizedClientLink>
++            </div>
+           </div>
++
+           <div className="flex items-center h-full">
+-            <LocalizedClientLink href="/" className="flex items-center gap-2 text-xl font-semibold tracking-tight text-slate-900" data-testid="nav-store-link">
+-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-sm font-bold text-white">N</span>
+-              <span>nuprix</span>
++            <LocalizedClientLink
++              href="/"
++              className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-nuprix-forest"
++              data-testid="nav-store-link"
++            >
++              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-nuprix-forest text-sm font-bold text-nuprix-ivory shadow-sm">
++                N
++              </span>
++              <span className="font-display tracking-tight text-2xl lowercase">nuprix</span>
+             </LocalizedClientLink>
+           </div>
+-          <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
++
++          <div className="flex items-center gap-x-4 xsmall:gap-x-6 h-full flex-1 basis-0 justify-end">
+             <Search />
+             <div className="hidden small:flex items-center gap-x-6 h-full">
+-              <LocalizedClientLink className="hover:text-ui-fg-base" href="/account" data-testid="nav-account-link">
++              <LocalizedClientLink
++                className="text-sm font-medium text-nuprix-muted hover:text-nuprix-forest transition-colors"
++                href="/account"
++                data-testid="nav-account-link"
++              >
+                 Account
+               </LocalizedClientLink>
+             </div>
+-            <Suspense fallback={<LocalizedClientLink className="hover:text-ui-fg-base flex gap-2" href="/cart" data-testid="nav-cart-link">Cart (0)</LocalizedClientLink>}>
++            <Suspense
++              fallback={
++                <LocalizedClientLink
++                  className="text-sm font-medium text-nuprix-muted hover:text-nuprix-forest flex gap-2"
++                  href="/cart"
++                  data-testid="nav-cart-link"
++                >
++                  Cart (0)
++                </LocalizedClientLink>
++              }
++            >
+               <CartButton />
+             </Suspense>
+           </div>
+diff --git a/nuprix-backend/apps/storefront/src/modules/products/components/product-tabs/index.tsx b/nuprix-backend/apps/storefront/src/modules/products/components/product-tabs/index.tsx
+index a0acdc3..a25f265 100644
+--- a/nuprix-backend/apps/storefront/src/modules/products/components/product-tabs/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/products/components/product-tabs/index.tsx
+@@ -3,7 +3,6 @@
+ import Back from "@modules/common/icons/back"
+ import FastDelivery from "@modules/common/icons/fast-delivery"
+ import Refresh from "@modules/common/icons/refresh"
+-
+ import Accordion from "./accordion"
+ import { HttpTypes } from "@medusajs/types"
+ 
+@@ -12,14 +11,19 @@ type ProductTabsProps = {
+ }
+ 
+ const ProductTabs = ({ product }: ProductTabsProps) => {
++  const isDigital = Boolean(
++    product.metadata?.is_digital ||
++    product.tags?.some((t) => t.value?.toLowerCase() === "digital" || t.value?.toLowerCase() === "download")
++  )
++
+   const tabs = [
+     {
+-      label: "Product Information",
+-      component: <ProductInfoTab product={product} />,
++      label: "Specifications & Details",
++      component: <ProductInfoTab product={product} isDigital={isDigital} />,
+     },
+     {
+-      label: "Shipping & Returns",
+-      component: <ShippingInfoTab />,
++      label: isDigital ? "Digital Delivery & Access" : "Shipping & Returns",
++      component: isDigital ? <DigitalDeliveryTab /> : <ShippingInfoTab />,
+     },
+   ]
+ 
+@@ -41,37 +45,82 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
+   )
+ }
+ 
+-const ProductInfoTab = ({ product }: ProductTabsProps) => {
+-  return (
+-    <div className="text-small-regular py-8">
+-      <div className="grid grid-cols-2 gap-x-8">
+-        <div className="flex flex-col gap-y-4">
++const ProductInfoTab = ({ product, isDigital }: { product: HttpTypes.StoreProduct; isDigital: boolean }) => {
++  if (isDigital) {
++    return (
++      <div className="text-xs leading-5 text-nuprix-muted py-4 space-y-3">
++        <p>This is a digital product delivered electronically to your account and verified order email address upon payment confirmation.</p>
++        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-nuprix-line">
+           <div>
+-            <span className="font-semibold">Material</span>
+-            <p>{product.material ? product.material : "-"}</p>
++            <span className="font-semibold text-nuprix-forest block">Format</span>
++            <span>Digital File Download</span>
+           </div>
+           <div>
+-            <span className="font-semibold">Country of origin</span>
+-            <p>{product.origin_country ? product.origin_country : "-"}</p>
+-          </div>
+-          <div>
+-            <span className="font-semibold">Type</span>
+-            <p>{product.type ? product.type.value : "-"}</p>
++            <span className="font-semibold text-nuprix-forest block">License</span>
++            <span>Personal / Single User</span>
+           </div>
+         </div>
+-        <div className="flex flex-col gap-y-4">
+-          <div>
+-            <span className="font-semibold">Weight</span>
+-            <p>{product.weight ? `${product.weight} g` : "-"}</p>
+-          </div>
+-          <div>
+-            <span className="font-semibold">Dimensions</span>
+-            <p>
+-              {product.length && product.width && product.height
+-                ? `${product.length}L x ${product.width}W x ${product.height}H`
+-                : "-"}
+-            </p>
+-          </div>
++      </div>
++    )
++  }
++
++  const hasPhysicalSpecs = Boolean(product.material || product.origin_country || product.weight || product.length)
++
++  return (
++    <div className="text-xs leading-5 text-nuprix-muted py-4">
++      {hasPhysicalSpecs ? (
++        <div className="grid grid-cols-2 gap-4">
++          {product.material && (
++            <div>
++              <span className="font-semibold text-nuprix-forest block">Material</span>
++              <p>{product.material}</p>
++            </div>
++          )}
++          {product.origin_country && (
++            <div>
++              <span className="font-semibold text-nuprix-forest block">Country of origin</span>
++              <p>{product.origin_country}</p>
++            </div>
++          )}
++          {product.weight && (
++            <div>
++              <span className="font-semibold text-nuprix-forest block">Weight</span>
++              <p>{product.weight} g</p>
++            </div>
++          )}
++          {product.length && product.width && product.height && (
++            <div>
++              <span className="font-semibold text-nuprix-forest block">Dimensions</span>
++              <p>{product.length}L x {product.width}W x {product.height}H</p>
++            </div>
++          )}
++        </div>
++      ) : (
++        <p>Physical merchandise fulfilled according to region shipping standards.</p>
++      )}
++    </div>
++  )
++}
++
++const DigitalDeliveryTab = () => {
++  return (
++    <div className="text-xs leading-5 text-nuprix-muted py-4 space-y-3">
++      <div className="flex items-start gap-x-2.5">
++        <FastDelivery />
++        <div>
++          <span className="font-semibold text-nuprix-forest block">Instant Electronic Access</span>
++          <p>
++            Immediately following completed payment capture, a unique verified download link is generated and sent to your email and accessible in your Account Downloads dashboard.
++          </p>
++        </div>
++      </div>
++      <div className="flex items-start gap-x-2.5">
++        <Refresh />
++        <div>
++          <span className="font-semibold text-nuprix-forest block">Standard Download Allowances</span>
++          <p>
++            Download tokens are securely rate-limited and provide multiple access attempts for your files.
++          </p>
+         </div>
+       </div>
+     </div>
+@@ -80,38 +129,23 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
+ 
+ const ShippingInfoTab = () => {
+   return (
+-    <div className="text-small-regular py-8">
+-      <div className="grid grid-cols-1 gap-y-8">
+-        <div className="flex items-start gap-x-2">
+-          <FastDelivery />
+-          <div>
+-            <span className="font-semibold">Fast delivery</span>
+-            <p className="max-w-sm">
+-              Your package will arrive in 3-5 business days at your pick up
+-              location or in the comfort of your home.
+-            </p>
+-          </div>
+-        </div>
+-        <div className="flex items-start gap-x-2">
+-          <Refresh />
+-          <div>
+-            <span className="font-semibold">Simple exchanges</span>
+-            <p className="max-w-sm">
+-              Is the fit not quite right? No worries - we&apos;ll exchange your
+-              product for a new one.
+-            </p>
+-          </div>
++    <div className="text-xs leading-5 text-nuprix-muted py-4 space-y-3">
++      <div className="flex items-start gap-x-2.5">
++        <FastDelivery />
++        <div>
++          <span className="font-semibold text-nuprix-forest block">Standard & Expedited Delivery</span>
++          <p>
++            Dispatched via regional fulfillment carriers. Estimated transit times vary by destination.
++          </p>
+         </div>
+-        <div className="flex items-start gap-x-2">
+-          <Back />
+-          <div>
+-            <span className="font-semibold">Easy returns</span>
+-            <p className="max-w-sm">
+-              Just return your product and we&apos;ll refund your money. No
+-              questions asked ΓÇô we&apos;ll do our best to make sure your return
+-              is hassle-free.
+-            </p>
+-          </div>
++      </div>
++      <div className="flex items-start gap-x-2.5">
++        <Back />
++        <div>
++          <span className="font-semibold text-nuprix-forest block">Return Policy</span>
++          <p>
++            Eligible physical merchandise may be returned according to our return policy terms.
++          </p>
+         </div>
+       </div>
+     </div>
+diff --git a/nuprix-backend/apps/storefront/src/modules/products/templates/index.tsx b/nuprix-backend/apps/storefront/src/modules/products/templates/index.tsx
+index 049c1cd..502dcb5 100644
+--- a/nuprix-backend/apps/storefront/src/modules/products/templates/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/products/templates/index.tsx
+@@ -1,8 +1,6 @@
+ import React, { Suspense } from "react"
+-
+ import VariantImageGallery from "@modules/products/components/image-gallery/variant-image-gallery"
+ import ProductActions from "@modules/products/components/product-actions"
+-import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
+ import ProductTabs from "@modules/products/components/product-tabs"
+ import RelatedProducts from "@modules/products/components/related-products"
+ import ProductInfo from "@modules/products/templates/product-info"
+@@ -26,32 +24,42 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
+   }
+ 
+   return (
+-    <>
++    <div className="bg-nuprix-ivory py-8 small:py-16">
+       <div
+-        className="content-container  flex flex-col small:flex-row small:items-start py-6 relative"
++        className="content-container grid grid-cols-1 small:grid-cols-12 gap-8 lg:gap-12 items-start"
+         data-testid="product-container"
+       >
+-        <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-6">
+-          <ProductInfo product={product} />
+-          <ProductTabs product={product} />
+-        </div>
+-        <div className="block w-full relative">
+-          <VariantImageGallery product={product} />
++        {/* Left Column: Visual Gallery (7 cols on desktop) */}
++        <div className="small:col-span-7 w-full">
++          <div className="surface-card p-4 small:p-6 overflow-hidden">
++            <VariantImageGallery product={product} />
++          </div>
+         </div>
+-        <div className="flex flex-col small:sticky small:top-48 small:py-0 small:max-w-[300px] w-full py-8 gap-y-12">
+-          <ProductOnboardingCta />
+-          <ProductActions product={product} region={region} />
++
++        {/* Right Column: Buy Box & Product Info & Tabs (5 cols on desktop, sticky) */}
++        <div className="small:col-span-5 flex flex-col gap-y-6 small:sticky small:top-24">
++          <div className="surface-card p-6 small:p-8 flex flex-col gap-y-6">
++            <ProductInfo product={product} />
++            <div className="border-t border-nuprix-line pt-6">
++              <ProductActions product={product} region={region} />
++            </div>
++          </div>
++
++          <div className="surface-card p-6">
++            <ProductTabs product={product} />
++          </div>
+         </div>
+       </div>
++
+       <div
+-        className="content-container my-16 small:my-32"
++        className="content-container mt-16 small:mt-24"
+         data-testid="related-products-container"
+       >
+         <Suspense fallback={<SkeletonRelatedProducts />}>
+           <RelatedProducts product={product} countryCode={countryCode} />
+         </Suspense>
+       </div>
+-    </>
++    </div>
+   )
+ }
+ 
+diff --git a/nuprix-backend/apps/storefront/src/modules/products/templates/product-info/index.tsx b/nuprix-backend/apps/storefront/src/modules/products/templates/product-info/index.tsx
+index 54810ba..37f7877 100644
+--- a/nuprix-backend/apps/storefront/src/modules/products/templates/product-info/index.tsx
++++ b/nuprix-backend/apps/storefront/src/modules/products/templates/product-info/index.tsx
+@@ -1,5 +1,5 @@
+ import { HttpTypes } from "@medusajs/types"
+-import { Heading, Text } from "@modules/common/components/ui"
++import { Heading, Text, Badge } from "@modules/common/components/ui"
+ import LocalizedClientLink from "@modules/common/components/localized-client-link"
+ 
+ type ProductInfoProps = {
+@@ -7,32 +7,51 @@ type ProductInfoProps = {
+ }
+ 
+ const ProductInfo = ({ product }: ProductInfoProps) => {
++  // Check if digital or physical from existing metadata or characteristics
++  const isDigital = Boolean(
++    product.metadata?.is_digital ||
++    product.tags?.some((t) => t.value?.toLowerCase() === "digital" || t.value?.toLowerCase() === "download")
++  )
++
+   return (
+-    <div id="product-info">
+-      <div className="flex flex-col gap-y-4 lg:max-w-[500px] mx-auto">
+-        {product.collection && (
++    <div id="product-info" className="flex flex-col gap-y-4">
++      <div className="flex items-center justify-between gap-2">
++        {product.collection ? (
+           <LocalizedClientLink
+             href={`/collections/${product.collection.handle}`}
+-            className="text-medium text-ui-fg-muted hover:text-ui-fg-subtle"
++            className="text-xs font-semibold uppercase tracking-wider text-nuprix-leaf hover:text-nuprix-forest transition-colors"
+           >
+             {product.collection.title}
+           </LocalizedClientLink>
++        ) : (
++          <span className="text-xs font-semibold uppercase tracking-wider text-nuprix-leaf">
++            Catalog
++          </span>
+         )}
+-        <Heading
+-          level="h1"
+-          className="text-3xl leading-10 text-ui-fg-base"
+-          data-testid="product-title"
+-        >
+-          {product.title}
+-        </Heading>
+ 
++        {isDigital ? (
++          <Badge color="blue">Instant Digital Download</Badge>
++        ) : (
++          <Badge color="green">Physical Product</Badge>
++        )}
++      </div>
++
++      <Heading
++        level="h1"
++        className="text-2xl small:text-3xl font-display font-medium text-nuprix-forest tracking-tight"
++        data-testid="product-title"
++      >
++        {product.title}
++      </Heading>
++
++      {product.description && (
+         <Text
+-          className="text-medium text-ui-fg-subtle whitespace-pre-line"
++          className="text-sm leading-6 text-nuprix-muted whitespace-pre-line"
+           data-testid="product-description"
+         >
+           {product.description}
+         </Text>
+-      </div>
++      )}
+     </div>
+   )
+ }
+diff --git a/nuprix-backend/apps/storefront/src/styles/globals.css b/nuprix-backend/apps/storefront/src/styles/globals.css
+index 1ebe912..60e5185 100644
+--- a/nuprix-backend/apps/storefront/src/styles/globals.css
++++ b/nuprix-backend/apps/storefront/src/styles/globals.css
+@@ -49,13 +49,56 @@
+   }
+ }
+ 
++@layer base {
++  :focus-visible {
++    outline: 2px solid #548365;
++    outline-offset: 2px;
++  }
++
++  ::selection {
++    background-color: #dce9dc;
++    color: #172b20;
++  }
++
++  @media (prefers-reduced-motion: reduce) {
++    *,
++    *::before,
++    *::after {
++      animation-duration: 0.01ms !important;
++      animation-iteration-count: 1 !important;
++      scroll-behavior: auto !important;
++      transition-duration: 0.01ms !important;
++    }
++  }
++}
++
+ @layer components {
+   .content-container {
+-    @apply max-w-[1440px] w-full mx-auto px-6;
++    @apply max-w-[1440px] w-full mx-auto px-4 xsmall:px-6;
++  }
++
++  .skip-link {
++    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-nuprix-forest focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white;
++  }
++
++  .eyebrow {
++    @apply text-[11px] font-semibold uppercase tracking-[0.2em] text-nuprix-leaf;
++  }
++
++  .heading-display {
++    @apply font-display font-medium tracking-[-0.02em] text-nuprix-forest;
++  }
++
++  .surface-card {
++    @apply rounded-2xl border border-nuprix-line bg-white;
++  }
++
++  .link-underline {
++    @apply font-semibold text-nuprix-pine underline decoration-nuprix-line-strong underline-offset-4 transition-colors hover:decoration-nuprix-pine;
+   }
+ 
+   .contrast-btn {
+-    @apply px-4 py-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors duration-200 ease-in;
++    @apply px-4 py-2 border border-nuprix-forest rounded-full hover:bg-nuprix-forest hover:text-white transition-colors duration-200 ease-in;
+   }
+ 
+   .text-xsmall-regular {
+diff --git a/nuprix-backend/apps/storefront/tailwind.config.js b/nuprix-backend/apps/storefront/tailwind.config.js
+index d89815c..35a3a0d 100644
+--- a/nuprix-backend/apps/storefront/tailwind.config.js
++++ b/nuprix-backend/apps/storefront/tailwind.config.js
+@@ -20,6 +20,27 @@ module.exports = {
+         padding: "padding-top padding-right padding-bottom padding-left",
+       },
+       colors: {
++        // Nuprix brand tokens. Use these instead of hardcoded hex values.
++        nuprix: {
++          ivory: "#f7f7f2",
++          paper: "#fbfbf8",
++          mist: "#eef1eb",
++          line: "#e3e8df",
++          "line-strong": "#cbd8cd",
++          sage: "#dce9dc",
++          leaf: "#71917a",
++          moss: "#548365",
++          pine: "#294b35",
++          forest: "#172b20",
++          ink: "#17211b",
++          charcoal: "#24372a",
++          muted: "#66736a",
++          subtle: "#788279",
++          lilac: "#e9e3fa",
++          sand: "#f5e5d7",
++          sky: "#dce8f4",
++          danger: "#9f2d2d",
++        },
+         grey: {
+           0: "#FFFFFF",
+           5: "#F9FAFB",
+@@ -57,8 +78,20 @@ module.exports = {
+       fontSize: {
+         "3xl": "2rem",
+       },
++      boxShadow: {
++        card: "0 1px 2px rgba(23, 43, 32, 0.04), 0 8px 24px rgba(23, 43, 32, 0.06)",
++        lift: "0 18px 45px rgba(28, 48, 34, 0.12)",
++      },
+       fontFamily: {
++        display: [
++          "var(--font-display)",
++          "Georgia",
++          "Cambria",
++          "Times New Roman",
++          "serif",
++        ],
+         sans: [
++          "var(--font-sans)",
+           "Inter",
+           "-apple-system",
+           "BlinkMacSystemFont",
+diff --git a/nuprix-backend/package-lock.json b/nuprix-backend/package-lock.json
+index 52df5c4..3e85459 100644
+--- a/nuprix-backend/package-lock.json
++++ b/nuprix-backend/package-lock.json
+@@ -119,42 +119,6 @@
+         }
+       }
+     },
+-    "apps/backend/node_modules/@medusajs/ui/node_modules/typescript": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/typescript/-/typescript-7.0.2.tgz",
+-      "integrity": "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==",
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "peer": true,
+-      "bin": {
+-        "tsc": "bin/tsc"
+-      },
+-      "engines": {
+-        "node": ">=16.20.0"
+-      },
+-      "optionalDependencies": {
+-        "@typescript/typescript-aix-ppc64": "7.0.2",
+-        "@typescript/typescript-darwin-arm64": "7.0.2",
+-        "@typescript/typescript-darwin-x64": "7.0.2",
+-        "@typescript/typescript-freebsd-arm64": "7.0.2",
+-        "@typescript/typescript-freebsd-x64": "7.0.2",
+-        "@typescript/typescript-linux-arm": "7.0.2",
+-        "@typescript/typescript-linux-arm64": "7.0.2",
+-        "@typescript/typescript-linux-loong64": "7.0.2",
+-        "@typescript/typescript-linux-mips64el": "7.0.2",
+-        "@typescript/typescript-linux-ppc64": "7.0.2",
+-        "@typescript/typescript-linux-riscv64": "7.0.2",
+-        "@typescript/typescript-linux-s390x": "7.0.2",
+-        "@typescript/typescript-linux-x64": "7.0.2",
+-        "@typescript/typescript-netbsd-arm64": "7.0.2",
+-        "@typescript/typescript-netbsd-x64": "7.0.2",
+-        "@typescript/typescript-openbsd-arm64": "7.0.2",
+-        "@typescript/typescript-openbsd-x64": "7.0.2",
+-        "@typescript/typescript-sunos-x64": "7.0.2",
+-        "@typescript/typescript-win32-arm64": "7.0.2",
+-        "@typescript/typescript-win32-x64": "7.0.2"
+-      }
+-    },
+     "apps/backend/node_modules/@types/node": {
+       "version": "20.19.43",
+       "resolved": "https://registry.npmjs.org/@types/node/-/node-20.19.43.tgz",
+@@ -6309,40 +6273,6 @@
+         }
+       }
+     },
+-    "node_modules/@medusajs/ui": {
+-      "version": "4.2.9",
+-      "resolved": "https://registry.npmjs.org/@medusajs/ui/-/ui-4.2.9.tgz",
+-      "integrity": "sha512-tpow4q1NDTlLAsaHkDqzc3iKTsEMMGW2FTjxKaEnGlvqB45uuOcbXxUv+hD3wqP2PB5MnslEvIKVuvyMQ+lRLw==",
+-      "license": "MIT",
+-      "optional": true,
+-      "peer": true,
+-      "dependencies": {
+-        "@dnd-kit/core": "^6.3.0",
+-        "@dnd-kit/sortable": "^10.0.0",
+-        "@dnd-kit/utilities": "^3.2.2",
+-        "@internationalized/date": "^3.12.4",
+-        "@medusajs/icons": "2.22.2",
+-        "@radix-ui/react-dialog": "1.1.4",
+-        "@radix-ui/react-dismissable-layer": "1.1.4",
+-        "@tanstack/react-table": "8.20.5",
+-        "clsx": "^2.1.1",
+-        "copy-to-clipboard": "^4.0.2",
+-        "cva": "1.0.0-beta.1",
+-        "lodash.isequal": "^4.5.0",
+-        "prism-react-renderer": "^2.0.6",
+-        "prismjs": "^1.30.0",
+-        "radix-ui": "1.1.2",
+-        "react-aria": "^3.53.1",
+-        "react-currency-input-field": "^4.0.14",
+-        "react-stately": "^3.51.0",
+-        "sonner": "^2.0.8",
+-        "tailwind-merge": "^2.2.1"
+-      },
+-      "peerDependencies": {
+-        "react": "^18.3.1",
+-        "react-dom": "^18.3.1"
+-      }
+-    },
+     "node_modules/@medusajs/ui-preset": {
+       "version": "2.22.7",
+       "resolved": "https://registry.npmjs.org/@medusajs/ui-preset/-/ui-preset-2.22.7.tgz",
+@@ -6356,17 +6286,6 @@
+         "tailwindcss": "^3.4.3 || ^4.0.0"
+       }
+     },
+-    "node_modules/@medusajs/ui/node_modules/@medusajs/icons": {
+-      "version": "2.22.2",
+-      "resolved": "https://registry.npmjs.org/@medusajs/icons/-/icons-2.22.2.tgz",
+-      "integrity": "sha512-IeBrOtLZSwS3/UwVo/zBklUalD5s9cHXJf0bJfrsz0f28SPkyBhMmDmBh8alDloDwbRni+IhtuQOAfEzNSKoYw==",
+-      "license": "MIT",
+-      "optional": true,
+-      "peer": true,
+-      "peerDependencies": {
+-        "react": "^18.3.1 || ^19.0.0"
+-      }
+-    },
+     "node_modules/@medusajs/user": {
+       "version": "2.22.7",
+       "resolved": "https://registry.npmjs.org/@medusajs/user/-/user-2.22.7.tgz",
+@@ -14556,7 +14475,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -14573,7 +14491,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -14590,7 +14507,6 @@
+       "cpu": [
+         "arm"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0",
+       "optional": true,
+       "os": [
+@@ -14607,7 +14523,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -14624,7 +14539,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -14641,7 +14555,6 @@
+       "cpu": [
+         "ppc64"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -14658,7 +14571,6 @@
+       "cpu": [
+         "s390x"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -14675,7 +14587,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -14692,7 +14603,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -14709,7 +14619,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -14726,7 +14635,6 @@
+       "cpu": [
+         "ia32"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -14743,7 +14651,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "dev": true,
+       "license": "Apache-2.0 AND MIT",
+       "optional": true,
+       "os": [
+@@ -15646,346 +15553,6 @@
+         "url": "https://opencollective.com/eslint"
+       }
+     },
+-    "node_modules/@typescript/typescript-aix-ppc64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-aix-ppc64/-/typescript-aix-ppc64-7.0.2.tgz",
+-      "integrity": "sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==",
+-      "cpu": [
+-        "ppc64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "aix"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-darwin-arm64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-darwin-arm64/-/typescript-darwin-arm64-7.0.2.tgz",
+-      "integrity": "sha512-gowzar9MwS/aRWp6f3a4KUqzRjAZjOsmGNCM6LcTgXum+dBfgsBVMN+AgvOCCbguXyick6LJhpBszxMebJ8syA==",
+-      "cpu": [
+-        "arm64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "darwin"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-darwin-x64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-darwin-x64/-/typescript-darwin-x64-7.0.2.tgz",
+-      "integrity": "sha512-SZ9xZInqApNlNGc9s0W1VSsktYSOe9cFqNOIqmN1Gs8SmkjKZYFt017G4VwPxASInODuAdbTW7sXiFUf893RgA==",
+-      "cpu": [
+-        "x64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "darwin"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-freebsd-arm64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-freebsd-arm64/-/typescript-freebsd-arm64-7.0.2.tgz",
+-      "integrity": "sha512-W5NH4y/J0plIIS5b2xvTEkU7JFxyqdMAOgf+Ilhl0vHQXKO5dZoxd+C/jEtq56c4F3wk71RB4BMRQ2XdI+bwYQ==",
+-      "cpu": [
+-        "arm64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "freebsd"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-freebsd-x64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-freebsd-x64/-/typescript-freebsd-x64-7.0.2.tgz",
+-      "integrity": "sha512-UMGDx5sTpzNw3WiPebH7l90IWfJggEd+egHt/q6p7/Cm3zqoV7VxkGXt+3DxPIw8CcmvAB0j3sVVfbhX+M4Tpw==",
+-      "cpu": [
+-        "x64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "freebsd"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-linux-arm": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-arm/-/typescript-linux-arm-7.0.2.tgz",
+-      "integrity": "sha512-gffT3xPz9sR7j/YJExkyPntrI0P2EP9XbOyWzth2/Gs0RstK+90RBcO0ncXoXy/beYll1SXw846Nf2zdnEz0QQ==",
+-      "cpu": [
+-        "arm"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "linux"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-linux-arm64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-arm64/-/typescript-linux-arm64-7.0.2.tgz",
+-      "integrity": "sha512-Qh4eU4/y3yDjnfjjyPYihMj5/ODIlmt+Bzu17OI+fiSRDW57QmU5SiN63exPRNJPKUzcc1INa1NXdrJ+MqHjUQ==",
+-      "cpu": [
+-        "arm64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "linux"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-linux-loong64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-loong64/-/typescript-linux-loong64-7.0.2.tgz",
+-      "integrity": "sha512-uEHck9i8hoAzXPiYRib1O7miOnz23SxIeVl6F4LXox+qov1K35jHcEW6VHKvZI+pyvl7fZEP4MCU5LYvIq1GuQ==",
+-      "cpu": [
+-        "loong64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "linux"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-linux-mips64el": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-mips64el/-/typescript-linux-mips64el-7.0.2.tgz",
+-      "integrity": "sha512-R4KvAMnE43W5Qeqb0Ly56O3mWMWIAgsMyz36DCaycd5nbg/9kzm0liw3JocfRqyJY0KPmzFjbswozXyW0DnIYA==",
+-      "cpu": [
+-        "mips64el"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "linux"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-linux-ppc64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-ppc64/-/typescript-linux-ppc64-7.0.2.tgz",
+-      "integrity": "sha512-DORx5b3sd/4S7eayxm4FQv+A7CrkUIGRaHiwI8oiHTAI1fAPWhF4J0vAlkC8biAlHSVVwxMQ3tjZ2/DVbnQiiA==",
+-      "cpu": [
+-        "ppc64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "linux"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-linux-riscv64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-riscv64/-/typescript-linux-riscv64-7.0.2.tgz",
+-      "integrity": "sha512-wf0jqEDOjrPRnKwYRyyJDRo11KMbvMFrU+q4zqKyChODBzvlkbhNQfKvLxQCcwTpdDaXSHZTVuh0JoCrKCUMHQ==",
+-      "cpu": [
+-        "riscv64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "linux"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-linux-s390x": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-s390x/-/typescript-linux-s390x-7.0.2.tgz",
+-      "integrity": "sha512-IkwJc3L7yhytWd/ewjyxNDfOmswCm9GWMJT/ue/dU4aZNbwZeYAetq42VyLmsmSjvoX7z74X6ZaYCtzAr0EuGw==",
+-      "cpu": [
+-        "s390x"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "linux"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-linux-x64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-linux-x64/-/typescript-linux-x64-7.0.2.tgz",
+-      "integrity": "sha512-EYdf2cNg7rgCWJnxCdJ+F3V39O8ihb37eHAu1LK8oAFizgTQbPOK7zHHXbPt8rX24COqODXeI3sIf0fCXG7H/A==",
+-      "cpu": [
+-        "x64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "linux"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-netbsd-arm64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-netbsd-arm64/-/typescript-netbsd-arm64-7.0.2.tgz",
+-      "integrity": "sha512-+polYF4MF04aPpO5FTkHran9yUQDSXqy5GiSDKpsll5jy3l3+g9QLhpf39T+ePtefhXLOGrLl0QIjkQP6VnelA==",
+-      "cpu": [
+-        "arm64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "netbsd"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-netbsd-x64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-netbsd-x64/-/typescript-netbsd-x64-7.0.2.tgz",
+-      "integrity": "sha512-8YIT0EHM/3dq10ZOVF/A7pc/YSMtbcecct4rWtexrnSCHOPcpC2KTLXfTCR6vDpnSiY12heNb1GiN/wu+T/FyA==",
+-      "cpu": [
+-        "x64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "netbsd"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-openbsd-arm64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-openbsd-arm64/-/typescript-openbsd-arm64-7.0.2.tgz",
+-      "integrity": "sha512-APT8+ClYnuYm1u9+kgGXoMj2VzWzcymwh2gNSQVySHfkRDGOTVkoWLjCmOQSaO+PoqQ57B0flRp9SA+7GnnkzQ==",
+-      "cpu": [
+-        "arm64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "openbsd"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-openbsd-x64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-openbsd-x64/-/typescript-openbsd-x64-7.0.2.tgz",
+-      "integrity": "sha512-yX7s+Q0Dln0Dt9tEzZsAjXXR/+ytBM7AlglaqyeMPxQszJ1JhlJdZ6jLA+IzldHtflX81em7lDao1xXu+aRRkg==",
+-      "cpu": [
+-        "x64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "openbsd"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-sunos-x64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-sunos-x64/-/typescript-sunos-x64-7.0.2.tgz",
+-      "integrity": "sha512-dLJDGaLZ1D4HPQn62u1n8mBDkJREwMsAkCdkwd4Ieqw+x3TUyTsqY0YiBCtE6H6OzzgGk3iuZ3vFWRS+E8/d1g==",
+-      "cpu": [
+-        "x64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "sunos"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-win32-arm64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-win32-arm64/-/typescript-win32-arm64-7.0.2.tgz",
+-      "integrity": "sha512-Gyl1Vy6OsWesLzmq+EP0Fb7b4Nid5232AvcA2SFcdYreldpNtYFFofPjnt62y9hQy7VTaZp65ICJjuAQRaVcIQ==",
+-      "cpu": [
+-        "arm64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "win32"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+-    "node_modules/@typescript/typescript-win32-x64": {
+-      "version": "7.0.2",
+-      "resolved": "https://registry.npmjs.org/@typescript/typescript-win32-x64/-/typescript-win32-x64-7.0.2.tgz",
+-      "integrity": "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==",
+-      "cpu": [
+-        "x64"
+-      ],
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "os": [
+-        "win32"
+-      ],
+-      "peer": true,
+-      "engines": {
+-        "node": ">=16.20.0"
+-      }
+-    },
+     "node_modules/@uiw/react-json-view": {
+       "version": "2.0.0-alpha.44",
+       "resolved": "https://registry.npmjs.org/@uiw/react-json-view/-/react-json-view-2.0.0-alpha.44.tgz",
+@@ -18392,39 +17959,6 @@
+       "integrity": "sha512-YFd3QM/yo17vH91L1IOZuvl09zM0zEEtdfTcOCKWcMdM++MNaQSyp09slXyFCLaPXvHstQFx/xC8myiFHSMUvw==",
+       "license": "MIT"
+     },
+-    "node_modules/cva": {
+-      "version": "1.0.0-beta.1",
+-      "resolved": "https://registry.npmjs.org/cva/-/cva-1.0.0-beta.1.tgz",
+-      "integrity": "sha512-gznFqTgERU9q4wg7jfgqtt34+RUt9S5t0xDAAEuDwQEAXEgjdDkKXpLLNjwSxsB4Ln/sqWJEH7yhE8Ny0mxd0w==",
+-      "license": "Apache-2.0",
+-      "optional": true,
+-      "peer": true,
+-      "dependencies": {
+-        "clsx": "2.0.0"
+-      },
+-      "funding": {
+-        "url": "https://joebell.co.uk/sponsors"
+-      },
+-      "peerDependencies": {
+-        "typescript": ">= 4.5.5 < 6"
+-      },
+-      "peerDependenciesMeta": {
+-        "typescript": {
+-          "optional": true
+-        }
+-      }
+-    },
+-    "node_modules/cva/node_modules/clsx": {
+-      "version": "2.0.0",
+-      "resolved": "https://registry.npmjs.org/clsx/-/clsx-2.0.0.tgz",
+-      "integrity": "sha512-rQ1+kcj+ttHG0MKVGBUXwayCCF1oh39BF5COIpRzuCEv8Mwjv0XucrI2ExNTOn9IlLifGClWQcU9BrZORvtw6Q==",
+-      "license": "MIT",
+-      "optional": true,
+-      "peer": true,
+-      "engines": {
+-        "node": ">=6"
+-      }
+-    },
+     "node_modules/damerau-levenshtein": {
+       "version": "1.0.8",
+       "resolved": "https://registry.npmjs.org/damerau-levenshtein/-/damerau-levenshtein-1.0.8.tgz",
+@@ -24278,15 +23812,6 @@
+       "integrity": "sha512-Bz5mupy2SVbPHURB98VAcw+aHh4vRV5IPNhILUCsOzRmsTmSQ17jIuqopAentWoehktxGd9e/hbIXq980/1QJg==",
+       "license": "MIT"
+     },
+-    "node_modules/lodash.isequal": {
+-      "version": "4.5.0",
+-      "resolved": "https://registry.npmjs.org/lodash.isequal/-/lodash.isequal-4.5.0.tgz",
+-      "integrity": "sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==",
+-      "deprecated": "This package is deprecated. Use require('node:util').isDeepStrictEqual instead.",
+-      "license": "MIT",
+-      "optional": true,
+-      "peer": true
+-    },
+     "node_modules/lodash.isinteger": {
+       "version": "4.0.4",
+       "resolved": "https://registry.npmjs.org/lodash.isinteger/-/lodash.isinteger-4.0.4.tgz",
+@@ -29069,18 +28594,6 @@
+         "url": "https://github.com/sponsors/sindresorhus"
+       }
+     },
+-    "node_modules/tailwind-merge": {
+-      "version": "2.6.1",
+-      "resolved": "https://registry.npmjs.org/tailwind-merge/-/tailwind-merge-2.6.1.tgz",
+-      "integrity": "sha512-Oo6tHdpZsGpkKG88HJ8RR1rg/RdnEkQEfMoEk2x1XRI3F1AxeU+ijRXpiVUF4UbLfcxxRGw6TbUINKYdWVsQTQ==",
+-      "license": "MIT",
+-      "optional": true,
+-      "peer": true,
+-      "funding": {
+-        "type": "github",
+-        "url": "https://github.com/sponsors/dcastil"
+-      }
+-    },
+     "node_modules/tailwindcss": {
+       "version": "3.4.19",
+       "resolved": "https://registry.npmjs.org/tailwindcss/-/tailwindcss-3.4.19.tgz",
+diff --git a/nuprix-backend/package.json b/nuprix-backend/package.json
+index 9422b9d..c6609d4 100644
+--- a/nuprix-backend/package.json
++++ b/nuprix-backend/package.json
+@@ -43,5 +43,11 @@
+     "@eslint/eslintrc": {
+       "ajv": "^6.12.4"
+     }
++  },
++  "allowScripts": {
++    "@swc/core@1.16.22": true,
++    "esbuild@0.28.2": true,
++    "protobufjs@7.6.6": true,
++    "msgpackr-extract@3.0.7": true
+   }
+-}
+\ No newline at end of file
++}

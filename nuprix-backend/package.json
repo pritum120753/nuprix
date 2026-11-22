@@ -43,5 +43,11 @@
     "@eslint/eslintrc": {
       "ajv": "^6.12.4"
     }
+  },
+  "allowScripts": {
+    "@swc/core@1.16.22": true,
+    "esbuild@0.28.2": true,
+    "protobufjs@7.6.6": true,
+    "msgpackr-extract@3.0.7": true
   }
 }

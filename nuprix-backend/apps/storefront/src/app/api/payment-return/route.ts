@@ -50,6 +50,17 @@ async function handleSslcommerzReturn(
   }
 
   if (
+    normalizedStatus === "timeout" ||
+    normalizedStatus === "network_error"
+  ) {
+    await setCartId(resolvedCartId)
+    return NextResponse.redirect(
+      `${origin}${prefix}/checkout?step=payment&error=payment_network_timeout`,
+      303
+    )
+  }
+
+  if (
     (normalizedStatus !== "success" &&
       normalizedStatus !== "valid" &&
       normalizedStatus !== "validated") ||

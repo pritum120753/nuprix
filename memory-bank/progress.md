@@ -128,12 +128,13 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
 - **Deliverables**: Branded responsive storefront, accessible navigation, honest physical vs. digital product expectations, core layout states.
 
 ### Phase 2 — Commerce Rules & Customer Journey Completion
-- **Status**: **In Progress / Nearing Completion** (Branch `codex/phase-2-commerce-journey`, PR #9).
-- **Scope & Remaining Steps**:
-  1. Complete SSLCommerz sandbox end-to-end checkout verification in storefront.
-  2. Finalize Medusa Admin currency settings: activate `BDT` alongside `EUR` and `USD` so the Bangladesh region dropdown populates correctly without manual DB scripts.
-  3. Wire the payment return UI states for edge cases (declined payments, session timeouts, network dropouts).
-  4. Fix missing `authenticate("customer", ["session", "bearer"])` in `apps/backend/src/api/middlewares.ts`.
+- **Status**: **Implementation Complete; Local Sandbox Browser Verification Blocked** (Branch `codex/phase-2-commerce-journey`, PR #9).
+- **Remaining Step Status**:
+  1. SSLCommerz sandbox checkout implementation and unit coverage are complete. Local browser verification is blocked on Windows (`EACCES` on storefront ports `8000`/`8010`) and a backend PostgreSQL connection that ended unexpectedly.
+  2. Medusa seed data now adds `BDT` alongside `EUR`/`USD`, with a Bangladesh region, `bd` tax coverage, and BDT shipping prices.
+  3. Payment return handling now distinguishes canceled, failed/declined, network-timeout, and order-verification failures. The checkout step shows a recovery message and retry action.
+  4. Completed and committed: `authenticate("customer", ["session", "bearer"])` coverage in `apps/backend/src/api/middlewares.ts`.
+- **Verification**: Storefront lint passed; backend lint passed with existing warnings; the SSLCommerz unit suite was invoked directly with PowerShell environment variables and exited successfully; Next.js storefront build exited successfully. The package test script itself remains incompatible with Windows because it embeds Unix `TEST_TYPE=unit` syntax.
 
 ### Phase 3 — Marketplace Core & Operator Workflows
 - **Status**: **Planned / Foundation Laid**.

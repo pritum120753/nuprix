@@ -145,12 +145,14 @@ const Payment = ({
     }
     const returnError = searchParams.get("error")
     if (returnError === "payment_canceled") {
-      setError("Payment was canceled. Please try again.")
+      setError("Payment was canceled. Your cart is still saved.")
     } else if (returnError === "payment_failed") {
-      setError("Payment could not be completed. Please try again.")
+      setError("The payment was declined or could not be completed.")
+    } else if (returnError === "payment_network_timeout") {
+      setError("The payment session timed out or the connection was interrupted.")
     } else if (returnError === "order_failed") {
       setError(
-        "Payment verification could not complete your order. Please try again."
+        "Payment verification could not complete your order. Your cart is still saved."
       )
     } else {
       setError(null)
@@ -244,9 +246,11 @@ const Payment = ({
             }
             data-testid="submit-payment-button"
           >
-            {!activeSession && isStripeLike(selectedPaymentMethod)
-              ? "Enter payment details"
-              : "Continue to review"}
+            {error
+              ? "Retry payment"
+              : !activeSession && isStripeLike(selectedPaymentMethod)
+                ? "Enter payment details"
+                : "Continue to review"}
           </Button>
         </div>
 
