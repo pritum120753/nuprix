@@ -119,7 +119,7 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
 │   Phase 8    │ ◀── │   Phase 7    │ ◀── │   Phase 6    │ ◀── ┌───────┴──────┐
 │    Launch    │     │   Digital    │     │   Payments   │     │   Phase 5    │
 │  Readiness   │     │  Hardening   │     │ & Settlement │     │Order Routing │
-│  [PLANNED]   │     │  [PLANNED]   │     │  [PLANNED]   │     │  [PLANNED]   │
+│  [PLANNED]   │     │  [PLANNED]   │     │  [IN PROG]   │     │  [PLANNED]   │
 └──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
 ```
 
@@ -199,7 +199,17 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   4. Cancellation & Partial Return Rules: Line-level cancellation workflows for unfulfilled items without disrupting completed lines.
 
 ### Phase 6 — Payments, Refunds & Marketplace Settlement
-- **Status**: **Planned / Partial Payment Scaffolding Active**.
+- **Status**: **In Progress / Vendor Payout Requests and Admin Batch Export Implemented** (Branch `feat/phase-6-marketplace-settlement`; no PR created).
+- **Implemented**:
+  1. Vendor payout requests now snapshot the selected bank-transfer or bKash, Nagad, or Rocket destination on each payout record.
+  2. MFS destinations use strict Zod validation for `01[3-9]\d{8}` and are restricted to BDT requests.
+  3. Vendor-facing payout and earnings reads expose payout status/method without returning bank account or mobile destination data.
+  4. Admin Marketplace Payouts shows destinations and exports approved payouts only as a spreadsheet-safe CSV batch.
+- **Verification**:
+  1. Focused payout validation and CSV tests passed: 2 suites, 11 tests.
+  2. Backend build passed; backend lint had 0 errors and 15 existing warnings.
+  3. Storefront lint and `tsc --noEmit` passed. Storefront production build passed; Next.js skipped its integrated type-validation step.
+- **Database and settlement note**: Migration `Migration20261123000006` and the vendor schema snapshot are created but not applied. No live gateway, automated transfer, or production payment activity was enabled.
 - **Scope**:
   1. Production Gateway Activation: Transition SSLCommerz and Stripe from sandbox to live production credentials upon approval.
   2. Local Mobile Financial Services (MFS): Direct integration support for bKash, Nagad, and Rocket MFS gateways in Bangladesh.
@@ -221,3 +231,13 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   2. Production High-Availability: Redis connection clustering, PostgreSQL connection pooling (PgBouncer), read replica configuration.
   3. End-to-End Stress Testing: Load test checkout spikes, concurrent token redemptions, and webhook surges.
   4. Final Legal Compliance: Publish approved legal documents (Terms of Service, Privacy Policy, Refund Policy, Vendor Agreement, Digital License).
+
+### Local Storefront Search Loop Fix — 2026-11-23
+- **Root cause**: The shared SDK fetch override read the locale through a `"use server"` function even for browser-side InstantSearch requests, invoking a Next.js Server Action POST on every search fetch.
+- **Fix**: Browser requests now read `_medusa_locale` directly from its existing client-readable cookie; server requests continue to use `getLocale()`. Backend `STORE_CORS` now allows `http://localhost:3000`.
+- **Verification**: `npm run lint` passed with 0 errors and 29 warnings. Local ports 3000 and 9000 were unavailable during this session, so browser request counts and live CORS behavior could not be verified; restart the backend to load the updated local `STORE_CORS`.
+
+### Windows Local Dev Startup — 2026-11-23
+- **Findings**: `medusa develop` lints by default when the Medusa ESLint plugin is installed, generates types by default, and starts the Admin Vite bundler unless `admin.disable` is set. Medusa resolves the Admin asset directory relative to the CLI working directory, while the build emits it under `.medusa/server/public/admin`.
+- **Changes**: Added the `ADMIN_DISABLED` config switch, an API-only `dev:api` command, explicit workspace backend build/start commands that start from `.medusa/server`, and aligned storefront dev/start ports to 3000.
+- **Verification**: Backend lint passed with 0 errors and 15 warnings. API-dev, built-start, and build command help plus package JSON parsing passed. Full server startup and cold-start timings were not run to avoid starting a database-backed service; the workspace is under OneDrive, which may affect Windows file I/O.

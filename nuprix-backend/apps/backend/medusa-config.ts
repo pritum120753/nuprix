@@ -127,6 +127,7 @@ module.exports = defineConfig({
       : []),
   ],
   admin: {
+    disable: process.env.ADMIN_DISABLED === 'true',
     vite: () => ({
       resolve: {
         alias: {

@@ -36,6 +36,7 @@ type DashboardProps = {
 }
 
 type Tab = "overview" | "orders" | "products" | "payouts" | "team"
+type PayoutMethod = "bank_transfer" | "bkash" | "nagad" | "rocket"
 
 const statusCopy = {
   pending: "Your application is under review. Product submissions and payout requests unlock after verification.",
@@ -66,7 +67,11 @@ export default function VendorDashboard({
   customerEmail,
 }: DashboardProps) {
   const router = useRouter()
+  const currencyCode = earnings?.balance.currency_code ?? "bdt"
   const [activeTab, setActiveTab] = useState<Tab>("overview")
+  const [payoutMethod, setPayoutMethod] =
+    useState<PayoutMethod>("bank_transfer")
+  const [payoutCurrency, setPayoutCurrency] = useState(currencyCode)
   const [applyState, applyAction] = useActionState(applyAsVendor, null)
   const [productState, productAction] = useActionState(submitVendorProduct, null)
   const [payoutState, payoutAction] = useActionState(requestVendorPayout, null)
@@ -144,7 +149,6 @@ export default function VendorDashboard({
 
   const { vendor } = profile
   const isVerified = vendor.status === "verified"
-  const currencyCode = earnings?.balance.currency_code ?? "bdt"
 
   const changeMemberRole = async (
     memberId: string,
@@ -484,10 +488,11 @@ export default function VendorDashboard({
               ) : (
                 <div className="overflow-hidden rounded-lg border border-nuprix-line">
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[620px] text-left text-sm">
+                    <table className="w-full min-w-[700px] text-left text-sm">
                       <thead className="bg-nuprix-mist text-xs text-nuprix-muted">
                         <tr>
                           <th className="px-4 py-3 font-semibold">Amount</th>
+                          <th className="px-4 py-3 font-semibold">Method</th>
                           <th className="px-4 py-3 font-semibold">Status</th>
                           <th className="px-4 py-3 font-semibold">Reference</th>
                           <th className="px-4 py-3 font-semibold">Requested</th>
@@ -497,6 +502,15 @@ export default function VendorDashboard({
                         {payouts.map((item) => (
                           <tr key={item.id}>
                             <td className="px-4 py-4 font-semibold text-nuprix-forest">{formatAmount(item.amount, item.currency_code)}</td>
+                            <td className="px-4 py-4 text-nuprix-muted">
+                              {item.payout_method === "bank_transfer"
+                                ? "Bank transfer"
+                                : item.payout_method === "bkash"
+                                  ? "bKash"
+                                  : item.payout_method
+                                    ? item.payout_method[0].toUpperCase() + item.payout_method.slice(1)
+                                    : "—"}
+                            </td>
                             <td className="px-4 py-4"><Badge color={payoutColors[item.status]}>{item.status}</Badge></td>
                             <td className="px-4 py-4 font-mono text-xs text-nuprix-muted">{item.reference || "—"}</td>
                             <td className="px-4 py-4 text-nuprix-muted">{formatDate(item.created_at)}</td>
@@ -605,15 +619,100 @@ export default function VendorDashboard({
                     <p className="text-xs text-nuprix-muted">Available balance</p>
                     <p className="mt-1 font-semibold text-nuprix-forest">{formatAmount(earnings?.balance.available_balance, currencyCode)}</p>
                   </div>
+                  <Field label="Payout method" htmlFor="payout-method">
+                    <select
+                      id="payout-method"
+                      name="payout_method"
+                      value={payoutMethod}
+                      onChange={(event) => {
+                        const method = event.target.value
+                        if (
+                          method === "bank_transfer" ||
+                          method === "bkash" ||
+                          method === "nagad" ||
+                          method === "rocket"
+                        ) {
+                          setPayoutMethod(method)
+                          if (method !== "bank_transfer") {
+                            setPayoutCurrency("bdt")
+                          }
+                        }
+                      }}
+                      className="portal-input"
+                    >
+                      <option value="bank_transfer">Bank transfer</option>
+                      <option value="bkash">bKash</option>
+                      <option value="nagad">Nagad</option>
+                      <option value="rocket">Rocket</option>
+                    </select>
+                  </Field>
+                  {payoutMethod === "bank_transfer" ? (
+                    <div className="space-y-4">
+                      <Field label="Bank name" htmlFor="payout-bank-name">
+                        <input
+                          id="payout-bank-name"
+                          name="bank_name"
+                          type="text"
+                          maxLength={120}
+                          required
+                          className="portal-input"
+                        />
+                      </Field>
+                      <Field label="Account holder name" htmlFor="payout-account-name">
+                        <input
+                          id="payout-account-name"
+                          name="account_name"
+                          type="text"
+                          maxLength={120}
+                          required
+                          className="portal-input"
+                        />
+                      </Field>
+                      <Field label="Account number" htmlFor="payout-account-number">
+                        <input
+                          id="payout-account-number"
+                          name="account_number"
+                          type="text"
+                          maxLength={120}
+                          required
+                          className="portal-input"
+                        />
+                      </Field>
+                    </div>
+                  ) : (
+                    <Field label="Bangladesh mobile number" htmlFor="payout-mobile-number">
+                      <input
+                        id="payout-mobile-number"
+                        name="mobile_number"
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="01[3-9][0-9]{8}"
+                        title="Enter an 11-digit Bangladesh mobile number beginning with 013–019."
+                        maxLength={11}
+                        required
+                        className="portal-input"
+                      />
+                    </Field>
+                  )}
                   <div className="grid grid-cols-1 gap-3 xsmall:grid-cols-[1fr_120px]">
                     <Field label="Amount (minor units)" htmlFor="payout-amount">
                       <input id="payout-amount" name="amount" type="number" min={1} required className="portal-input" />
                     </Field>
                     <Field label="Currency" htmlFor="payout-currency">
-                      <select id="payout-currency" name="currency_code" defaultValue={currencyCode} className="portal-input">
+                      <select
+                        id="payout-currency"
+                        name="currency_code"
+                        value={payoutCurrency}
+                        onChange={(event) => setPayoutCurrency(event.target.value)}
+                        className="portal-input"
+                      >
                         <option value="bdt">BDT</option>
-                        <option value="usd">USD</option>
-                        <option value="eur">EUR</option>
+                        {payoutMethod === "bank_transfer" && (
+                          <>
+                            <option value="usd">USD</option>
+                            <option value="eur">EUR</option>
+                          </>
+                        )}
                       </select>
                     </Field>
                   </div>

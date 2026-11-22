@@ -54,9 +54,9 @@
     "semantic_hash": "a10b4978dbbf03e8bab090cc9cabd934"
   },
   "nuprix-backend/apps/backend/src/admin/routes/marketplace/page.tsx": {
-    "mtime": 1795370911.4483006,
-    "seen": 1795371169.7165427,
-    "ast_hash": "1ed3853428f5069045f417f5969364f0",
+    "mtime": 1795374859.1911657,
+    "seen": 1795378444.309448,
+    "ast_hash": "d027e547f33481403d6301929f8698ba",
     "semantic_hash": ""
   },
   "nuprix-backend/apps/backend/src/admin/tsconfig.json": {
@@ -252,16 +252,16 @@
     "semantic_hash": "4f7273ea99539efb3a72c98b85c194ac"
   },
   "nuprix-backend/apps/backend/src/api/store/vendors/me/earnings/route.ts": {
-    "mtime": 1795006820.7453344,
-    "seen": 1795357765.2758672,
-    "ast_hash": "4717262de0ae1193c7effc05f52ae9c7",
-    "semantic_hash": "4717262de0ae1193c7effc05f52ae9c7"
+    "mtime": 1795374866.1286047,
+    "seen": 1795378444.3214486,
+    "ast_hash": "73bc0876b145a1e17e1ee8a348024b7e",
+    "semantic_hash": ""
   },
   "nuprix-backend/apps/backend/src/api/store/vendors/me/payouts/route.ts": {
-    "mtime": 1795006823.4641607,
-    "seen": 1795357765.2758672,
-    "ast_hash": "8787fbbf3c66e620274da2153bf57814",
-    "semantic_hash": "8787fbbf3c66e620274da2153bf57814"
+    "mtime": 1795375590.1279702,
+    "seen": 1795378444.3234491,
+    "ast_hash": "715b82e18a46b54d20acb3e93ed481f6",
+    "semantic_hash": ""
   },
   "nuprix-backend/apps/backend/src/api/store/vendors/me/products/[productId]/route.ts": {
     "mtime": 1795006462.8859446,
@@ -282,9 +282,9 @@
     "semantic_hash": "fd72a924dfa81c2fa15f77795bd37e91"
   },
   "nuprix-backend/apps/backend/src/api/store/vendors/validators.ts": {
-    "mtime": 1795373969.1130853,
-    "seen": 1795374106.0606518,
-    "ast_hash": "aff5314546d1c27b1cc3695595771e4e",
+    "mtime": 1795374920.73277,
+    "seen": 1795378444.3244472,
+    "ast_hash": "8c630bca997e288fe465991de668b49f",
     "semantic_hash": ""
   },
   "nuprix-backend/apps/backend/src/lib/__tests__/download-status.unit.spec.ts": {
@@ -553,10 +553,10 @@
     "semantic_hash": "dce041e7378917ceb6d504a5c4baf439"
   },
   "nuprix-backend/apps/backend/src/modules/vendor/models/vendor-payout.ts": {
-    "mtime": 1795006773.7843418,
-    "seen": 1795357765.2874064,
-    "ast_hash": "6d11417debd1ff50687afa76d8c40b16",
-    "semantic_hash": "6d11417debd1ff50687afa76d8c40b16"
+    "mtime": 1795374663.2525384,
+    "seen": 1795378444.3444495,
+    "ast_hash": "89358904b0a7d3a3a48f5654b887bbde",
+    "semantic_hash": ""
   },
   "nuprix-backend/apps/backend/src/modules/vendor/models/vendor-product.ts": {
     "mtime": 1795002343.3662417,
@@ -571,9 +571,9 @@
     "semantic_hash": "05b7acb828d8b67f5ac6a57e22496141"
   },
   "nuprix-backend/apps/backend/src/modules/vendor/service.ts": {
-    "mtime": 1795373002.978871,
-    "seen": 1795373776.2408953,
-    "ast_hash": "7659c121a47ee494293f6e50631b1e9d",
+    "mtime": 1795376877.052279,
+    "seen": 1795378444.3454492,
+    "ast_hash": "f6273308c0a5edc6701b1206270bc888",
     "semantic_hash": ""
   },
   "nuprix-backend/apps/backend/src/scripts/seed-demo-products.ts": {
@@ -715,9 +715,9 @@
     "semantic_hash": "782cca7e6aaf700d3dbf58ea51806f25"
   },
   "nuprix-backend/apps/storefront/next-env.d.ts": {
-    "mtime": 1795363486.326455,
-    "seen": 1795364755.6692195,
-    "ast_hash": "0e4a65e8b2b9aa3ed0f8957b9406bd41",
+    "mtime": 1795376580.9988863,
+    "seen": 1795378444.3554478,
+    "ast_hash": "c7b887684e81cfa5830eeeb7286485f6",
     "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/next.config.js": {
@@ -1261,9 +1261,9 @@
     "semantic_hash": "97e2b7a97ba331bb83d59b8917035c15"
   },
   "nuprix-backend/apps/storefront/src/lib/data/vendors.ts": {
-    "mtime": 1795373343.1546247,
-    "seen": 1795373776.269443,
-    "ast_hash": "396b343e079da64f473737dad15cc20d",
+    "mtime": 1795374818.208761,
+    "seen": 1795378444.394448,
+    "ast_hash": "f095fa463cbee142aec328632000c87a",
     "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/src/lib/hooks/use-in-view.tsx": {
@@ -1327,10 +1327,10 @@
     "semantic_hash": "4c41f02eb611d8897939fc2b81600bec"
   },
   "nuprix-backend/apps/storefront/src/lib/util/get-locale-header.ts": {
-    "mtime": 1794605700.9580796,
-    "seen": 1795357765.3229325,
-    "ast_hash": "fe692ec7411f5e4865d476cfb94a3bb0",
-    "semantic_hash": "fe692ec7411f5e4865d476cfb94a3bb0"
+    "mtime": 1795378213.0261235,
+    "seen": 1795378444.398449,
+    "ast_hash": "4364f1985b14fb09e0264b44907342b9",
+    "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/src/lib/util/get-percentage-diff.ts": {
     "mtime": 1794605700.9580796,
@@ -2443,10 +2443,10 @@
     "semantic_hash": "ffec6d0894ed469a11f5450f3c457a76"
   },
   "nuprix-backend/apps/storefront/tsconfig.json": {
-    "mtime": 1794605701.1099539,
-    "seen": 1795357765.3701587,
-    "ast_hash": "f1a89622055300c9a7e1f1a3db5cd841",
-    "semantic_hash": "f1a89622055300c9a7e1f1a3db5cd841"
+    "mtime": 1795377606.5312357,
+    "seen": 1795378444.468362,
+    "ast_hash": "aa5df90354abd107b0f4961e1b2ec0cb",
+    "semantic_hash": ""
   },
   "nuprix-backend/eslint.config.ts": {
     "mtime": 1794605701.1129527,
@@ -2485,15 +2485,15 @@
     "semantic_hash": ""
   },
   "docs/implementation-roadmap.md": {
-    "mtime": 1794641803.0713456,
-    "seen": 1795359303.474891,
-    "ast_hash": "2e1ff48c91682744e30140a56e24bc49",
+    "mtime": 1795376063.3766122,
+    "seen": 1795378444.4723632,
+    "ast_hash": "e5e8d9eb3d0a6fb679ddb5a98c4e9bff",
     "semantic_hash": ""
   },
   "memory-bank/progress.md": {
-    "mtime": 1795373977.8619213,
-    "seen": 1795374106.182652,
-    "ast_hash": "375b1e78f29c0057cb403b69bc37397f",
+    "mtime": 1795378368.7609708,
+    "seen": 1795378444.4723632,
+    "ast_hash": "a9c08cfc697e423b6bc5b00e5f30f873",
     "semantic_hash": ""
   },
   "memory-bank/projectbrief.md": {
@@ -2623,9 +2623,9 @@
     "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/src/modules/account/components/vendor-portal/dashboard.tsx": {
-    "mtime": 1795373567.3229191,
-    "seen": 1795373776.282315,
-    "ast_hash": "d6aa710604ee3dd66b15157f74f1ab69",
+    "mtime": 1795375936.2827106,
+    "seen": 1795378444.4144487,
+    "ast_hash": "15eb2064465ca375855b75572ae0723a",
     "semantic_hash": ""
   },
   "nuprix-backend/apps/backend/src/api/store/vendors/me/members/[memberId]/route.ts": {
@@ -2704,6 +2704,48 @@
     "mtime": 1795373752.1165748,
     "seen": 1795373776.324903,
     "ast_hash": "ea7abc817edaae191ef25afc5c9defe1",
+    "semantic_hash": ""
+  },
+  ".playwright-mcp/page-2026-11-22T20-02-47-025Z.yml": {
+    "mtime": 1795377767.0267131,
+    "seen": 1795378444.3064485,
+    "ast_hash": "bd0cb6f0fc51ad210dcfc9e1aefdaf3d",
+    "semantic_hash": ""
+  },
+  "nuprix-backend/apps/backend/src/api/admin/payouts/export/__tests__/csv.unit.spec.ts": {
+    "mtime": 1795374842.6699312,
+    "seen": 1795378444.3134496,
+    "ast_hash": "7694f4cfc7bb4a279e5aaa467aee6b80",
+    "semantic_hash": ""
+  },
+  "nuprix-backend/apps/backend/src/api/admin/payouts/export/csv.ts": {
+    "mtime": 1795375590.133971,
+    "seen": 1795378444.3134496,
+    "ast_hash": "f9ca14e10cb35f3e863d48272fbb1cf4",
+    "semantic_hash": ""
+  },
+  "nuprix-backend/apps/backend/src/api/admin/payouts/export/route.ts": {
+    "mtime": 1795374842.5927541,
+    "seen": 1795378444.3134496,
+    "ast_hash": "789487f710ad880c1267b745527e90ac",
+    "semantic_hash": ""
+  },
+  "nuprix-backend/apps/backend/src/api/store/vendors/__tests__/payout-validators.unit.spec.ts": {
+    "mtime": 1795374842.9412353,
+    "seen": 1795378444.3204472,
+    "ast_hash": "da5b601696c087461b84313e34325a80",
+    "semantic_hash": ""
+  },
+  "nuprix-backend/apps/backend/src/modules/vendor/migrations/.snapshot-vendor.json": {
+    "mtime": 1795374785.1920662,
+    "seen": 1795378444.3414485,
+    "ast_hash": "664a6c837125a61f883db5d9ab389784",
+    "semantic_hash": ""
+  },
+  "nuprix-backend/apps/backend/src/modules/vendor/migrations/Migration20261123000006.ts": {
+    "mtime": 1795374795.5783136,
+    "seen": 1795378444.342451,
+    "ast_hash": "355e4e541d02a2f945ca15ad34678565",
     "semantic_hash": ""
   },
   "nuprix-backend/package-lock.json": {

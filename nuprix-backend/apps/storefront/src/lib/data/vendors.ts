@@ -48,6 +48,7 @@ export type VendorPayoutItem = {
   id: string
   amount: number
   currency_code: string
+  payout_method: "bank_transfer" | "bkash" | "nagad" | "rocket" | null
   status: "requested" | "approved" | "paid" | "rejected"
   reference: string | null
   created_at: string
@@ -407,6 +408,20 @@ export async function requestVendorPayout(
   const currency_code =
     (formData.get("currency_code") as string | null)?.trim().toLowerCase() ||
     "bdt"
+  const payout_method = String(formData.get("payout_method") ?? "")
+  const body: Record<string, string | number> = {
+    amount: rawAmount,
+    currency_code,
+    payout_method,
+  }
+
+  if (payout_method === "bank_transfer") {
+    body.bank_name = String(formData.get("bank_name") ?? "").trim()
+    body.account_name = String(formData.get("account_name") ?? "").trim()
+    body.account_number = String(formData.get("account_number") ?? "").trim()
+  } else {
+    body.mobile_number = String(formData.get("mobile_number") ?? "").trim()
+  }
 
   if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
     return { success: false, error: "Enter a valid positive payout amount." }
@@ -417,7 +432,7 @@ export async function requestVendorPayout(
     await sdk.client.fetch("/store/vendors/me/payouts", {
       method: "POST",
       headers,
-      body: { amount: rawAmount, currency_code },
+      body,
       cache: "no-store",
     })
     return { success: true, error: null }

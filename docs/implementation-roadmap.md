@@ -26,7 +26,7 @@ This roadmap divides delivery into eight independently reviewable phases. Each p
 
 ## Phase 6 — Payments, refunds, and marketplace settlement
 
-**Status: Planned; provider, credentials, and settlement decisions are unresolved.** Choose launch payment methods and configure matching backend providers, webhook validation, failure recovery, and refunds. Decide whether suppliers are paid off-platform or through marketplace payouts. If platform-managed, implement commissions, balances, payout reconciliation, dispute operations, and applicable compliance controls. Never activate live payments without approval.
+**Status: In progress; vendor payout requests and approved-payout CSV export implemented.** Vendor requests support bank transfer and bKash, Nagad, or Rocket destination snapshots; MFS requests require a valid Bangladesh mobile number and BDT. Admin operators can export approved payouts for manual disbursement. Provider, credentials, payment policies, automated disbursement, refunds, and dispute operations remain unresolved. These changes do not activate live payment gateways or transfer funds.
 
 ## Phase 7 — Digital delivery hardening
 
