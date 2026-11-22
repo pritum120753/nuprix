@@ -101,6 +101,10 @@
     @apply px-4 py-2 border border-nuprix-forest rounded-full hover:bg-nuprix-forest hover:text-white transition-colors duration-200 ease-in;
   }
 
+  .portal-input {
+    @apply min-h-[44px] w-full rounded-md border border-nuprix-line bg-white px-3 py-2 text-sm text-nuprix-ink shadow-none outline-none transition-colors focus:border-nuprix-moss focus:ring-1 focus:ring-nuprix-moss;
+  }
+
   .text-xsmall-regular {
     @apply text-[10px] leading-4 font-normal;
   }

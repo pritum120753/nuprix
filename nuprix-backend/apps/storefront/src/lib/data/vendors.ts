@@ -113,6 +113,24 @@ export const retrieveMyVendorProducts = async (): Promise<
     .catch(() => [])
 }
 
+export const retrieveMyVendorPayouts = async (): Promise<
+  VendorPayoutItem[]
+> => {
+  const headers = await getAuthHeaders()
+  if (!("authorization" in headers)) {
+    return []
+  }
+
+  return sdk.client
+    .fetch<{ payouts: VendorPayoutItem[] }>("/store/vendors/me/payouts", {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    })
+    .then((res) => res.payouts ?? [])
+    .catch(() => [])
+}
+
 export const retrieveMyVendorEarnings = async (
   currencyCode = "bdt"
 ): Promise<VendorEarningsResponse | null> => {
