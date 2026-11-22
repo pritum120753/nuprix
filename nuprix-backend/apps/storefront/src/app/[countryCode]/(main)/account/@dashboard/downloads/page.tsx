@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import DownloadItemActions from "@modules/account/components/download-item-actions"
+import { retrieveCustomer } from "@lib/data/customer"
 import { listCustomerDownloads } from "@lib/data/downloads"
 
 export const metadata: Metadata = {
@@ -17,6 +18,12 @@ const statusLabels = {
 } as const
 
 export default async function DownloadsPage() {
+  const customer = await retrieveCustomer({ cache: "no-store" })
+
+  if (!customer) {
+    return null
+  }
+
   const downloads = await listCustomerDownloads()
 
   return (

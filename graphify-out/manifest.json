@@ -36,16 +36,16 @@
     "semantic_hash": "1a91ca16d1326be0c33e827f7fd2a41e"
   },
   "nuprix-backend/apps/backend/medusa-config.ts": {
-    "mtime": 1795286207.481912,
-    "seen": 1795357765.2665436,
-    "ast_hash": "fdb3d3be260d4d29cd643955994b9dbb",
-    "semantic_hash": "fdb3d3be260d4d29cd643955994b9dbb"
+    "mtime": 1795379751.4517632,
+    "seen": 1795380215.8949325,
+    "ast_hash": "9ff5af4cf7987dff6c0a64a5b1b9c80d",
+    "semantic_hash": ""
   },
   "nuprix-backend/apps/backend/package.json": {
-    "mtime": 1794618061.9015367,
-    "seen": 1795357765.2665436,
-    "ast_hash": "85217c31433a43e27882417a6a426c20",
-    "semantic_hash": "85217c31433a43e27882417a6a426c20"
+    "mtime": 1795379751.4547637,
+    "seen": 1795380215.8949325,
+    "ast_hash": "83a6e1c184c313ec285c142849a6a258",
+    "semantic_hash": ""
   },
   "nuprix-backend/apps/backend/src/admin/i18n/index.ts": {
     "mtime": 1794605700.8629303,
@@ -727,9 +727,9 @@
     "semantic_hash": "bd8b8f324d7be9ff7e050c67eff0e39d"
   },
   "nuprix-backend/apps/storefront/package.json": {
-    "mtime": 1795373405.804137,
-    "seen": 1795373776.2474113,
-    "ast_hash": "3c6e146c5957e709fdd1cbe53291e27b",
+    "mtime": 1795379751.80328,
+    "seen": 1795380215.9279325,
+    "ast_hash": "4bfc44b3f182081a15c5dda559cfca5b",
     "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/postcss.config.js": {
@@ -2455,10 +2455,10 @@
     "semantic_hash": "91b3b89d5eda40e9976d81cc9cfa8e30"
   },
   "nuprix-backend/package.json": {
-    "mtime": 1794641785.6045425,
-    "seen": 1795357765.3711646,
-    "ast_hash": "add00151e4721cbbd8fcab7814f23e4a",
-    "semantic_hash": "add00151e4721cbbd8fcab7814f23e4a"
+    "mtime": 1795379751.8072803,
+    "seen": 1795380216.0027406,
+    "ast_hash": "0d45decbcfc68d134bc48ed73c688bb1",
+    "semantic_hash": ""
   },
   "nuprix-backend/turbo.json": {
     "mtime": 1794605701.1159523,
@@ -2491,9 +2491,9 @@
     "semantic_hash": ""
   },
   "memory-bank/progress.md": {
-    "mtime": 1795378368.7609708,
-    "seen": 1795378444.4723632,
-    "ast_hash": "a9c08cfc697e423b6bc5b00e5f30f873",
+    "mtime": 1795379906.9175432,
+    "seen": 1795380216.0057387,
+    "ast_hash": "0d4612accaf7dc32539324733cdfa7a7",
     "semantic_hash": ""
   },
   "memory-bank/projectbrief.md": {

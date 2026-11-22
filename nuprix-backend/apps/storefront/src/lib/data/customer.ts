@@ -40,33 +40,43 @@ async function requestVerificationEmail(email: string, token: string) {
   )
 }
 
-export const retrieveCustomer =
-  async (): Promise<HttpTypes.StoreCustomer | null> => {
-    const authHeaders = await getAuthHeaders()
+export const retrieveCustomer = async (
+  options: { cache?: "force-cache" | "no-store" } = {}
+): Promise<HttpTypes.StoreCustomer | null> => {
+  const authHeaders = await getAuthHeaders()
 
-    if (!("authorization" in authHeaders)) return null
+  if (!("authorization" in authHeaders)) return null
 
-    const headers = {
-      ...authHeaders,
-    }
-
-    const next = {
-      ...(await getCacheOptions("customers")),
-    }
-
-    return await sdk.client
-      .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
-        method: "GET",
-        query: {
-          fields: "*orders",
-        },
-        headers,
-        next,
-        cache: "force-cache",
-      })
-      .then(({ customer }) => customer)
-      .catch(() => null)
+  const headers = {
+    ...authHeaders,
   }
+
+  const fetchOptions = {
+    method: "GET" as const,
+    query: { fields: "*orders" },
+    headers,
+  }
+
+  const cacheOptions =
+    options.cache === "no-store"
+      ? {
+          cache: "no-store" as const,
+        }
+      : {
+          next: {
+            ...(await getCacheOptions("customers")),
+          },
+          cache: "force-cache" as const,
+        }
+
+  return await sdk.client
+    .fetch<{ customer: HttpTypes.StoreCustomer }>(
+      `/store/customers/me`,
+      { ...fetchOptions, ...cacheOptions }
+    )
+    .then(({ customer }) => customer)
+    .catch(() => null)
+}
 
 export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   const headers = {
