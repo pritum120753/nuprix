@@ -24,6 +24,35 @@ export const UpdateVendorMemberSchema = z.object({
 })
 export type UpdateVendorMemberBody = z.infer<typeof UpdateVendorMemberSchema>
 
+export const UpdateVendorFulfillmentSchema = z
+  .object({
+    status: z.enum(["pending", "processing", "shipped", "delivered", "canceled", "exception"]),
+    carrier: z.string().trim().min(1).max(100).nullable().optional(),
+    tracking_number: z.string().trim().min(1).max(200).nullable().optional(),
+    tracking_url: z.string().trim().nullable().optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.tracking_url) {
+      try {
+        const url = new URL(value.tracking_url)
+        if (url.protocol !== "https:") {
+          ctx.addIssue({
+            code: "custom",
+            path: ["tracking_url"],
+            message: "Tracking URL must use HTTPS.",
+          })
+        }
+      } catch {
+        ctx.addIssue({
+          code: "custom",
+          path: ["tracking_url"],
+          message: "Tracking URL must be a valid HTTPS URL.",
+        })
+      }
+    }
+  })
+export type UpdateVendorFulfillmentBody = z.infer<typeof UpdateVendorFulfillmentSchema>
+
 export const RequestVendorPayoutSchema = z.object({
   amount: z.number().int().positive(),
   currency_code: z.string().min(3).max(3),

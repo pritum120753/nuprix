@@ -7,9 +7,11 @@ import {
   requestVendorPayout,
   submitVendorProduct,
   updateVendorMemberRole,
+  updateVendorFulfillment,
   type MyVendorProfile,
   type VendorEarningsResponse,
   type VendorMemberItem,
+  type VendorFulfillmentOrder,
   type VendorPayoutItem,
   type VendorProductItem,
 } from "@lib/data/vendors"
@@ -29,10 +31,11 @@ type DashboardProps = {
   earnings: VendorEarningsResponse | null
   payouts: VendorPayoutItem[]
   members: VendorMemberItem[]
+  vendorOrders: VendorFulfillmentOrder[]
   customerEmail?: string | null
 }
 
-type Tab = "overview" | "products" | "payouts" | "team"
+type Tab = "overview" | "orders" | "products" | "payouts" | "team"
 
 const statusCopy = {
   pending: "Your application is under review. Product submissions and payout requests unlock after verification.",
@@ -59,6 +62,7 @@ export default function VendorDashboard({
   earnings,
   payouts,
   members,
+  vendorOrders,
   customerEmail,
 }: DashboardProps) {
   const router = useRouter()
@@ -69,6 +73,14 @@ export default function VendorDashboard({
   const [inviteState, inviteAction] = useActionState(inviteVendorMember, null)
   const [teamError, setTeamError] = useState<string | null>(null)
   const [teamBusyId, setTeamBusyId] = useState<string | null>(null)
+  const [fulfillmentError, setFulfillmentError] = useState<string | null>(null)
+  const [fulfillmentBusyId, setFulfillmentBusyId] = useState<string | null>(null)
+  const [fulfillmentDraft, setFulfillmentDraft] = useState<Record<string, {
+    status: VendorFulfillmentOrder["status"]
+    carrier: string
+    tracking_number: string
+    tracking_url: string
+  }>>({})
   const { state: payoutModalOpen, open: openPayoutModal, close: closePayoutModal } =
     useToggleState(false)
   const productFormRef = useRef<HTMLFormElement>(null)
@@ -164,8 +176,27 @@ export default function VendorDashboard({
     setTeamBusyId(null)
   }
 
+  const saveFulfillment = async (order: VendorFulfillmentOrder) => {
+    const draft = fulfillmentDraft[order.id]
+    setFulfillmentBusyId(order.id)
+    setFulfillmentError(null)
+    const result = await updateVendorFulfillment(order.order_id, {
+      status: draft?.status ?? order.status,
+      carrier: draft?.carrier?.trim() || null,
+      tracking_number: draft?.tracking_number?.trim() || null,
+      tracking_url: draft?.tracking_url?.trim() || null,
+    })
+    if (result.success) {
+      router.refresh()
+    } else {
+      setFulfillmentError(result.error ?? "Could not update fulfillment.")
+    }
+    setFulfillmentBusyId(null)
+  }
+
   const tabs: { id: Tab; label: string }[] = [
     { id: "overview", label: "Overview" },
+    { id: "orders", label: `Orders (${vendorOrders.length})` },
     { id: "products", label: `Products (${products.length})` },
     { id: "payouts", label: `Payouts (${payouts.length})` },
     ...(profile.role === "owner"
@@ -313,6 +344,126 @@ export default function VendorDashboard({
                       </tbody>
                     </table>
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "orders" && (
+            <div className="space-y-5">
+              <div>
+                <h2 className="font-display text-xl text-nuprix-forest">Vendor orders</h2>
+                <p className="mt-1 text-xs text-nuprix-muted">Manage fulfillment and tracking for orders containing your products.</p>
+              </div>
+
+              {fulfillmentError && <ErrorMessage error={fulfillmentError} />}
+
+              {vendorOrders.length === 0 ? (
+                <EmptyState title="No vendor fulfillment groups" description="Orders containing your products will appear here." />
+              ) : (
+                <div className="space-y-4">
+                  {vendorOrders.map((order) => {
+                    const draft = fulfillmentDraft[order.id]
+                    return (
+                      <section key={order.id} className="rounded-lg border border-nuprix-line bg-nuprix-paper p-4">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="text-xs text-nuprix-muted">Order</p>
+                            <p className="font-mono text-sm text-nuprix-ink">{order.order_id}</p>
+                          </div>
+                          <Badge color={order.status === "delivered" ? "green" : order.status === "exception" || order.status === "canceled" ? "red" : "blue"}>
+                            {order.status}
+                          </Badge>
+                        </div>
+
+                        <div className="mt-4 grid gap-3 small:grid-cols-2">
+                          <Field label="Status" htmlFor={`fulfillment-status-${order.id}`}>
+                            <select
+                              id={`fulfillment-status-${order.id}`}
+                              value={draft?.status ?? order.status}
+                              onChange={(event) => setFulfillmentDraft((prev) => ({
+                                ...prev,
+                                [order.id]: {
+                                  status: event.target.value as VendorFulfillmentOrder["status"],
+                                  carrier: draft?.carrier ?? order.carrier ?? "",
+                                  tracking_number: draft?.tracking_number ?? order.tracking_number ?? "",
+                                  tracking_url: draft?.tracking_url ?? order.tracking_url ?? "",
+                                },
+                              }))}
+                              className="portal-input"
+                            >
+                              <option value="pending">Pending</option>
+                              <option value="processing">Processing</option>
+                              <option value="shipped">Shipped</option>
+                              <option value="delivered">Delivered</option>
+                              <option value="canceled">Canceled</option>
+                              <option value="exception">Exception</option>
+                            </select>
+                          </Field>
+                          <Field label="Carrier" htmlFor={`fulfillment-carrier-${order.id}`}>
+                            <input
+                              id={`fulfillment-carrier-${order.id}`}
+                              value={draft?.carrier ?? order.carrier ?? ""}
+                              onChange={(event) => setFulfillmentDraft((prev) => ({
+                                ...prev,
+                                [order.id]: {
+                                  status: draft?.status ?? order.status,
+                                  carrier: event.target.value,
+                                  tracking_number: draft?.tracking_number ?? order.tracking_number ?? "",
+                                  tracking_url: draft?.tracking_url ?? order.tracking_url ?? "",
+                                },
+                              }))}
+                              className="portal-input"
+                            />
+                          </Field>
+                          <Field label="Tracking number" htmlFor={`fulfillment-number-${order.id}`}>
+                            <input
+                              id={`fulfillment-number-${order.id}`}
+                              value={draft?.tracking_number ?? order.tracking_number ?? ""}
+                              onChange={(event) => setFulfillmentDraft((prev) => ({
+                                ...prev,
+                                [order.id]: {
+                                  status: draft?.status ?? order.status,
+                                  carrier: draft?.carrier ?? order.carrier ?? "",
+                                  tracking_number: event.target.value,
+                                  tracking_url: draft?.tracking_url ?? order.tracking_url ?? "",
+                                },
+                              }))}
+                              className="portal-input"
+                            />
+                          </Field>
+                          <Field label="Tracking URL (HTTPS)" htmlFor={`fulfillment-url-${order.id}`}>
+                            <input
+                              id={`fulfillment-url-${order.id}`}
+                              type="url"
+                              placeholder="https://carrier.example/track/..."
+                              value={draft?.tracking_url ?? order.tracking_url ?? ""}
+                              onChange={(event) => setFulfillmentDraft((prev) => ({
+                                ...prev,
+                                [order.id]: {
+                                  status: draft?.status ?? order.status,
+                                  carrier: draft?.carrier ?? order.carrier ?? "",
+                                  tracking_number: draft?.tracking_number ?? order.tracking_number ?? "",
+                                  tracking_url: event.target.value,
+                                },
+                              }))}
+                              className="portal-input"
+                            />
+                          </Field>
+                        </div>
+
+                        <div className="mt-4 flex justify-end">
+                          <Button
+                            size="large"
+                            disabled={fulfillmentBusyId === order.id}
+                            onClick={() => void saveFulfillment(order)}
+                          >
+                            Save fulfillment
+                          </Button>
+                        </div>
+                      </section>
+                    )
+                  })}
                 </div>
               )}
             </div>

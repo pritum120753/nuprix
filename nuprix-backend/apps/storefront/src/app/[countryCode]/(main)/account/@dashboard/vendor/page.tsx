@@ -3,6 +3,7 @@ import {
   retrieveMyVendor,
   retrieveMyVendorEarnings,
   retrieveMyVendorMembers,
+  retrieveMyVendorOrders,
   retrieveMyVendorPayouts,
   retrieveMyVendorProducts,
 } from "@lib/data/vendors"
@@ -20,7 +21,7 @@ export default async function VendorAccountPage() {
     retrieveMyVendor(),
   ])
 
-  const [products, earnings, payouts, members] =
+  const [products, earnings, payouts, members, vendorOrders] =
     profile?.vendor.status === "verified"
       ? await Promise.all([
           retrieveMyVendorProducts(),
@@ -29,8 +30,9 @@ export default async function VendorAccountPage() {
           profile.role === "owner"
             ? retrieveMyVendorMembers()
             : Promise.resolve([]),
+          retrieveMyVendorOrders(),
         ])
-      : [[], null, [], []]
+      : [[], null, [], [], []]
 
   return (
     <VendorPortal
@@ -39,6 +41,7 @@ export default async function VendorAccountPage() {
       earnings={earnings}
       payouts={payouts}
       members={members}
+      vendorOrders={vendorOrders}
       customerEmail={customer?.email}
     />
   )

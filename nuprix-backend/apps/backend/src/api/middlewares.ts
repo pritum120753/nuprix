@@ -22,6 +22,7 @@ import {
   ApplyVendorSchema,
   InviteVendorMemberSchema,
   RequestVendorPayoutSchema,
+  UpdateVendorFulfillmentSchema,
   UpdateVendorMemberSchema,
   SubmitVendorProductSchema,
 } from './store/vendors/validators'
@@ -32,6 +33,10 @@ export default defineMiddlewares({
   routes: [
     {
       matcher: '/store/vendors/me*',
+      middlewares: [authenticate('customer', ['session', 'bearer'])],
+    },
+    {
+      matcher: '/store/orders/*/fulfillment-groups',
       middlewares: [authenticate('customer', ['session', 'bearer'])],
     },
     {
@@ -110,6 +115,11 @@ export default defineMiddlewares({
       method: ['POST'],
       matcher: '/store/vendors/me/members',
       middlewares: [validateAndTransformBody(InviteVendorMemberSchema)],
+    },
+    {
+      method: ['PATCH'],
+      matcher: '/store/vendors/me/orders/*/fulfillment',
+      middlewares: [validateAndTransformBody(UpdateVendorFulfillmentSchema)],
     },
     {
       method: ['PATCH'],

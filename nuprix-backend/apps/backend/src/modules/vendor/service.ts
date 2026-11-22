@@ -5,6 +5,8 @@ import VendorEarning from "./models/vendor-earning"
 import VendorMember from "./models/vendor-member"
 import VendorPayout from "./models/vendor-payout"
 import VendorProduct from "./models/vendor-product"
+import VendorFulfillmentGroup from "./models/vendor-fulfillment-group"
+import VendorFulfillmentItem from "./models/vendor-fulfillment-item"
 
 export function normalizeVendorHandle(raw: string): string {
   return raw
@@ -30,6 +32,8 @@ class VendorModuleService extends MedusaService({
   VendorProduct,
   VendorEarning,
   VendorPayout,
+  VendorFulfillmentGroup,
+  VendorFulfillmentItem,
 }) {
   /**
    * Resolves the vendor and membership record for an authenticated user.
@@ -232,6 +236,96 @@ class VendorModuleService extends MedusaService({
 
     await this.createVendorEarnings(toCreate)
     return { created_count: toCreate.length }
+  }
+
+  async createFulfillmentGroups(input: {
+    orderId: string
+    items: Array<{
+      id: string
+      product_id?: string | null
+      quantity?: number | null
+    }>
+  }): Promise<{ created_groups: number; created_items: number }> {
+    if (!input.orderId || !input.items.length) {
+      return { created_groups: 0, created_items: 0 }
+    }
+
+    const productIds = [
+      ...new Set(
+        input.items
+          .map((item) => item.product_id)
+          .filter((id): id is string => Boolean(id))
+      ),
+    ]
+    if (!productIds.length) {
+      return { created_groups: 0, created_items: 0 }
+    }
+
+    const mappings = await this.listVendorProducts(
+      { product_id: productIds },
+      { take: productIds.length }
+    )
+    if (!mappings.length) {
+      return { created_groups: 0, created_items: 0 }
+    }
+
+    const vendorByProduct = new Map(
+      mappings.map((mapping) => [mapping.product_id, mapping.vendor_id])
+    )
+
+    const existingGroups = await this.listVendorFulfillmentGroups(
+      { order_id: input.orderId },
+      { take: 500 }
+    )
+    const existingGroupByVendor = new Map(
+      existingGroups.map((group) => [group.vendor_id, group])
+    )
+
+    const existingItems = await this.listVendorFulfillmentItems(
+      { order_id: input.orderId },
+      { take: 1000 }
+    )
+    const existingLineItemIds = new Set(
+      existingItems.map((item) => item.line_item_id)
+    )
+
+    let createdGroups = 0
+    let createdItems = 0
+
+    for (const item of input.items) {
+      if (!item.product_id || existingLineItemIds.has(item.id)) {
+        continue
+      }
+
+      const vendorId = vendorByProduct.get(item.product_id)
+      if (!vendorId) {
+        continue
+      }
+
+      let group = existingGroupByVendor.get(vendorId)
+      if (!group) {
+        group = await this.createVendorFulfillmentGroups({
+          vendor_id: vendorId,
+          order_id: input.orderId,
+          status: "pending",
+        })
+        existingGroupByVendor.set(vendorId, group)
+        createdGroups += 1
+      }
+
+      await this.createVendorFulfillmentItems({
+        group_id: group.id,
+        vendor_id: vendorId,
+        order_id: input.orderId,
+        line_item_id: item.id,
+        product_id: item.product_id,
+        quantity: item.quantity ?? 1,
+      })
+      createdItems += 1
+      existingLineItemIds.add(item.id)
+    }
+
+    return { created_groups: createdGroups, created_items: createdItems }
   }
 
   async markOrderEarningsAvailable(orderId: string): Promise<number> {

@@ -3,9 +3,11 @@ import { getCartDeliverySplit } from "@lib/util/product"
 import { HttpTypes } from "@medusajs/types"
 import Divider from "@modules/common/components/divider"
 import { Heading, Text } from "@modules/common/components/ui"
+import type { VendorFulfillmentGroup } from "@lib/data/orders"
 
 type ShippingDetailsProps = {
   order: HttpTypes.StoreOrder
+  vendorFulfillmentGroups?: VendorFulfillmentGroup[]
 }
 
 type OrderFulfillmentLabel = {
@@ -36,7 +38,10 @@ function safeTrackingUrl(raw?: string | null): string | null {
   }
 }
 
-const ShippingDetails = ({ order }: ShippingDetailsProps) => {
+const ShippingDetails = ({
+  order,
+  vendorFulfillmentGroups = [],
+}: ShippingDetailsProps) => {
   const { isDigitalOnly } = getCartDeliverySplit(order.items)
   const fulfillments = (
     (order as unknown as { fulfillments?: OrderFulfillment[] }).fulfillments ??
@@ -115,6 +120,74 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
               </Text>
             </div>
           </div>
+
+          {vendorFulfillmentGroups.length > 0 && (
+            <div
+              className="mt-6 space-y-3"
+              data-testid="vendor-fulfillment-groups"
+            >
+              <Text className="txt-medium-plus text-ui-fg-base">
+                Vendor Shipments
+              </Text>
+              {vendorFulfillmentGroups.map((group) => {
+                const statusLabel =
+                  group.status === "delivered"
+                    ? "Delivered"
+                    : group.status === "shipped"
+                      ? "Shipped"
+                      : group.status === "processing"
+                        ? "Processing"
+                        : group.status === "exception"
+                          ? "Exception"
+                          : group.status === "canceled"
+                            ? "Canceled"
+                            : "Preparing"
+                const safeUrl =
+                  group.tracking_url?.startsWith("https://")
+                    ? group.tracking_url
+                    : null
+
+                return (
+                  <div
+                    key={group.id}
+                    className="rounded-lg border border-nuprix-line bg-nuprix-ivory p-4"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <Text className="txt-medium-plus text-nuprix-forest">
+                          {group.vendor_name || "Marketplace Vendor"}
+                        </Text>
+                        <Text className="txt-medium text-nuprix-muted">
+                          {statusLabel}
+                        </Text>
+                      </div>
+                      {group.carrier && (
+                        <Text className="text-xs text-nuprix-muted">
+                          Carrier: {group.carrier}
+                        </Text>
+                      )}
+                    </div>
+                    <div className="mt-3 text-sm text-nuprix-muted">
+                      Tracking:{" "}
+                      <span className="font-mono text-nuprix-ink">
+                        {group.tracking_number || "Pending"}
+                      </span>
+                      {safeUrl && (
+                        <>
+                          {" "}(<a
+                            href={safeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-nuprix-pine underline underline-offset-2"
+                          >Track package</a>)
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
 
           <div
             className="mt-6 rounded-lg border border-nuprix-line bg-nuprix-ivory p-4 space-y-2"

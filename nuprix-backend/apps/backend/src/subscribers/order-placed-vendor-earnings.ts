@@ -23,6 +23,7 @@ export default async function orderPlacedVendorEarnings({
       "total",
       "items.id",
       "items.product_id",
+      "items.quantity",
       "items.total",
       ...PAYMENT_COLLECTION_FIELDS,
     ],
@@ -37,6 +38,7 @@ export default async function orderPlacedVendorEarnings({
         items?: Array<{
           id: string
           product_id?: string | null
+          quantity?: number | null
           total?: unknown
         }> | null
         payment_collections?: Parameters<typeof isFullyPaid>[0]
@@ -56,6 +58,11 @@ export default async function orderPlacedVendorEarnings({
     currencyCode: order.currency_code || "bdt",
     items: order.items,
     initialStatus: paid ? "available" : "pending",
+  })
+
+  await vendorService.createFulfillmentGroups({
+    orderId: order.id,
+    items: order.items,
   })
 }
 

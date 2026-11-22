@@ -177,7 +177,20 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   4. Stale Data Handling: Gracefully mark products as temporarily unavailable when supplier feeds fail.
 
 ### Phase 5 — Order Routing & Physical Fulfillment
-- **Status**: **Planned**.
+- **Status**: **In Implementation / Verification Passed** (Branch `feat/phase-5-order-splitting`).
+- **Vendor Split Fulfillment**:
+  1. Added vendor fulfillment group and line-item models with migration `Migration20261123000005`.
+  2. `order.placed` now creates replay-safe vendor fulfillment groups for multi-vendor carts.
+  3. Vendor order and fulfillment routes are scoped by authenticated membership and `vendor_id`.
+  4. Vendor fulfillment updates support status, carrier, tracking number, and HTTPS-only tracking URLs.
+  5. Customer fulfillment endpoint verifies order customer ownership before returning split groups.
+  6. Storefront customer order details and Vendor Portal Orders view now expose split fulfillment states.
+- **Verification**:
+  1. Focused vendor suite passed: 6 suites and 15 tests.
+  2. Backend lint passed with existing route-mutation warnings.
+  3. Backend build and integrated frontend build completed successfully.
+  4. Standalone storefront build completed under verification.
+- **Database Note**: The migration is created but not applied; production/database migration remains unchanged.
 - **Scope**:
   1. Multi-Vendor Order Splitting: Split mixed-vendor orders into discrete supplier fulfillment groups.
   2. Vendor Purchase Order Generation: Transmit line items to corresponding suppliers or notify vendors of items requiring dispatch.

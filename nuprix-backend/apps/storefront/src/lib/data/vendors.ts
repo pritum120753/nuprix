@@ -61,6 +61,26 @@ export type VendorMemberItem = {
   created_at: string
 }
 
+export type VendorFulfillmentOrder = {
+  id: string
+  vendor_id: string
+  order_id: string
+  status: "pending" | "processing" | "shipped" | "delivered" | "canceled" | "exception"
+  carrier: string | null
+  tracking_number: string | null
+  tracking_url: string | null
+  shipped_at: string | null
+  delivered_at: string | null
+  canceled_at: string | null
+  created_at: string
+  items: Array<{
+    id: string
+    line_item_id: string
+    product_id: string | null
+    quantity: number
+  }>
+}
+
 export type VendorEarningsResponse = {
   balance: VendorBalance
   payouts: VendorPayoutItem[]
@@ -229,6 +249,59 @@ export async function removeVendorMember(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Could not remove member.",
+    }
+  }
+}
+
+export const retrieveMyVendorOrders = async (): Promise<
+  VendorFulfillmentOrder[]
+> => {
+  const headers = await getAuthHeaders()
+  if (!("authorization" in headers)) {
+    return []
+  }
+
+  return sdk.client
+    .fetch<{ fulfillment_groups: VendorFulfillmentOrder[] }>(
+      "/store/vendors/me/orders",
+      {
+        method: "GET",
+        headers,
+        cache: "no-store",
+      }
+    )
+    .then((res) => res.fulfillment_groups ?? [])
+    .catch(() => [])
+}
+
+export async function updateVendorFulfillment(
+  orderId: string,
+  input: {
+    status: VendorFulfillmentOrder["status"]
+    carrier?: string | null
+    tracking_number?: string | null
+    tracking_url?: string | null
+  }
+): Promise<{ success: boolean; error?: string | null }> {
+  const headers = await getAuthHeaders()
+  try {
+    await sdk.client.fetch(
+      `/store/vendors/me/orders/${encodeURIComponent(orderId)}/fulfillment`,
+      {
+        method: "PATCH",
+        headers,
+        body: input,
+        cache: "no-store",
+      }
+    )
+    return { success: true, error: null }
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Could not update fulfillment.",
     }
   }
 }
