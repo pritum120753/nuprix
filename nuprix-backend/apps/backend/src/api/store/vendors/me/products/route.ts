@@ -2,6 +2,7 @@ import type {
   AuthenticatedMedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
 import { VENDOR_MODULE } from "../../../../../modules/vendor"
 import type VendorModuleService from "../../../../../modules/vendor/service"
 import type { SubmitVendorProductBody } from "../../validators"
@@ -51,6 +52,15 @@ export async function POST(
   }
 
   const { product_id } = req.validatedBody
+
+  const productService = req.scope.resolve(Modules.PRODUCT)
+  try {
+    await productService.retrieveProduct(product_id, {
+      select: ["id", "status"],
+    })
+  } catch {
+    return res.status(404).json({ message: "Product does not exist in catalog." })
+  }
   const [existing] = await vendorService.listVendorProducts(
     { product_id },
     { take: 1 }
@@ -73,3 +83,4 @@ export async function POST(
 
   return res.status(existing ? 200 : 201).json({ vendor_product })
 }
+

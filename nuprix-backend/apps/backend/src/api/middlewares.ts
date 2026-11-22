@@ -1,4 +1,5 @@
 import {
+  authenticate,
   configureStoreSearch,
   defineMiddlewares,
   validateAndTransformBody,
@@ -27,6 +28,14 @@ import {
 // the route narrows it to published products in the key's sales channels.
 export default defineMiddlewares({
   routes: [
+    {
+      matcher: '/store/vendors/me*',
+      middlewares: [authenticate('customer', ['session', 'bearer'])],
+    },
+    {
+      matcher: '/store/customer/downloads*',
+      middlewares: [authenticate('customer', ['session', 'bearer'])],
+    },
     {
       method: ['GET'],
       matcher: '/downloads/*',

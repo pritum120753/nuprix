@@ -9,7 +9,7 @@ export const ApplyVendorSchema = z.object({
 export type ApplyVendorBody = z.infer<typeof ApplyVendorSchema>
 
 export const SubmitVendorProductSchema = z.object({
-  product_id: z.string().min(1),
+  product_id: z.string().trim().min(1, "Product ID is required").max(255),
 })
 export type SubmitVendorProductBody = z.infer<typeof SubmitVendorProductSchema>
 
