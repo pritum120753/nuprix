@@ -3,6 +3,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import DownloadItemActions from "@modules/account/components/download-item-actions"
 import { retrieveCustomer } from "@lib/data/customer"
 import { listCustomerDownloads } from "@lib/data/downloads"
+import { Download, KeyRound, PackageOpen } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "My Downloads | Nuprix",
@@ -28,11 +29,11 @@ export default async function DownloadsPage() {
 
   return (
     <section className="w-full" data-testid="customer-downloads-page">
-      <div className="mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#71917a]">
+      <div className="mb-8 border-b border-nuprix-line pb-6">
+        <p className="mb-3 section-kicker">
           Your digital library
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-[#172b20]">
+        <h1 className="font-display text-3xl font-medium tracking-[-0.04em] text-nuprix-forest small:text-4xl">
           My Downloads
         </h1>
         <p className="mt-2 text-sm leading-6 text-nuprix-muted">
@@ -42,7 +43,10 @@ export default async function DownloadsPage() {
       </div>
 
       {downloads.length === 0 ? (
-        <div className="rounded-2xl border border-[#e5eae3] bg-[#f7f9f5] px-6 py-10 text-center">
+        <div className="rounded-[24px] border border-dashed border-nuprix-line-strong bg-nuprix-paper px-6 py-12 text-center">
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-nuprix-sage text-nuprix-pine">
+            <PackageOpen className="h-5 w-5" aria-hidden="true" />
+          </div>
           <h2 className="text-lg font-semibold text-[#24372a]">
             Your library is empty
           </h2>
@@ -57,17 +61,24 @@ export default async function DownloadsPage() {
           </LocalizedClientLink>
         </div>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {downloads.map((download) => (
             <li
               key={download.id}
-              className="flex flex-col gap-4 rounded-2xl border border-[#e5eae3] bg-white p-5 small:flex-row small:items-center small:justify-between"
+              className="flex flex-col gap-5 rounded-[22px] border border-nuprix-line bg-white p-5 shadow-[0_8px_30px_rgba(22,53,40,0.05)] small:flex-row small:items-center small:justify-between"
             >
-              <div className="min-w-0">
-                <h2 className="font-semibold text-[#24372a]">{download.title}</h2>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-nuprix-mist text-nuprix-pine">
+                    <Download className="h-4 w-4" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="font-display text-xl font-medium text-nuprix-forest">{download.title}</h2>
                 <p className="mt-1 truncate text-sm text-nuprix-muted">
                   {download.file_name}
                 </p>
+                  </div>
+                </div>
                 <p className="mt-2 text-xs text-nuprix-muted">
                   {download.download_count} of {download.max_downloads} downloads used
                   {download.expires_at
@@ -78,8 +89,9 @@ export default async function DownloadsPage() {
                   Order: {download.order_id}
                 </p>
                 {download.license_key && (
-                  <div className="mt-3">
-                    <p className="text-xs font-semibold text-[#42644d]">
+                  <div className="mt-4 rounded-[14px] border border-nuprix-line-strong bg-nuprix-paper p-3">
+                    <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-nuprix-pine">
+                      <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
                       License key
                     </p>
                     <code className="mt-1 block break-all rounded-lg bg-[#f7f9f5] px-3 py-2 text-xs text-[#24372a]">

@@ -27,14 +27,14 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
   const classification = await retrieveProductClassification(product.id)
 
   return (
-    <div className="bg-nuprix-ivory py-8 small:py-16">
+    <div className="bg-nuprix-ivory py-8 small:py-12">
       <div
         className="content-container grid grid-cols-1 small:grid-cols-12 gap-8 lg:gap-12 items-start"
         data-testid="product-container"
       >
         {/* Left Column: Visual Gallery (7 cols on desktop) */}
         <div className="small:col-span-7 w-full">
-          <div className="surface-card p-4 small:p-6 overflow-hidden">
+          <div className="surface-card overflow-hidden p-3 small:p-5">
             <VariantImageGallery product={product} />
           </div>
         </div>

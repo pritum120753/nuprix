@@ -20,12 +20,12 @@ const ProductInfo = ({ product, classification }: ProductInfoProps) => {
         {product.collection ? (
           <LocalizedClientLink
             href={`/collections/${product.collection.handle}`}
-            className="text-xs font-semibold uppercase tracking-wider text-nuprix-leaf hover:text-nuprix-forest transition-colors"
+            className="text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-leaf hover:text-nuprix-forest transition-colors"
           >
             {product.collection.title}
           </LocalizedClientLink>
         ) : (
-          <span className="text-xs font-semibold uppercase tracking-wider text-nuprix-leaf">
+          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-leaf">
             Catalog
           </span>
         )}
@@ -41,7 +41,7 @@ const ProductInfo = ({ product, classification }: ProductInfoProps) => {
 
       <Heading
         level="h1"
-        className="text-2xl small:text-3xl font-display font-medium text-nuprix-forest tracking-tight"
+        className="text-3xl small:text-[42px] font-display font-medium leading-[1.04] text-nuprix-forest tracking-[-0.04em]"
         data-testid="product-title"
       >
         {product.title}

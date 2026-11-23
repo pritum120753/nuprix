@@ -2,6 +2,7 @@ import ChevronDown from "@modules/common/icons/chevron-down"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
+import { MapPin, UserRound } from "lucide-react"
 
 type OverviewProps = {
   customer: HttpTypes.StoreCustomer | null
@@ -13,7 +14,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
     <div data-testid="overview-page-wrapper" className="w-full">
       <div>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-6 pb-4 border-b border-nuprix-line">
-          <h1 className="text-2xl font-display font-medium text-nuprix-forest" data-testid="welcome-message">
+          <h1 className="text-3xl font-display font-medium tracking-[-0.03em] text-nuprix-forest" data-testid="welcome-message">
             Welcome back, {customer?.first_name || "Customer"}
           </h1>
           <span className="text-xs text-nuprix-muted">
@@ -31,9 +32,12 @@ const Overview = ({ customer, orders }: OverviewProps) => {
         <div className="flex flex-col py-4">
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="surface-card p-5">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-nuprix-leaf mb-2">
+              <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-nuprix-leaf">
                 Profile
               </h3>
+                <UserRound className="h-4 w-4 text-nuprix-moss" aria-hidden="true" />
+              </div>
               <div className="flex items-baseline gap-x-2">
                 <span
                   className="text-3xl font-bold text-nuprix-forest"
@@ -49,9 +53,12 @@ const Overview = ({ customer, orders }: OverviewProps) => {
             </div>
 
             <div className="surface-card p-5">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-nuprix-leaf mb-2">
+              <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-nuprix-leaf">
                 Addresses
               </h3>
+                <MapPin className="h-4 w-4 text-nuprix-moss" aria-hidden="true" />
+              </div>
               <div className="flex items-baseline gap-x-2">
                 <span
                   className="text-3xl font-bold text-nuprix-forest"

@@ -70,7 +70,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
           leaveTo="opacity-0"
         >
           <div
-            className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200"
+            className="flex h-full w-full flex-col items-center justify-center gap-y-3 border-t border-nuprix-line bg-nuprix-paper/95 p-4 text-large-regular shadow-[0_-12px_30px_rgba(22,53,40,0.08)] backdrop-blur-xl"
             data-testid="mobile-actions"
           >
             <div className="flex items-center gap-x-2">

@@ -268,3 +268,12 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   3. Dark editorial footer with clearer category, collection, and policy hierarchy plus fulfillment/trust indicators.
   4. Redesigned homepage hero, trust rail, featured collection spacing, and shared product cards with fulfillment badges and hover elevation.
 - **Verification**: On `feat/pro-ui-redesign`, `npm run lint` completed with zero errors and 29 existing repository warnings. `npm run build` completed successfully and generated all storefront routes. No Storefront API, Server Action, cart, checkout, or account data contract was changed.
+
+### Storefront Phase B — Inner storefront redesign
+- **Status**: **Implemented** on `feat/pro-ui-redesign`.
+- **Implemented**:
+  1. Catalog header, search, filter rail, and product hit presentation were restyled within the existing InstantSearch state and routing.
+  2. Product detail gallery, buy box, fulfillment badge, variant options, availability, add-to-cart, and mobile purchase bar were restyled without changing variant or cart handlers.
+  3. Account layout/sidebar, overview cards/recent-order presentation, downloads library, license-key block, Copy feedback, and download actions were restyled without changing account or entitlement APIs.
+  4. Vendor overview cards, tabs, fulfillment cards, product/payout/team tables, and payout modal were restyled without changing Server Actions or mutation payloads.
+- **Verification**: Storefront `tsc --noEmit --ignoreDeprecations 5.0` passed. Final `npm run lint` completed with zero errors and 29 existing repository warnings. Final `npm run build` completed successfully and generated all routes. `git diff --check` passed. Existing `addToCart`, `signout`, `regenerateCustomerDownload`, vendor mutations, form field names, and active-only `NPRX-...` copy behavior were preserved.

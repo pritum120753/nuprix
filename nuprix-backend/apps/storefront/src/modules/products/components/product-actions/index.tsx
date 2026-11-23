@@ -158,7 +158,7 @@ export default function ProductActions({
           <input type="hidden" name="quantity" value="1" />
           <div>
             {(product.variants?.length ?? 0) > 1 && (
-              <div className="flex flex-col gap-y-4">
+              <div className="flex flex-col gap-y-5">
                 {(product.options || []).map((option) => {
                   return (
                     <div key={option.id}>
@@ -183,7 +183,7 @@ export default function ProductActions({
 
           {selectedVariant && isValidVariant && (
             <p
-              className="text-small-regular text-ui-fg-subtle"
+              className="inline-flex w-fit items-center gap-2 rounded-full bg-nuprix-mist px-3 py-1.5 text-xs font-semibold text-nuprix-pine"
               data-testid="product-availability"
             >
               {inStock ? "In stock" : "Out of stock"}
@@ -200,7 +200,7 @@ export default function ProductActions({
               !isValidVariant
             }
             variant="primary"
-            className="w-full h-10"
+            className="primary-action w-full border-0"
             isLoading={isAdding}
             data-testid="add-product-button"
           >

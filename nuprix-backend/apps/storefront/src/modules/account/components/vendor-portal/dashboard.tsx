@@ -250,16 +250,16 @@ export default function VendorDashboard({
 
       {isVerified && (
         <>
-          <nav className="no-scrollbar flex overflow-x-auto border-b border-nuprix-line" aria-label="Vendor dashboard sections">
+          <nav className="no-scrollbar flex overflow-x-auto rounded-[16px] border border-nuprix-line bg-nuprix-paper p-1.5" aria-label="Vendor dashboard sections">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`min-h-[44px] whitespace-nowrap border-b-2 px-4 text-sm font-semibold transition-colors ${
+                className={`min-h-[44px] whitespace-nowrap rounded-[11px] px-4 text-sm font-semibold transition-colors ${
                   activeTab === tab.id
-                    ? "border-nuprix-forest text-nuprix-forest"
-                    : "border-transparent text-nuprix-muted hover:text-nuprix-pine"
+                    ? "bg-nuprix-forest text-white shadow-sm"
+                    : "text-nuprix-muted hover:bg-white hover:text-nuprix-pine"
                 }`}
                 aria-current={activeTab === tab.id ? "page" : undefined}
               >
@@ -325,10 +325,10 @@ export default function VendorDashboard({
               {products.length === 0 ? (
                 <EmptyState title="No product submissions" description="Submit a catalog product ID to begin the review process." />
               ) : (
-                <div className="overflow-hidden rounded-lg border border-nuprix-line">
+                <div className="overflow-hidden rounded-[18px] border border-nuprix-line bg-white shadow-[0_8px_28px_rgba(22,53,40,0.04)]">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[620px] text-left text-sm">
-                      <thead className="bg-nuprix-mist text-xs text-nuprix-muted">
+                      <thead className="bg-nuprix-paper text-xs uppercase tracking-[0.08em] text-nuprix-muted">
                         <tr>
                           <th className="px-4 py-3 font-semibold">Product ID</th>
                           <th className="px-4 py-3 font-semibold">Status</th>
@@ -369,7 +369,7 @@ export default function VendorDashboard({
                   {vendorOrders.map((order) => {
                     const draft = fulfillmentDraft[order.id]
                     return (
-                      <section key={order.id} className="rounded-lg border border-nuprix-line bg-nuprix-paper p-4">
+                      <section key={order.id} className="rounded-[18px] border border-nuprix-line bg-nuprix-paper p-5 shadow-[0_8px_28px_rgba(22,53,40,0.04)]">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <p className="text-xs text-nuprix-muted">Order</p>
@@ -486,10 +486,10 @@ export default function VendorDashboard({
               {payouts.length === 0 ? (
                 <EmptyState title="No payout requests" description="Request a payout when you have an available balance." />
               ) : (
-                <div className="overflow-hidden rounded-lg border border-nuprix-line">
+                <div className="overflow-hidden rounded-[18px] border border-nuprix-line bg-white shadow-[0_8px_28px_rgba(22,53,40,0.04)]">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[700px] text-left text-sm">
-                      <thead className="bg-nuprix-mist text-xs text-nuprix-muted">
+                      <thead className="bg-nuprix-paper text-xs uppercase tracking-[0.08em] text-nuprix-muted">
                         <tr>
                           <th className="px-4 py-3 font-semibold">Amount</th>
                           <th className="px-4 py-3 font-semibold">Method</th>
@@ -555,10 +555,10 @@ export default function VendorDashboard({
               {members.length === 0 ? (
                 <EmptyState title="No team members" description="Invite an existing Nuprix customer to join this vendor team." />
               ) : (
-                <div className="overflow-hidden rounded-lg border border-nuprix-line">
+                <div className="overflow-hidden rounded-[18px] border border-nuprix-line bg-white shadow-[0_8px_28px_rgba(22,53,40,0.04)]">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[620px] text-left text-sm">
-                      <thead className="bg-nuprix-mist text-xs text-nuprix-muted">
+                      <thead className="bg-nuprix-paper text-xs uppercase tracking-[0.08em] text-nuprix-muted">
                         <tr>
                           <th className="px-4 py-3 font-semibold">Member</th>
                           <th className="px-4 py-3 font-semibold">Role</th>
@@ -742,16 +742,20 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor: string; c
 
 function SummaryCard({ label, value, tone }: { label: string; value: string; tone?: "forest" }) {
   return (
-    <div className="rounded-lg border border-nuprix-line bg-nuprix-paper p-4">
-      <p className="text-xs text-nuprix-muted">{label}</p>
-      <p className={`mt-2 text-lg font-semibold ${tone ? "text-nuprix-forest" : "text-nuprix-ink"}`}>{value}</p>
+    <div className={`rounded-[18px] border p-5 shadow-[0_8px_28px_rgba(22,53,40,0.04)] ${
+      tone === "forest"
+        ? "border-nuprix-forest bg-nuprix-forest text-white"
+        : "border-nuprix-line bg-nuprix-paper"
+    }`}>
+      <p className={`text-xs font-semibold uppercase tracking-[0.08em] ${tone === "forest" ? "text-[#cad9cd]" : "text-nuprix-muted"}`}>{label}</p>
+      <p className={`mt-2 text-xl font-semibold ${tone === "forest" ? "text-white" : "text-nuprix-ink"}`}>{value}</p>
     </div>
   )
 }
 
 function SectionCard({ title, description, action, children }: { title: string; description: string; action: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-nuprix-line bg-nuprix-paper p-5">
+    <section className="rounded-[18px] border border-nuprix-line bg-nuprix-paper p-5 shadow-[0_8px_28px_rgba(22,53,40,0.04)]">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <h2 className="font-display text-lg text-nuprix-forest">{title}</h2>
@@ -766,7 +770,7 @@ function SectionCard({ title, description, action, children }: { title: string; 
 
 function EmptyState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-nuprix-line-strong bg-nuprix-paper px-6 py-10 text-center">
+    <div className="rounded-[18px] border border-dashed border-nuprix-line-strong bg-nuprix-paper px-6 py-12 text-center">
       <p className="font-display text-lg text-nuprix-forest">{title}</p>
       <p className="mt-1 text-sm text-nuprix-muted">{description}</p>
     </div>

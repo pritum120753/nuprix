@@ -13,10 +13,10 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className="flex-1 py-8 small:py-16 bg-nuprix-ivory min-h-[calc(100vh-64px)]" data-testid="account-page">
+    <div className="flex-1 py-8 small:py-12 bg-nuprix-ivory min-h-[calc(100vh-72px)]" data-testid="account-page">
       <div className="content-container max-w-6xl mx-auto flex flex-col gap-8">
-        <div className="grid grid-cols-1 small:grid-cols-[260px_1fr] gap-8">
-          <aside className="surface-card p-6 h-fit">
+        <div className="grid grid-cols-1 small:grid-cols-[250px_1fr] gap-6 small:gap-8">
+          <aside className="surface-card p-4 small:p-5 h-fit small:sticky small:top-24">
             {customer && <AccountNav customer={customer} />}
           </aside>
           <section className="surface-card p-6 small:p-8">

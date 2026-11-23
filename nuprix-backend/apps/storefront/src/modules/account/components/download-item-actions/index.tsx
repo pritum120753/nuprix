@@ -5,6 +5,7 @@ import {
   type CustomerDownload,
 } from "@lib/data/downloads"
 import { useState } from "react"
+import { Check, Copy, Download, RotateCcw } from "lucide-react"
 
 type DownloadItemActionsProps = {
   downloadId: string
@@ -66,8 +67,13 @@ const DownloadItemActions = ({
             type="button"
             onClick={() => void handleCopyLicenseKey()}
             aria-label={`Copy license key for ${title}`}
-            className="inline-flex min-h-[44px] items-center rounded-full border border-nuprix-line bg-white px-4 py-2 text-xs font-semibold text-nuprix-forest transition hover:border-nuprix-forest"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-nuprix-line-strong bg-white px-4 py-2 text-xs font-semibold text-nuprix-forest transition hover:-translate-y-0.5 hover:border-nuprix-moss hover:bg-nuprix-paper"
           >
+            {copied ? (
+              <Check className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Copy className="h-4 w-4" aria-hidden="true" />
+            )}
             {copied ? "Copied" : "Copy license key"}
           </button>
           {copyError && (
@@ -85,9 +91,10 @@ const DownloadItemActions = ({
                 href={downloadUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-[44px] items-center rounded-full bg-nuprix-forest px-4 py-2 text-xs font-semibold text-nuprix-ivory transition hover:bg-nuprix-pine"
+                className="primary-action min-h-[44px] px-5 py-2 text-xs"
                 data-testid={`download-now-link-${downloadId}`}
               >
+                <Download className="h-4 w-4" aria-hidden="true" />
                 Download {title}
               </a>
               <p className="text-xs text-nuprix-muted">
@@ -100,9 +107,13 @@ const DownloadItemActions = ({
               onClick={() => void handleRegenerate()}
               disabled={pending}
               aria-label={`Request new download link for ${title}`}
-              className="inline-flex min-h-[44px] items-center rounded-full border border-nuprix-line bg-white px-4 py-2 text-xs font-semibold text-nuprix-forest transition hover:border-nuprix-forest disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-nuprix-line-strong bg-white px-4 py-2 text-xs font-semibold text-nuprix-forest transition hover:border-nuprix-moss disabled:opacity-50"
               data-testid={`regenerate-download-button-${downloadId}`}
             >
+              <RotateCcw
+                className={`h-4 w-4 ${pending ? "animate-spin" : ""}`}
+                aria-hidden="true"
+              />
               {pending ? "Generating link..." : "Request new link"}
             </button>
           )}
