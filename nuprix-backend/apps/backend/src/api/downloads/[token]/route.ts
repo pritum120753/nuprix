@@ -93,6 +93,31 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     return res.status(status).json({ message: MESSAGES[outcome.reason] })
   }
 
+  const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER)
+  try {
+    void (async () => {
+      try {
+        await service.recordDownloadEvent({
+          entitlement_id: entitlement.id,
+          ip_address: req.ip,
+          user_agent: req.headers["user-agent"],
+        })
+      } catch (error: unknown) {
+        logger.error(
+          `Failed to record download event for entitlement ${entitlement.id}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        )
+      }
+    })()
+  } catch (error: unknown) {
+    logger.error(
+      `Failed to start download telemetry for entitlement ${entitlement.id}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    )
+  }
+
   res.setHeader("Cache-Control", "no-store")
   res.setHeader("Referrer-Policy", "no-referrer")
   return res.redirect(302, outcome.url)

@@ -84,6 +84,7 @@ export const grantDownloadEntitlementsStep = createStep(
         digital_file_id: file.id,
         max_downloads: file.max_downloads,
         expires_after_days: file.expires_after_days,
+        generate_license_key: file.generate_license_key,
       })
       createdIds.push(id)
 

@@ -23,6 +23,7 @@ type DigitalFileRecord = {
   mime_type: string | null
   size_bytes: number | null
   license_note: string | null
+  generate_license_key: boolean
   max_downloads: number
   expires_after_days: number | null
 }
@@ -61,6 +62,7 @@ const ProductDigitalFilesWidget = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [title, setTitle] = useState("")
   const [licenseNote, setLicenseNote] = useState("")
+  const [generateLicenseKey, setGenerateLicenseKey] = useState(false)
   const [maxDownloads, setMaxDownloads] = useState("5")
   const [expiresAfterDays, setExpiresAfterDays] = useState("")
   const [uploading, setUploading] = useState(false)
@@ -191,6 +193,7 @@ const ProductDigitalFilesWidget = ({
           mime_type: selectedFile.type || undefined,
           size_bytes: selectedFile.size,
           license_note: licenseNote.trim() || undefined,
+          generate_license_key: generateLicenseKey,
           max_downloads: Number.isFinite(parsedMax) ? parsedMax : 5,
           expires_after_days:
             parsedExpiry && Number.isFinite(parsedExpiry)
@@ -209,6 +212,7 @@ const ProductDigitalFilesWidget = ({
       setSelectedFile(null)
       setTitle("")
       setLicenseNote("")
+      setGenerateLicenseKey(false)
       setMaxDownloads("5")
       setExpiresAfterDays("")
       setSuccess("Digital file uploaded and attached to product.")
@@ -321,6 +325,11 @@ const ProductDigitalFilesWidget = ({
                       License: {file.license_note}
                     </Text>
                   )}
+                  {file.generate_license_key && (
+                    <Text size="xsmall" className="text-ui-fg-muted">
+                      Unique license key generated for each order
+                    </Text>
+                  )}
                 </div>
                 <Button
                   variant="secondary"
@@ -356,6 +365,15 @@ const ProductDigitalFilesWidget = ({
               disabled={uploading}
             />
           </div>
+          <label className="flex items-center gap-2 text-sm text-ui-fg-base">
+            <input
+              type="checkbox"
+              checked={generateLicenseKey}
+              onChange={(event) => setGenerateLicenseKey(event.target.checked)}
+              disabled={uploading}
+            />
+            Generate a unique license key for each purchase
+          </label>
           <div className="space-y-1.5">
             <Label htmlFor="nuprix-digital-title">Display Title</Label>
             <Input

@@ -30,7 +30,7 @@ This roadmap divides delivery into eight independently reviewable phases. Each p
 
 ## Phase 7 — Digital delivery hardening
 
-**Status: Planned.** Validate private storage and upload controls, product/variant file attachment and versioning, payment-gated entitlements, email delivery, signed download links, customer download UX, refund/cancel revocation, limits/expiry, audit logs, and recovery procedures.
+**Status: In progress.** Digital files can opt into per-order cryptographically random license keys encrypted at rest; customer downloads expose only active keys, and refund/cancel revocation invalidates them. Successful download telemetry records event time, masked IP, user-agent, and entitlement ID asynchronously alongside the signed-URL redirect. Malware scanning, resumable large-asset streaming, external license-provider activation/revocation, and broader audit/recovery procedures remain unresolved/out of scope for this increment.
 
 ## Phase 8 — Launch readiness and controlled rollout
 

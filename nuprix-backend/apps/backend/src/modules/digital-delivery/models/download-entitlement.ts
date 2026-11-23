@@ -10,6 +10,8 @@ const DownloadEntitlement = model
     email: model.text(),
     digital_file_id: model.text(),
     token_hash: model.text().unique(),
+    license_key_encrypted: model.text().nullable(),
+    license_key_hash: model.text().unique().nullable(),
     max_downloads: model.number().default(5),
     download_count: model.number().default(0),
     expires_at: model.dateTime().nullable(),

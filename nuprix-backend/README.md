@@ -180,6 +180,15 @@ The storefront is configured via environment variables in `apps/storefront/.env.
 | `NEXT_PUBLIC_ADYEN_CLIENT_KEY` | Adyen client key (optional), when the Adyen payment provider is registered in the backend | — |
 | `NEXT_PUBLIC_ADYEN_ENVIRONMENT` | Adyen environment, `test` or `live` (optional) | `test` |
 
+Digital files can optionally generate a unique customer license key per order.
+Set `DIGITAL_LICENSE_ENCRYPTION_KEY` in the backend environment to a persistent
+64-character hexadecimal key (generate one with `openssl rand -hex 32`) before
+enabling this option in the admin. Keep the key backed up and do not rotate it
+without re-encrypting existing licenses. Set `DIGITAL_DOWNLOAD_IP_SALT` to a
+persistent secret so download telemetry can store SHA-256 IP hashes. Telemetry
+stores the event time, entitlement ID, salted IP hash, and truncated user-agent
+string.
+
 ## Resources
 
 - [Medusa Documentation](https://docs.medusajs.com)

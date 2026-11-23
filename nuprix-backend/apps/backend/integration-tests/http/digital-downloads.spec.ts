@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { DIGITAL_DELIVERY_MODULE } from "../../src/modules/digital-delivery"
 import type DigitalDeliveryModuleService from "../../src/modules/digital-delivery/service"
 import { grantDigitalAccessWorkflow } from "../../src/workflows/grant-digital-access"
+import { revokeDigitalAccessWorkflow } from "../../src/workflows/revoke-digital-access"
 
 jest.setTimeout(120 * 1000)
 
@@ -15,8 +16,12 @@ medusaIntegrationTestRunner({
     DIGITAL_S3_SECRET_ACCESS_KEY: "test-secret",
   },
   testSuite: ({ api, getContainer }) => {
-    const get = (path: string) =>
-      api.get(path, { maxRedirects: 0, validateStatus: () => true })
+    const get = (path: string, headers?: Record<string, string>) =>
+      api.get(path, {
+        maxRedirects: 0,
+        validateStatus: () => true,
+        headers,
+      })
 
     // Gives an order a real payment collection (the only source of truth
     // Medusa has for whether an order is paid).
@@ -134,6 +139,31 @@ medusaIntegrationTestRunner({
       expect(entitlement.download_count).toBe(2)
     })
 
+    it("records masked download telemetry without storing the raw IP address", async () => {
+      process.env.DIGITAL_ALLOW_UNCAPTURED = "true"
+      const { token, service, entitlementId } = await seed()
+
+      const response = await get(`/downloads/${token}`, {
+        "user-agent": "Nuprix integration test",
+      })
+      expect(response.status).toBe(302)
+
+      let events = await service.listDownloadEvents({
+        entitlement_id: entitlementId,
+      })
+      for (let attempt = 0; events.length === 0 && attempt < 20; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 25))
+        events = await service.listDownloadEvents({
+          entitlement_id: entitlementId,
+        })
+      }
+
+      expect(events).toHaveLength(1)
+      expect(events[0].ip_hash).toHaveLength(64)
+      expect(events[0].user_agent).toBe("Nuprix integration test")
+      expect(events[0].occurred_at).toBeInstanceOf(Date)
+    })
+
     it("never lets parallel requests exceed the limit", async () => {
       process.env.DIGITAL_ALLOW_UNCAPTURED = "true"
       const { token, service, entitlementId } = await seed(2)
@@ -197,6 +227,82 @@ medusaIntegrationTestRunner({
       expect(granted).toHaveLength(1)
       expect(granted[0].email).toBe("buyer2@example.com")
       expect(granted[0].token_hash).toHaveLength(64)
+    })
+
+    it("issues an encrypted unique license key and invalidates it on revocation", async () => {
+      const previousEncryptionKey = process.env.DIGITAL_LICENSE_ENCRYPTION_KEY
+      process.env.DIGITAL_LICENSE_ENCRYPTION_KEY = "d".repeat(64)
+      try {
+        const container = getContainer()
+        const orders = container.resolve(Modules.ORDER)
+        const service: DigitalDeliveryModuleService = container.resolve(
+          DIGITAL_DELIVERY_MODULE
+        )
+        const order = await orders.createOrders({
+          currency_code: "usd",
+          email: "license-buyer@example.com",
+          customer_id: "cus_license_test",
+          items: [
+            {
+              title: "License",
+              quantity: 1,
+              unit_price: 10,
+              product_id: "prod_license",
+            },
+          ],
+        })
+        const file = await service.createDigitalFiles({
+          product_id: "prod_license",
+          title: "License",
+          file_key: "digital/license/app.zip",
+          file_name: "app.zip",
+          generate_license_key: true,
+        })
+
+        await grantDigitalAccessWorkflow(container).run({
+          input: { order_id: order.id },
+        })
+        const [granted] = await service.listDownloadEntitlements({
+          order_id: order.id,
+          digital_file_id: file.id,
+        })
+        const beforeRevoke = await service.listCustomerDownloads(
+          "cus_license_test",
+          [order.id],
+          new Map([[order.id, { paid: true, canceled: false }]])
+        )
+
+        expect(beforeRevoke[0].license_key).toMatch(/^NPRX-(?:[0-9A-F]{4}-){3}[0-9A-F]{4}$/)
+        const entitlement = await service.retrieveDownloadEntitlement(
+          granted.id
+        )
+        expect(entitlement.license_key_encrypted).not.toBe(
+          beforeRevoke[0].license_key
+        )
+        expect(entitlement.license_key_hash).toHaveLength(64)
+
+        await revokeDigitalAccessWorkflow(container).run({
+          input: { order_id: order.id },
+        })
+        const afterRevoke = await service.listCustomerDownloads(
+          "cus_license_test",
+          [order.id],
+          new Map([[order.id, { paid: true, canceled: true }]])
+        )
+
+        expect(afterRevoke[0].license_key).toBeNull()
+        const revokedEntitlement = await service.retrieveDownloadEntitlement(
+          granted.id
+        )
+        expect(revokedEntitlement.license_key_encrypted).toBeNull()
+        expect(revokedEntitlement.license_key_hash).toBeNull()
+      } finally {
+        if (previousEncryptionKey === undefined) {
+          delete process.env.DIGITAL_LICENSE_ENCRYPTION_KEY
+        } else {
+          process.env.DIGITAL_LICENSE_ENCRYPTION_KEY = previousEncryptionKey
+        }
+      }
     })
   },
 })

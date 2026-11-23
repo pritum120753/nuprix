@@ -77,6 +77,16 @@ export default async function DownloadsPage() {
                 <p className="mt-1 text-xs text-nuprix-muted">
                   Order: {download.order_id}
                 </p>
+                {download.license_key && (
+                  <div className="mt-3">
+                    <p className="text-xs font-semibold text-[#42644d]">
+                      License key
+                    </p>
+                    <code className="mt-1 block break-all rounded-lg bg-[#f7f9f5] px-3 py-2 text-xs text-[#24372a]">
+                      {download.license_key}
+                    </code>
+                  </div>
+                )}
               </div>
               <div className="flex flex-col items-start gap-2 small:items-end">
                 <span
@@ -92,6 +102,7 @@ export default async function DownloadsPage() {
                   downloadId={download.id}
                   status={download.status}
                   title={download.title}
+                  licenseKey={download.license_key}
                 />
               </div>
             </li>
