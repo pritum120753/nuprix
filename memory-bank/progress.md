@@ -258,3 +258,13 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
 - **Remaining Phase 7 work**: malware scanning, resumable large-asset streaming, and wider audit/recovery workflows are not implemented by this increment.
 - **Verification**: Backend build and TypeScript check passed; backend lint passed with 15 existing warnings. Storefront lint passed with 29 existing warnings; production build compiled successfully but skipped type validation. Storefront `tsc --noEmit --ignoreDeprecations 5.0` passed; the plain check is blocked by the repository's `ignoreDeprecations: "6.0"` setting versus the installed TypeScript. Focused license/analytics unit tests passed using `$env:TEST_TYPE="unit"` (2 suites, 6 tests). The HTTP integration suite was not run; the generated migration was not applied.
 - **Pre-existing worktree state**: Graphify output was already modified before this implementation and was preserved.
+
+### Storefront Phase A — UI redesign
+- **Status**: **Implemented** on `feat/pro-ui-redesign` without changing Storefront API calls, Server Actions, cart/checkout logic, or Medusa data types.
+- **Direction**: Elevated Editorial Commerce — warm ivory surfaces, deep forest anchors, sage/digital accents, restrained amber highlights, Fraunces display typography, and Inter UI typography.
+- **Implemented**:
+  1. Global base styles, focus/selection states, content width, card/glass/action utilities, and refined Nuprix color tokens.
+  2. Sticky glass navigation with the existing catalog, search drawer, account, cart dropdown, and localized/mobile menu behaviors preserved.
+  3. Dark editorial footer with clearer category, collection, and policy hierarchy plus fulfillment/trust indicators.
+  4. Redesigned homepage hero, trust rail, featured collection spacing, and shared product cards with fulfillment badges and hover elevation.
+- **Verification**: On `feat/pro-ui-redesign`, `npm run lint` completed with zero errors and 29 existing repository warnings. `npm run build` completed successfully and generated all storefront routes. No Storefront API, Server Action, cart, checkout, or account data contract was changed.

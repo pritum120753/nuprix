@@ -3,6 +3,8 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
+import { ArrowUpRight, Download, Package } from "lucide-react"
+import { getProductFulfillmentType } from "@lib/util/product"
 
 export default async function ProductPreview({
   product,
@@ -14,6 +16,7 @@ export default async function ProductPreview({
   region: HttpTypes.StoreRegion
 }) {
   const { cheapestPrice } = getProductPrice({ product })
+  const fulfillmentType = getProductFulfillmentType(product)
 
   return (
     <LocalizedClientLink href={`/products/${product.handle}`} className="group block h-full">
@@ -27,8 +30,16 @@ export default async function ProductPreview({
             isFeatured={isFeatured}
             className="rounded-[1.35rem] border border-[#e6eae3] bg-[#eef1eb] p-3 shadow-none transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_18px_45px_rgba(28,48,34,0.12)]"
           />
-          <span className="absolute bottom-5 right-5 grid h-10 w-10 translate-y-2 place-items-center rounded-full bg-[#172b20] text-lg text-white opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100" aria-hidden="true">
-            ↗
+          <span className="absolute left-5 top-5 inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-nuprix-pine shadow-sm backdrop-blur">
+            {fulfillmentType === "digital" ? (
+              <Download className="h-3.5 w-3.5" aria-hidden="true" />
+            ) : (
+              <Package className="h-3.5 w-3.5" aria-hidden="true" />
+            )}
+            {fulfillmentType === "mixed" ? "Physical + digital" : fulfillmentType}
+          </span>
+          <span className="absolute bottom-5 right-5 grid h-11 w-11 translate-y-2 place-items-center rounded-full bg-nuprix-forest text-white opacity-0 shadow-lift transition duration-300 group-hover:translate-y-0 group-hover:opacity-100" aria-hidden="true">
+            <ArrowUpRight className="h-4 w-4" />
           </span>
         </div>
 

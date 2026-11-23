@@ -22,16 +22,16 @@ module.exports = {
       colors: {
         // Nuprix brand tokens. Use these instead of hardcoded hex values.
         nuprix: {
-          ivory: "#f7f7f2",
-          paper: "#fbfbf8",
+          ivory: "#f7f8f4",
+          paper: "#fbfcf8",
           mist: "#eef1eb",
-          line: "#e3e8df",
+          line: "#e1e7de",
           "line-strong": "#cbd8cd",
           sage: "#dce9dc",
           leaf: "#71917a",
-          moss: "#548365",
+          moss: "#285943",
           pine: "#294b35",
-          forest: "#172b20",
+          forest: "#163528",
           ink: "#17211b",
           charcoal: "#24372a",
           muted: "#66736a",

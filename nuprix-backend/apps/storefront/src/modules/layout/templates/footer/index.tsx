@@ -2,6 +2,7 @@ import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
 import { Text } from "@modules/common/components/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { PackageCheck, ShieldCheck } from "lucide-react"
 
 export default async function Footer() {
   const [{ collections }, productCategories] = await Promise.all([
@@ -13,28 +14,38 @@ export default async function Footer() {
   ])
 
   return (
-    <footer className="border-t border-nuprix-line bg-nuprix-paper w-full mt-24">
+    <footer className="mt-24 w-full overflow-hidden bg-nuprix-forest text-nuprix-ivory">
       <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-12 xsmall:flex-row items-start justify-between py-16 small:py-24">
+        <div className="flex flex-col gap-y-12 xsmall:flex-row items-start justify-between py-16 small:py-20">
           <div className="max-w-sm">
             <LocalizedClientLink
               href="/"
-              className="flex items-center gap-2 text-2xl font-bold tracking-tight text-nuprix-forest"
+              className="flex items-center gap-2 text-2xl font-bold tracking-tight text-white"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-nuprix-forest text-xs font-bold text-nuprix-ivory">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-nuprix-ivory text-xs font-bold text-nuprix-forest">
                 N
               </span>
-              <span className="font-display tracking-tight text-2xl lowercase">nuprix</span>
+              <span className="font-display tracking-[-0.04em] text-[27px] lowercase">nuprix</span>
             </LocalizedClientLink>
-            <p className="mt-4 text-sm leading-6 text-nuprix-muted">
+            <p className="mt-5 max-w-sm text-sm leading-7 text-[#cbd8cd]">
               Thoughtfully curated everyday essentials and instant digital downloads in a single unified catalog.
             </p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-[#dfe8df]">
+                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                Secure checkout
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-[#dfe8df]">
+                <PackageCheck className="h-4 w-4" aria-hidden="true" />
+                Mixed fulfillment
+              </span>
+            </div>
           </div>
 
           <div className="text-sm gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
             {productCategories && productCategories?.length > 0 && (
               <div className="flex flex-col gap-y-3">
-                <span className="text-xs font-semibold uppercase tracking-wider text-nuprix-forest">
+                <span className="text-xs font-semibold uppercase tracking-wider text-white">
                   Categories
                 </span>
                 <ul className="grid grid-cols-1 gap-2.5" data-testid="footer-categories">
@@ -43,7 +54,7 @@ export default async function Footer() {
                     return (
                       <li key={c.id}>
                         <LocalizedClientLink
-                          className="text-nuprix-muted hover:text-nuprix-forest transition-colors text-sm"
+                          className="text-[#bac9bd] hover:text-white transition-colors text-sm"
                           href={`/categories/${c.handle}`}
                           data-testid="category-link"
                         >
@@ -58,14 +69,14 @@ export default async function Footer() {
 
             {collections && collections.length > 0 && (
               <div className="flex flex-col gap-y-3">
-                <span className="text-xs font-semibold uppercase tracking-wider text-nuprix-forest">
+                <span className="text-xs font-semibold uppercase tracking-wider text-white">
                   Collections
                 </span>
                 <ul className="grid grid-cols-1 gap-2.5">
                   {collections?.slice(0, 6).map((c) => (
                     <li key={c.id}>
                       <LocalizedClientLink
-                        className="text-nuprix-muted hover:text-nuprix-forest transition-colors text-sm"
+                        className="text-[#bac9bd] hover:text-white transition-colors text-sm"
                         href={`/collections/${c.handle}`}
                       >
                         {c.title}
@@ -77,13 +88,13 @@ export default async function Footer() {
             )}
 
             <div className="flex flex-col gap-y-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-nuprix-forest">
+              <span className="text-xs font-semibold uppercase tracking-wider text-white">
                 Help & Information
               </span>
               <ul className="grid grid-cols-1 gap-2.5 text-sm">
                 <li>
                   <LocalizedClientLink
-                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    className="text-[#bac9bd] hover:text-white transition-colors"
                     href="/about"
                   >
                     About Us
@@ -91,7 +102,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    className="text-[#bac9bd] hover:text-white transition-colors"
                     href="/faq"
                   >
                     FAQ
@@ -99,7 +110,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    className="text-[#bac9bd] hover:text-white transition-colors"
                     href="/shipping"
                   >
                     Shipping Policy
@@ -107,7 +118,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    className="text-[#bac9bd] hover:text-white transition-colors"
                     href="/returns"
                   >
                     Returns & Refunds
@@ -115,7 +126,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    className="text-[#bac9bd] hover:text-white transition-colors"
                     href="/refund-policy"
                   >
                     Refund Policy
@@ -123,7 +134,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    className="text-[#bac9bd] hover:text-white transition-colors"
                     href="/digital-license"
                   >
                     Digital License
@@ -131,7 +142,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    className="text-[#bac9bd] hover:text-white transition-colors"
                     href="/terms"
                   >
                     Terms of Service
@@ -139,7 +150,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    className="text-[#bac9bd] hover:text-white transition-colors"
                     href="/privacy"
                   >
                     Privacy Policy
@@ -147,7 +158,7 @@ export default async function Footer() {
                 </li>
                 <li>
                   <LocalizedClientLink
-                    className="text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                    className="text-[#bac9bd] hover:text-white transition-colors"
                     href="/contact"
                   >
                     Contact Us
@@ -158,8 +169,8 @@ export default async function Footer() {
           </div>
         </div>
 
-        <div className="flex w-full py-8 border-t border-nuprix-line flex-col sm:flex-row items-center justify-between text-xs text-nuprix-muted gap-4">
-          <Text className="text-xs text-nuprix-muted">
+        <div className="flex w-full py-8 border-t border-white/10 flex-col sm:flex-row items-center justify-between text-xs text-[#bac9bd] gap-4">
+          <Text className="text-xs text-[#bac9bd]">
             © {new Date().getFullYear()} Nuprix. All rights reserved.
           </Text>
           <div className="flex items-center gap-6">

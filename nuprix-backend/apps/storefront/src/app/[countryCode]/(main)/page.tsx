@@ -126,7 +126,7 @@ export default async function Home(props: {
       />
       <Hero />
       {collections?.length ? (
-        <div className="py-12">
+        <div className="border-t border-nuprix-line/70 bg-nuprix-paper py-4">
           <ul className="flex flex-col gap-x-6">
             <FeaturedProducts collections={collections} region={region} />
           </ul>

@@ -34,10 +34,10 @@ export default async function ProductRail({
   }
 
   return (
-    <section className="content-container py-12 small:py-20">
+    <section className="content-container py-12 small:py-16">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4 small:mb-10">
         <div>
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#71917a]">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-nuprix-pine">
             Explore the collection
           </p>
           <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[#172b20] small:text-3xl">

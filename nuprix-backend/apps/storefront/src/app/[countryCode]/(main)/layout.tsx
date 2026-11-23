@@ -38,7 +38,11 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
           shippingOptions={shippingOptions}
         />
       )}
-      <main id="main-content" tabIndex={-1} className="relative">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="relative min-h-[70vh] overflow-hidden"
+      >
         {props.children}
       </main>
       <Footer />

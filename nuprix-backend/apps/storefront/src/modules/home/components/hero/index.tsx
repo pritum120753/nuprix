@@ -1,19 +1,23 @@
 import { Heading } from "@modules/common/components/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import {
+  ArrowRight,
+  Download,
+  Package,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react"
 
 const benefits = [
   {
-    number: "01",
     title: "Browse your way",
     description: "Find useful products across technology, home, fashion, and more.",
   },
   {
-    number: "02",
     title: "Physical and digital",
     description: "Shop shippable products and digital downloads in one catalog.",
   },
   {
-    number: "03",
     title: "Choose with confidence",
     description: "Review product information and available options before you buy.",
   },
@@ -28,66 +32,78 @@ const categories = [
 
 const Hero = () => {
   return (
-    <div className="bg-[#f7f7f2] text-[#17211b]">
+    <div className="bg-nuprix-ivory text-nuprix-ink">
       <section className="relative isolate overflow-hidden" aria-labelledby="home-hero-title">
         <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-          <div className="absolute -right-40 -top-48 h-[34rem] w-[34rem] rounded-full bg-[#d9eddf] blur-3xl" />
-          <div className="absolute -bottom-64 left-[22%] h-[34rem] w-[34rem] rounded-full bg-[#e9e3fa] blur-3xl" />
-          <div className="absolute inset-0 opacity-[0.18] [background-image:radial-gradient(#53645a_0.7px,transparent_0.7px)] [background-size:22px_22px]" />
+          <div className="absolute -right-40 -top-48 h-[34rem] w-[34rem] rounded-full bg-nuprix-sage/80 blur-3xl" />
+          <div className="absolute -bottom-64 left-[22%] h-[34rem] w-[34rem] rounded-full bg-nuprix-lilac/70 blur-3xl" />
+          <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(#53645a_0.7px,transparent_0.7px)] [background-size:24px_24px]" />
         </div>
 
-        <div className="content-container grid items-center gap-12 py-14 small:min-h-[560px] small:grid-cols-[1.1fr_.9fr] small:py-20">
+        <div className="content-container grid items-center gap-10 py-12 small:min-h-[610px] small:grid-cols-[1.08fr_.92fr] small:py-16">
           <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#cbd8cd] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#42644d]">
-              <span className="h-2 w-2 rounded-full bg-[#5c9b6c]" />
-              Physical finds. Digital downloads.
+            <span className="inline-flex items-center gap-2 rounded-full border border-nuprix-line-strong bg-white/80 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-pine shadow-sm backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+              Curated for everyday living
             </span>
 
-            <Heading id="home-hero-title" level="h1" className="mt-7 max-w-2xl text-5xl font-semibold leading-[1.04] tracking-[-0.055em] text-[#17211b] small:text-7xl">
-              Everyday finds.
-              <span className="block text-[#548365]">Digital discoveries.</span>
+            <Heading id="home-hero-title" level="h1" className="mt-7 max-w-3xl text-[46px] font-medium leading-[0.98] tracking-[-0.065em] text-nuprix-ink xsmall:text-[56px] small:text-[68px] medium:text-[76px]">
+              Find it here.
+              <span className="block text-nuprix-moss">Love it for longer.</span>
             </Heading>
 
-            <p className="mt-7 max-w-xl text-base leading-8 text-[#5d6a60] small:text-lg">
-              Explore physical products and digital downloads across technology,
-              lifestyle, home, fashion, and more.
+            <p className="mt-7 max-w-xl text-base leading-8 text-nuprix-muted small:text-lg">
+              A considered marketplace for useful physical goods and instant digital
+              downloads, brought together in one beautifully simple place.
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-4">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <LocalizedClientLink
                 href="/store"
-                className="inline-flex min-h-12 items-center justify-center rounded-md bg-[#203b29] px-6 text-base font-semibold text-white transition-colors hover:bg-[#31563c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#548365] focus-visible:ring-offset-2"
+                className="primary-action"
               >
                 Browse all products
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </LocalizedClientLink>
               <LocalizedClientLink
                 href="/search"
-                className="inline-flex min-h-12 items-center rounded-md px-4 text-sm font-semibold text-[#294b35] transition-colors hover:bg-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#548365] focus-visible:ring-offset-2"
+                className="secondary-action"
               >
-                Search Nuprix <span className="ml-2" aria-hidden="true">→</span>
+                Search Nuprix
               </LocalizedClientLink>
             </div>
 
-            <p className="mt-8 text-xs font-medium tracking-wide text-[#68766b]">
-              SHOP PRODUCTS <span className="mx-2">·</span> DOWNLOAD DIGITAL GOODS
-            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-nuprix-muted">
+              <span className="inline-flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-nuprix-moss" aria-hidden="true" />
+                Secure shopping
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Package className="h-4 w-4 text-nuprix-moss" aria-hidden="true" />
+                Physical delivery
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Download className="h-4 w-4 text-nuprix-moss" aria-hidden="true" />
+                Instant digital access
+              </span>
+            </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[470px]">
-            <div className="absolute -inset-5 rotate-[-5deg] rounded-[2rem] bg-[#dce9dc]" />
-            <div className="relative overflow-hidden rounded-[1.65rem] border border-white/80 bg-[#172b20] p-6 text-white shadow-[0_28px_80px_rgba(27,52,35,0.18)] small:p-8">
+          <div className="relative mx-auto w-full max-w-[500px]">
+            <div className="absolute -inset-4 rotate-3 rounded-[32px] border border-nuprix-line-strong bg-nuprix-sage/80" />
+            <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-nuprix-forest p-6 text-white shadow-[0_28px_80px_rgba(22,53,40,0.22)] small:p-8">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#b8d3bd]">The Nuprix marketplace</span>
-                <span className="rounded-full border border-white/20 px-3 py-1 text-[10px] uppercase tracking-widest text-[#d6e7d8]">Explore</span>
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#bdd2c2]">The Nuprix edit</span>
+                <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[#dfe8df]">New finds</span>
               </div>
-              <div className="mt-10">
-                <div className="text-[11px] uppercase tracking-[0.25em] text-[#a9c6ae]">Find your next favorite</div>
-                <div className="mt-3 text-4xl font-semibold leading-[1.05] tracking-[-0.05em] small:text-5xl">
-                  Shop what you need.
-                  <span className="block text-[#b8e0bd]">Discover what you love.</span>
+              <div className="mt-9">
+                <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#aac3af]">Curated across categories</div>
+                <div className="mt-3 font-display text-4xl leading-[1.02] tracking-[-0.045em] small:text-5xl">
+                  Useful things,
+                  <span className="block text-[#bfe0c5]">beautifully found.</span>
                 </div>
-                <p className="mt-5 max-w-xs text-sm leading-6 text-[#d0ddd1]">
-                  Browse a mix of physical products and downloadable goods.
+                <p className="mt-5 max-w-sm text-sm leading-6 text-[#d0ddd1]">
+                  Explore products for work, home, style, and instant access.
                 </p>
               </div>
               <ul className="mt-9 grid grid-cols-2 gap-3" aria-label="Examples of what you can discover">
@@ -106,14 +122,16 @@ const Hero = () => {
         </div>
       </section>
 
-      <section className="border-y border-[#e3e8df] bg-white/65">
+      <section className="border-y border-nuprix-line bg-white/75">
         <div className="content-container grid gap-7 py-9 small:grid-cols-3 small:gap-10 small:py-11">
-          {benefits.map((benefit) => (
-            <article key={benefit.number} className="flex gap-4">
-              <span className="pt-1 text-xs font-semibold tracking-widest text-[#71917a]">{benefit.number}</span>
+          {benefits.map((benefit, index) => (
+            <article key={benefit.title} className="flex gap-4">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-nuprix-line-strong bg-nuprix-paper text-[11px] font-bold text-nuprix-pine">
+                {String(index + 1).padStart(2, "0")}
+              </span>
               <div>
-                <h2 className="text-sm font-semibold text-[#24372a]">{benefit.title}</h2>
-                <p className="mt-1 max-w-xs text-sm leading-6 text-[#758078]">{benefit.description}</p>
+                <h2 className="text-sm font-semibold text-nuprix-charcoal">{benefit.title}</h2>
+                <p className="mt-1 max-w-xs text-sm leading-6 text-nuprix-muted">{benefit.description}</p>
               </div>
             </article>
           ))}
