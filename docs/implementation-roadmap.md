@@ -32,6 +32,8 @@ This roadmap divides delivery into eight independently reviewable phases. Each p
 
 **Status: In progress.** Digital files can opt into per-order cryptographically random license keys encrypted at rest; customer downloads expose only active keys, and refund/cancel revocation invalidates them. Successful download telemetry records event time, masked IP, user-agent, and entitlement ID asynchronously alongside the signed-URL redirect. Malware scanning, resumable large-asset streaming, external license-provider activation/revocation, and broader audit/recovery procedures remain unresolved/out of scope for this increment.
 
+**Additional hardening in progress:** Payment-gated entitlements, authenticated customer link regeneration, payment-aware download status, and safe email handling. Download-token request-path redaction, shared status precedence, zero-total/multiple-payment handling, and cross-process locking are included. Production still requires a PostgreSQL-backed locking provider and a verified private storage configuration; refund/cancel revocation, auditability, and recovery procedures need end-to-end verification before this phase is complete. `DIGITAL_ALLOW_UNCAPTURED` is development/test-only and must never bypass production payment checks.
+
 ## Phase 8 — Launch readiness and controlled rollout
 
 **Status: Planned; production rollout still requires explicit approval.** Complete end-to-end coverage for physical, digital, mixed carts, supplier/inventory failure, payment/refund, and shipment flows. Establish production observability, backup and access controls, reconciliation, support procedures, deployment documentation, and a limited pilot before scaling supplier coverage.

@@ -20,6 +20,9 @@ export type CustomerDownload = {
   status:
     | "available"
     | "awaiting_payment"
+    | "refunded"
+    | "order_canceled"
+    | "unavailable"
     | "expired"
     | "revoked"
     | "limit_reached"
@@ -40,25 +43,21 @@ export const listCustomerDownloads = async (): Promise<CustomerDownload[]> => {
 
 export const regenerateCustomerDownload = async (
   entitlementId: string
-): Promise<{ download_url?: string; error?: string }> => {
-  const headers = await getAuthHeaders()
-
+): Promise<{ success: boolean; message: string }> => {
   try {
-    const res = await sdk.client.fetch<{
-      entitlement_id: string
-      download_url: string
-    }>(`/store/customer/downloads/${encodeURIComponent(entitlementId)}/regenerate`, {
-      method: "POST",
-      headers,
-      cache: "no-store",
-    })
-    return { download_url: res.download_url }
-  } catch (error) {
+    const headers = await getAuthHeaders()
+    await sdk.client.fetch(
+      `/store/customer/downloads/${encodeURIComponent(entitlementId)}/regenerate`,
+      { method: "POST", headers, cache: "no-store" }
+    )
     return {
-      error:
-        error instanceof Error
-          ? error.message
-          : "Could not generate a new download link. Please try again.",
+      success: true,
+      message: "A fresh download link was sent to your order email.",
+    }
+  } catch {
+    return {
+      success: false,
+      message: "We could not send a new link. Please try again later.",
     }
   }
 }

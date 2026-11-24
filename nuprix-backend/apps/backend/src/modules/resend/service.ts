@@ -64,10 +64,11 @@ class ResendNotificationProviderService extends AbstractNotificationProviderServ
     })
 
     if (error) {
-      this.logger_.error(`Resend failed: ${error.name} - ${error.message}`)
+      // Avoid logging provider error payloads that could include sensitive data.
+      this.logger_.error("Resend could not send a notification email.")
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
-        `Failed to send email: ${error.message}`
+        "Failed to send email"
       )
     }
 

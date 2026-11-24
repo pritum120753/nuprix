@@ -34,10 +34,29 @@ describe("isFullyPaid", () => {
     ).toBe(true)
   })
 
-  it("treats free / zero-total orders as paid", () => {
-    expect(isFullyPaid([], { orderTotal: 0 })).toBe(true)
-    expect(isFullyPaid(undefined, { orderTotal: { numeric: 0 } })).toBe(true)
-    expect(isFullyPaid([{ amount: 0, captured_amount: 0 }])).toBe(true)
-    expect(isFullyPaid([], { orderTotal: 10 })).toBe(false)
+  it("treats a zero-total order as paid without a payment collection", () => {
+    expect(isFullyPaid([], 0)).toBe(true)
+    expect(isFullyPaid(undefined, { numeric: 0 })).toBe(true)
+  })
+
+  it("compares total captured funds to the order total across collections", () => {
+    expect(
+      isFullyPaid(
+        [
+          { amount: 25, captured_amount: 25 },
+          { amount: 25, captured_amount: 0 },
+        ],
+        25
+      )
+    ).toBe(true)
+    expect(
+      isFullyPaid(
+        [
+          { amount: 10, captured_amount: 4 },
+          { amount: 15, captured_amount: 6 },
+        ],
+        25
+      )
+    ).toBe(false)
   })
 })

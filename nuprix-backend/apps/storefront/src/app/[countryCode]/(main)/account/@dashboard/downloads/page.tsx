@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import DownloadItemActions from "@modules/account/components/download-item-actions"
+import RegenerateDownloadButton from "@modules/account/components/regenerate-download-button"
 import { retrieveCustomer } from "@lib/data/customer"
 import { listCustomerDownloads } from "@lib/data/downloads"
 import { Download, KeyRound, PackageOpen } from "lucide-react"
@@ -13,6 +14,9 @@ export const metadata: Metadata = {
 const statusLabels = {
   available: "Available",
   awaiting_payment: "Awaiting payment",
+  refunded: "Refunded",
+  order_canceled: "Order canceled",
+  unavailable: "Unavailable",
   expired: "Expired",
   revoked: "Access revoked",
   limit_reached: "Limit reached",
@@ -116,6 +120,9 @@ export default async function DownloadsPage() {
                   title={download.title}
                   licenseKey={download.license_key}
                 />
+                {download.status === "available" ? (
+                  <RegenerateDownloadButton entitlementId={download.id} />
+                ) : null}
               </div>
             </li>
           ))}

@@ -1,6 +1,7 @@
 // The Order record has no stored payment_status: Medusa derives it from the
-// order's payment collections. This applies the same idea for one question:
-// "has this order been paid in full and not refunded?"
+// order's payment collections. Digital delivery uses the order total as the
+// amount that must be captured, so an extra empty collection cannot undo a
+// successful payment.
 
 type PaymentCollectionRow = {
   status?: string | null
@@ -28,29 +29,50 @@ export const PAYMENT_COLLECTION_FIELDS = [
   "payment_collections.refunded_amount",
 ]
 
-export function isFullyPaid(
-  collections: (PaymentCollectionRow | null | undefined)[] | null | undefined,
-  options?: { orderTotal?: unknown }
-): boolean {
-  const active = (collections ?? []).filter(
-    (c): c is PaymentCollectionRow => Boolean(c) && c?.status !== "canceled"
-  )
-  const hasZeroOrderTotal =
-    options?.orderTotal !== undefined &&
-    options?.orderTotal !== null &&
-    toNumber(options.orderTotal) <= EPSILON
+export type PaymentState = "paid" | "unpaid" | "refunded"
 
-  if (!active.length) {
-    return hasZeroOrderTotal
+export function getPaymentState(
+  collections: (PaymentCollectionRow | null | undefined)[] | null | undefined,
+  orderTotal?: unknown
+): PaymentState {
+  const active = (collections ?? []).filter(
+    (collection): collection is PaymentCollectionRow =>
+      Boolean(collection) && collection?.status !== "canceled"
+  )
+
+  if (active.some((collection) => toNumber(collection.refunded_amount) > EPSILON)) {
+    return "refunded"
   }
 
-  return active.every((c) => {
-    const amount = toNumber(c.amount)
-    const captured = toNumber(c.captured_amount)
-    const refunded = toNumber(c.refunded_amount)
-    if (amount <= EPSILON) {
-      return refunded <= EPSILON && amount - captured <= EPSILON
-    }
-    return refunded <= EPSILON && captured > 0 && amount - captured <= EPSILON
+  const total = orderTotal === undefined ? undefined : toNumber(orderTotal)
+  if (total !== undefined && total <= EPSILON) {
+    return "paid"
+  }
+  if (!active.length) {
+    return "unpaid"
+  }
+
+  if (total !== undefined) {
+    const captured = active.reduce(
+      (sum, collection) => sum + toNumber(collection.captured_amount),
+      0
+    )
+    return captured > 0 && captured + EPSILON >= total ? "paid" : "unpaid"
+  }
+
+  // Callers without an order total retain the conservative legacy rule.
+  return active.every((collection) => {
+    const amount = toNumber(collection.amount)
+    const captured = toNumber(collection.captured_amount)
+    return captured > 0 && amount - captured <= EPSILON
   })
+    ? "paid"
+    : "unpaid"
+}
+
+export function isFullyPaid(
+  collections: (PaymentCollectionRow | null | undefined)[] | null | undefined,
+  orderTotal?: unknown
+): boolean {
+  return getPaymentState(collections, orderTotal) === "paid"
 }

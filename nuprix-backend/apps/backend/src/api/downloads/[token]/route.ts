@@ -1,15 +1,14 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { createDownloadUrl } from "../../../lib/digital-storage"
 import {
-  isFullyPaid,
-  PAYMENT_COLLECTION_FIELDS,
-} from "../../../lib/order-payment"
+  type CustomerDownloadStatus,
+  resolveDownloadStatus,
+} from "../../../lib/customer-download-status"
+import { createDownloadUrl } from "../../../lib/digital-storage"
+import { PAYMENT_COLLECTION_FIELDS } from "../../../lib/order-payment"
 import { DIGITAL_DELIVERY_MODULE } from "../../../modules/digital-delivery"
 import type DigitalDeliveryModuleService from "../../../modules/digital-delivery/service"
 
-// Public on purpose: the unguessable token in the URL is the credential, so
-// it works from an email link with no publishable key or login.
 export const AUTHENTICATE = false
 
 const MESSAGES = {
@@ -17,9 +16,23 @@ const MESSAGES = {
   revoked: "Access to this download has been withdrawn.",
   expired: "This download link has expired.",
   limit_reached: "The download limit for this file has been reached.",
-  unpaid: "This order's payment has not been confirmed yet.",
+  awaiting_payment: "This order's payment has not been confirmed yet.",
+  refunded: "This order was refunded, so the file is no longer available.",
+  order_canceled: "This order was canceled, so the file is not available.",
   unavailable: "This file is not available right now.",
 } as const
+
+function blockedStatusResponse(
+  status: Exclude<CustomerDownloadStatus, "available"> | "invalid",
+  res: MedusaResponse
+) {
+  if (status === "invalid") {
+    return res.status(404).json({ message: MESSAGES.invalid })
+  }
+  const statusCode =
+    status === "awaiting_payment" ? 402 : status === "unavailable" ? 404 : 410
+  return res.status(statusCode).json({ message: MESSAGES[status] })
+}
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const token = req.params.token
@@ -31,92 +44,77 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
 
   const preliminary = await service.checkToken(token)
   if (!preliminary.ok) {
-    const status = preliminary.reason === "invalid" ? 404 : 410
-    return res.status(status).json({ message: MESSAGES[preliminary.reason] })
+    return blockedStatusResponse("invalid", res)
   }
 
-  const entitlement = await service.retrieveDownloadEntitlement(
-    preliminary.entitlement_id
-  )
-
-  const { data: orders } = await query.graph({
-    entity: "order",
-    fields: ["id", "status", "total", ...PAYMENT_COLLECTION_FIELDS],
-    filters: { id: entitlement.order_id },
-  })
-  const order = orders[0]
-  const requireCapture = process.env.DIGITAL_ALLOW_UNCAPTURED !== "true"
-  const paid = isFullyPaid(order?.payment_collections, {
-    orderTotal: order?.total,
-  })
-  const canceled = order?.status === "canceled"
-
-  if (!order || canceled || (requireCapture && !paid)) {
-    return res.status(402).json({ message: MESSAGES.unpaid })
-  }
-
-  // Serialise per entitlement so two parallel requests cannot both pass the
-  // limit check and exceed max_downloads. The signed URL is created before the
-  // download is counted, so a storage failure never costs the customer a try.
   let outcome:
-    | { ok: true; url: string }
-    | { ok: false; reason: keyof typeof MESSAGES }
+    | { ok: true; url: string; entitlementId: string }
+    | {
+        ok: false
+        status: Exclude<CustomerDownloadStatus, "available"> | "invalid"
+      }
 
   try {
     outcome = await locking.execute(
-      `download:${entitlement.id}`,
+      `download:${preliminary.entitlement_id}`,
       async () => {
         const check = await service.checkToken(token)
         if (!check.ok) {
-          return check
+          return { ok: false as const, status: "invalid" as const }
+        }
+        const currentEntitlement = await service.retrieveDownloadEntitlement(
+          check.entitlement_id
+        )
+        const { data: currentOrders } = await query.graph({
+          entity: "order",
+          fields: ["id", "status", "total", ...PAYMENT_COLLECTION_FIELDS],
+          filters: { id: currentEntitlement.order_id },
+        })
+        const status = resolveDownloadStatus(
+          currentEntitlement,
+          currentOrders[0] ?? null
+        )
+        if (status !== "available") {
+          return { ok: false as const, status }
         }
         const file = await service.retrieveDigitalFile(check.digital_file_id)
         const url = await createDownloadUrl(file.file_key, file.file_name)
         await service.recordDownload(check.entitlement_id)
-        return { ok: true as const, url }
+        return {
+          ok: true as const,
+          url,
+          entitlementId: check.entitlement_id,
+        }
       },
       { timeout: 5 }
     )
-  } catch (error) {
+  } catch {
     req.scope
       .resolve(ContainerRegistrationKeys.LOGGER)
-      .error(
-        `Download failed for entitlement ${entitlement.id}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      )
+      .error("Download request failed while creating a temporary signed URL.")
     return res.status(503).json({ message: MESSAGES.unavailable })
   }
 
   if (!outcome.ok) {
-    const status = outcome.reason === "invalid" ? 404 : 410
-    return res.status(status).json({ message: MESSAGES[outcome.reason] })
+    return blockedStatusResponse(outcome.status, res)
   }
 
   const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER)
-  try {
-    void (async () => {
-      try {
-        await service.recordDownloadEvent({
-          entitlement_id: entitlement.id,
-          ip_address: req.ip,
-          user_agent: req.headers["user-agent"],
-        })
-      } catch (error: unknown) {
-        logger.error(
-          `Failed to record download event for entitlement ${entitlement.id}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        )
-      }
-    })()
-  } catch (error: unknown) {
-    logger.error(
-      `Failed to start download telemetry for entitlement ${entitlement.id}: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    )
-  }
+  void (async () => {
+    try {
+      await service.recordDownloadEvent({
+        entitlement_id: outcome.entitlementId,
+        ip_address: req.ip,
+        user_agent: req.headers["user-agent"],
+      })
+    } catch (error: unknown) {
+      logger.error(
+        `Failed to record download event: ${
+          error instanceof Error ? error.message : "unknown error"
+        }`
+      )
+    }
+  })()
 
   res.setHeader("Cache-Control", "no-store")
   res.setHeader("Referrer-Policy", "no-referrer")

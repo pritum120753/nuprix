@@ -1,8 +1,15 @@
 import { loadEnv, defineConfig } from '@medusajs/framework/utils'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import { logger as defaultLogger } from "@medusajs/framework/logger"
+import { createTokenRedactingLogger } from "./src/lib/http-log-redaction"
 
-loadEnv(process.env.NODE_ENV || 'development', process.cwd())
+loadEnv(process.env.NODE_ENV || "development", process.cwd())
+
+// Medusa's HTTP logger writes request paths through Logger.http. Download
+// tokens are bearer credentials, so redact them before any HTTP log sink sees
+// the formatted message.
+const logger = createTokenRedactingLogger(defaultLogger)
 
 function resolveDatabaseCaCert(): string | undefined {
   if (process.env.DATABASE_CA_CERT?.trim()) {
@@ -45,6 +52,7 @@ if (useDatabaseSsl) {
 
 
 module.exports = defineConfig({
+  logger,
   projectConfig: {
     databaseUrl: databaseUrl?.toString(),
     ...(useDatabaseSsl
@@ -69,9 +77,21 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET,
       cookieSecret: process.env.COOKIE_SECRET,
-    }
+    },
   },
   modules: [
+    {
+      resolve: "@medusajs/medusa/locking",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/locking-postgres",
+            id: "locking-postgres",
+            is_default: true,
+          },
+        ],
+      },
+    },
     { resolve: "./src/modules/digital-delivery" },
     { resolve: "./src/modules/vendor" },
     { resolve: "./src/modules/audit-log" },
