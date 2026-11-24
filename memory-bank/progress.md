@@ -314,3 +314,22 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   1. Storefront production build completed with TypeScript checking enabled.
   2. Direct Jest unit execution passed 16 suites and 66 tests.
   3. The npm `test:unit` script remains Windows-incompatible because it embeds Unix `TEST_TYPE=unit` syntax; direct PowerShell environment variables were used successfully.
+
+### Storefront React 19 type resolution — 2026-11-24
+- **Status**: **Implemented**.
+- **Implemented**:
+  1. Aligned Storefront React and ReactDOM runtime dependencies and type packages to React 19.0.5.
+  2. Kept `moduleResolution: "bundler"` and added explicit Storefront React 19 type mappings.
+  3. Reinstalled the exact Medusa types and icons packages so their declaration entrypoints are available.
+- **Verification**:
+  1. `npx tsc --noEmit` completed with 0 errors.
+  2. `npm run build` completed successfully with TypeScript checking enabled.
+
+### Backend Medusa subpath resolution — 2026-11-24
+- **Status**: **Implemented**.
+- **Implemented**:
+  1. Kept the Medusa-compatible `module: "Node16"` and `moduleResolution: "Node16"` settings.
+  2. Restored exact Medusa framework and utils declarations at 2.22.7.
+- **Verification**:
+  1. `npx tsc --noEmit` passed with 0 errors.
+  2. Direct PowerShell unit Jest execution passed 19 suites and 78 tests.
