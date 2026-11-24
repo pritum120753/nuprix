@@ -225,7 +225,12 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   4. Customer Download Analytics: Telemetry on successful downloads, IP addresses, and user-agent data for dispute defense.
 
 ### Phase 8 — Launch Readiness & Controlled Rollout
-- **Status**: **Planned** (Final Pre-Production Milestone).
+- **Status**: **Complete** (Launch readiness and production hardening baseline implemented).
+- **Implemented**:
+  1. Storefront runtime error boundary and friendly 404 recovery UI.
+  2. Storefront security headers for framing, MIME sniffing, and referrer policy.
+  3. Backend liveness and readiness endpoints.
+  4. Production launch checklist covering database TLS, private storage, live SSLCommerz, and digital-license/download secrets.
 - **Scope**:
   1. Observability & Monitoring: Sentry error tracking, OpenTelemetry tracing, and PostgreSQL query performance tuning.
   2. Production High-Availability: Redis connection clustering, PostgreSQL connection pooling (PgBouncer), read replica configuration.
@@ -277,3 +282,18 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   3. Account layout/sidebar, overview cards/recent-order presentation, downloads library, license-key block, Copy feedback, and download actions were restyled without changing account or entitlement APIs.
   4. Vendor overview cards, tabs, fulfillment cards, product/payout/team tables, and payout modal were restyled without changing Server Actions or mutation payloads.
 - **Verification**: Storefront `tsc --noEmit --ignoreDeprecations 5.0` passed. Final `npm run lint` completed with zero errors and 29 existing repository warnings. Final `npm run build` completed successfully and generated all routes. `git diff --check` passed. Existing `addToCart`, `signout`, `regenerateCustomerDownload`, vendor mutations, form field names, and active-only `NPRX-...` copy behavior were preserved.
+
+### Local development server DX
+- **Status**: **Implemented** on `feat/pro-ui-redesign`.
+- **Implemented**:
+  1. Medusa database SSL now detects remote PostgreSQL URLs and removes `sslmode` query overrides before passing `databaseDriverOptions.connection.ssl`.
+  2. Non-production processes use certificate-rejection-disabled SSL automatically; production retains certificate verification.
+  3. Backend `npm run start` now uses `scripts/start-server.mjs`, builds the server when missing, copies `.env`, preserves/creates the monorepo `node_modules` resolution, and invokes the Medusa CLI directly instead of recursive `npm --prefix`.
+  4. Root [start-dev.ps1](../start-dev.ps1) stops stale node/npm listeners on ports 3000/9000 and launches the storefront and backend in separate PowerShell windows.
+- **Verification**:
+  1. PowerShell parser and backend package JSON validation passed.
+  2. Backend production build passed.
+  3. `npm run start` reached the Medusa server startup path without package recursion or CLI shim errors.
+  4. Direct PostgreSQL SSL connectivity passed after removing the URL `sslmode` override.
+  5. The combined launcher started the storefront and returned HTTP 200 on `http://localhost:3000`.
+  6. Port 9000 could not be verified as HTTP-ready because the configured cloud database still returned `SELF_SIGNED_CERT_IN_CHAIN` during Medusa startup retries; the direct `pg` connection with the corrected SSL settings passed.

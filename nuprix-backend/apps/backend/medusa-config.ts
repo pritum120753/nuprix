@@ -23,8 +23,22 @@ function resolveDatabaseCaCert(): string | undefined {
 }
 
 const databaseCaCert = resolveDatabaseCaCert()
-const useDatabaseSsl = Boolean(databaseCaCert) || process.env.DATABASE_SSL === 'true'
 const databaseUrl = process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL) : undefined
+const databaseSslMode = databaseUrl?.searchParams.get('sslmode')?.toLowerCase()
+const isProduction = process.env.NODE_ENV === 'production'
+if (!isProduction) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+}
+const isLocalDatabase =
+  !databaseUrl ||
+  ['localhost', '127.0.0.1', '::1'].includes(databaseUrl.hostname)
+const useDatabaseSsl =
+  Boolean(databaseCaCert) ||
+  process.env.DATABASE_SSL === 'true' ||
+  databaseSslMode === 'require' ||
+  databaseSslMode === 'verify-full' ||
+  databaseSslMode === 'verify-ca' ||
+  (!isLocalDatabase && process.env.DATABASE_SSL !== 'false')
 if (useDatabaseSsl) {
   databaseUrl?.searchParams.delete('sslmode')
 }
@@ -40,10 +54,10 @@ module.exports = defineConfig({
               ssl: databaseCaCert
                 ? {
                     ca: databaseCaCert,
-                    rejectUnauthorized: true,
+                      rejectUnauthorized: isProduction,
                   }
                 : {
-                    rejectUnauthorized: true,
+                    rejectUnauthorized: isProduction,
                   },
             },
           },

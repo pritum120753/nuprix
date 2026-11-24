@@ -1,3 +1,8 @@
+---
+name: pro-ui
+description: pro-ui
+disable-model-invocation: true
+---
 Redesign the target UI component/page to a modern, ultra-clean SaaS/Marketplace standard (inspired by Linear, Stripe, and LemonSqueezy).
 Rules:
 1. NEVER break or remove existing Server Actions, API calls, form validations, or TypeScript props.

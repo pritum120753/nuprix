@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "build": "medusa build",
-    "start": "npm --prefix .medusa/server run start",
+    "start": "node scripts/start-server.mjs",
     "dev": "medusa develop",
     "dev:api": "medusa develop --no-lint --no-types",
     "lint": "medusa lint",

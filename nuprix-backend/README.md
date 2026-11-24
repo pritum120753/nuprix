@@ -63,6 +63,17 @@ The fastest way to get started is deploying with [Medusa Cloud](https://cloud.me
 
 ### Local Installation
 
+After dependencies are installed, start both the Next.js storefront and
+Medusa backend from the repository root on Windows:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start-dev.ps1
+```
+
+This opens the storefront at `http://localhost:3000` and Medusa Admin at
+`http://localhost:9000/app`, clearing stale processes from ports 3000 and 9000
+before launching each server.
+
 > **Prerequisites:**
 >
 > - [Node.js](https://nodejs.org/) v22.22+
