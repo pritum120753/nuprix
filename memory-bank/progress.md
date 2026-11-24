@@ -297,3 +297,20 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   4. Direct PostgreSQL SSL connectivity passed after removing the URL `sslmode` override.
   5. The combined launcher started the storefront and returned HTTP 200 on `http://localhost:3000`.
   6. Port 9000 could not be verified as HTTP-ready because the configured cloud database still returned `SELF_SIGNED_CERT_IN_CHAIN` during Medusa startup retries; the direct `pg` connection with the corrected SSL settings passed.
+
+### Security and production hardening — 2026-11-24
+- **Status**: **Implemented** on `feat/pro-ui-redesign`.
+- **Implemented**:
+  1. Added `id="main-content"` to the storefront runtime error boundary.
+  2. Removed legacy `is_digital`, digital/download tag, and metadata fulfillment fallbacks; backend classification is now the only fulfillment source and unavailable classification defaults to physical.
+  3. Removed hard-coded fallback license text and generic download assumptions from product tabs.
+  4. Re-enabled Next.js Storefront TypeScript checking and removed the incompatible `ignoreDeprecations` setting.
+  5. Added broad `authenticate("user", ["session", "bearer"])` protection for `/admin/*` API routes.
+- **Database verification**:
+  1. `npx medusa db:migrate` completed successfully.
+  2. `Migration20261123154708` was applied.
+  3. `Migration20261123000005` and `Migration20261123000006` were already up to date.
+- **Verification**:
+  1. Storefront production build completed with TypeScript checking enabled.
+  2. Direct Jest unit execution passed 16 suites and 66 tests.
+  3. The npm `test:unit` script remains Windows-incompatible because it embeds Unix `TEST_TYPE=unit` syntax; direct PowerShell environment variables were used successfully.

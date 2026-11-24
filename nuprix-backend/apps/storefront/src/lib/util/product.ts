@@ -24,28 +24,6 @@ export const isSimpleProduct = (product: HttpTypes.StoreProduct): boolean => {
   return product.options?.length === 1 && product.options[0].values?.length === 1
 }
 
-function normalizeFulfillmentType(
-  value: unknown
-): ProductFulfillmentType | undefined {
-  if (typeof value !== "string") {
-    return undefined
-  }
-  const normalized = value.trim().toLowerCase()
-  if (
-    normalized === "digital" ||
-    normalized === "physical" ||
-    normalized === "mixed"
-  ) {
-    return normalized
-  }
-  return undefined
-}
-
-/**
- * Resolves a product's fulfillment type from the authoritative backend
- * classification first, then product metadata, then legacy tag/metadata
- * fallback for unmigrated catalog records.
- */
 export const getProductFulfillmentType = (
   product: HttpTypes.StoreProduct,
   classification?: ProductClassification | null
@@ -53,23 +31,7 @@ export const getProductFulfillmentType = (
   if (classification?.product_type) {
     return classification.product_type
   }
-
-  const authoritative = normalizeFulfillmentType(
-    product.metadata?.nuprix_product_type
-  )
-  if (authoritative) {
-    return authoritative
-  }
-
-  const hasLegacyDigitalSignal = Boolean(
-    product.metadata?.is_digital ||
-      product.tags?.some((t) => {
-        const val = t.value?.toLowerCase()
-        return val === "digital" || val === "download"
-      })
-  )
-
-  return hasLegacyDigitalSignal ? "digital" : "physical"
+  return "physical"
 }
 
 export type LineItemWithProduct = {
@@ -85,13 +47,7 @@ export const getLineItemFulfillmentType = (
   if (product) {
     return getProductFulfillmentType(product)
   }
-
-  const metaType = normalizeFulfillmentType(item.metadata?.nuprix_product_type)
-  if (metaType) {
-    return metaType
-  }
-
-  return item.metadata?.is_digital ? "digital" : "physical"
+  return "physical"
 }
 
 export const getCartDeliverySplit = (

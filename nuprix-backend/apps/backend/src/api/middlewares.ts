@@ -32,6 +32,10 @@ import {
 export default defineMiddlewares({
   routes: [
     {
+      matcher: '/admin/*',
+      middlewares: [authenticate('user', ['session', 'bearer'])],
+    },
+    {
       matcher: '/store/vendors/me*',
       middlewares: [authenticate('customer', ['session', 'bearer'])],
     },

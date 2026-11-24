@@ -15,7 +15,10 @@ export default function Error({
   }, [error])
 
   return (
-    <main className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center gap-5 px-6 text-center">
+    <main
+      id="main-content"
+      className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center gap-5 px-6 text-center"
+    >
       <div className="flex max-w-md flex-col gap-3">
         <p className="text-small-regular text-ui-fg-muted">Unexpected error</p>
         <h1 className="text-2xl-semi text-ui-fg-base">

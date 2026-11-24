@@ -78,8 +78,8 @@ const ProductInfoTab = ({
   classification?: ProductClassification | null
 }) => {
   const primaryFile = classification?.digital_files?.[0]
-  const licenseText =
-    primaryFile?.license_note || "Standard digital license (see terms)"
+  const licenseText = primaryFile?.license_note
+  const fileCount = classification?.digital_files?.length ?? 0
 
   if (productType === "digital" || productType === "mixed") {
     return (
@@ -95,16 +95,16 @@ const ProductInfoTab = ({
             <span>
               {primaryFile
                 ? `${primaryFile.file_name}${
-                    classification && classification.digital_files.length > 1
-                      ? ` (+${classification.digital_files.length - 1} more)`
+                    fileCount > 1
+                      ? ` (+${fileCount - 1} more)`
                       : ""
                   }`
-                : "Digital File Download"}
+                : "Not specified"}
             </span>
           </div>
           <div>
             <span className="font-semibold text-nuprix-forest block">License</span>
-            <span>{licenseText}</span>
+            <span>{licenseText || "Not specified"}</span>
           </div>
         </div>
       </div>
@@ -160,8 +160,8 @@ const DigitalDeliveryTab = ({
         primaryFile.expires_after_days
           ? ` within ${primaryFile.expires_after_days} days`
           : ""
-      } via short-lived signed links.`
-    : "Download tokens are securely rate-limited and provide multiple access attempts for your files."
+          }.`
+    : "Not specified."
 
   return (
     <div className="text-xs leading-5 text-nuprix-muted py-4 space-y-3">
