@@ -13,13 +13,13 @@ const PRODUCT_LIMIT = 12
 const StoreTemplate = ({ currencyCode }: { currencyCode: string }) => {
   return (
     <div className="py-8 content-container small:py-12" data-testid="category-container">
-      <div className="mb-8 overflow-hidden rounded-[24px] border border-nuprix-line bg-nuprix-paper px-6 py-8 small:px-9 small:py-10">
-        <p className="mb-3 section-kicker">
-          Find your next favorite
+      <div className="mb-6 overflow-hidden rounded-[20px] border border-nuprix-line bg-white px-5 py-7 small:px-8 small:py-8">
+        <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-indigo">
+          Nuprix marketplace
         </p>
         <h1
           data-testid="store-page-title"
-          className="font-display text-4xl font-medium tracking-[-0.04em] text-nuprix-forest small:text-5xl"
+          className="text-4xl font-bold tracking-[-0.045em] text-nuprix-ink small:text-5xl"
         >
           All products
         </h1>

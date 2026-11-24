@@ -25,17 +25,17 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
 
   return (
     <fieldset className="flex flex-col gap-y-3" disabled={disabled}>
-      <legend className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-nuprix-charcoal">
+      <legend className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-nuprix-muted">
         Select {title}
       </legend>
       <div
-        className="flex flex-wrap justify-between gap-2"
+        className="flex flex-wrap gap-2"
         data-testid={dataTestId}
       >
         {filteredOptions.map((v) => {
           const id = `${name}-${v}`.replace(/[^A-Za-z0-9_-]/g, "-")
           return (
-            <div key={v} className="flex-1">
+            <div key={v}>
               <input
                 type="radio"
                 id={id}
@@ -48,9 +48,9 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               <label
                 htmlFor={id}
                 className={clx(
-                  "flex min-h-11 items-center justify-center cursor-pointer rounded-full border border-nuprix-line bg-nuprix-paper px-4 text-sm font-semibold text-nuprix-charcoal peer-focus-visible:ring-2 peer-focus-visible:ring-nuprix-moss peer-focus-visible:ring-offset-2 peer-disabled:cursor-not-allowed",
+                  "flex min-h-11 items-center justify-center cursor-pointer rounded-lg border border-nuprix-line bg-white px-4 text-sm font-semibold text-nuprix-ink peer-focus-visible:ring-2 peer-focus-visible:ring-nuprix-indigo peer-focus-visible:ring-offset-2 peer-disabled:cursor-not-allowed",
                   {
-                    "border-nuprix-forest bg-nuprix-forest text-white": v === current,
+                    "border-nuprix-indigo bg-nuprix-indigo text-white": v === current,
                     "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
                       v !== current,
                   }

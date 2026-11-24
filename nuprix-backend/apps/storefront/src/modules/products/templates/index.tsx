@@ -27,28 +27,28 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
   const classification = await retrieveProductClassification(product.id)
 
   return (
-    <div className="bg-nuprix-ivory py-8 small:py-12">
+    <div className="bg-nuprix-ivory py-6 small:py-10">
       <div
         className="content-container grid grid-cols-1 small:grid-cols-12 gap-8 lg:gap-12 items-start"
         data-testid="product-container"
       >
         {/* Left Column: Visual Gallery (7 cols on desktop) */}
         <div className="small:col-span-7 w-full">
-          <div className="surface-card overflow-hidden p-3 small:p-5">
+          <div className="overflow-hidden rounded-[20px] border border-nuprix-line bg-white p-2 shadow-[0_8px_30px_rgba(15,23,42,.05)] small:p-4">
             <VariantImageGallery product={product} />
           </div>
         </div>
 
         {/* Right Column: Buy Box & Product Info & Tabs (5 cols on desktop, sticky) */}
         <div className="small:col-span-5 flex flex-col gap-y-6 small:sticky small:top-24">
-          <div className="surface-card p-6 small:p-8 flex flex-col gap-y-6">
+          <div className="rounded-[20px] border border-nuprix-line bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,.05)] small:p-7 flex flex-col gap-y-5">
             <ProductInfo product={product} classification={classification} />
             <div className="border-t border-nuprix-line pt-6">
               <ProductActions product={product} region={region} />
             </div>
           </div>
 
-          <div className="surface-card p-6">
+          <div className="rounded-[20px] border border-nuprix-line bg-white p-5 small:p-6">
             <ProductTabs product={product} classification={classification} />
           </div>
         </div>

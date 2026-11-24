@@ -33,11 +33,11 @@ export default async function DownloadsPage() {
 
   return (
     <section className="w-full" data-testid="customer-downloads-page">
-      <div className="mb-8 border-b border-nuprix-line pb-6">
-        <p className="mb-3 section-kicker">
-          Your digital library
+      <div className="mb-6 rounded-[16px] border border-nuprix-line bg-nuprix-mist/50 px-5 py-5">
+        <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-violet">
+          License key vault
         </p>
-        <h1 className="font-display text-3xl font-medium tracking-[-0.04em] text-nuprix-forest small:text-4xl">
+        <h1 className="text-3xl font-bold tracking-[-0.04em] text-nuprix-ink small:text-4xl">
           My Downloads
         </h1>
         <p className="mt-2 text-sm leading-6 text-nuprix-muted">
@@ -47,8 +47,8 @@ export default async function DownloadsPage() {
       </div>
 
       {downloads.length === 0 ? (
-        <div className="rounded-[24px] border border-dashed border-nuprix-line-strong bg-nuprix-paper px-6 py-12 text-center">
-          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-nuprix-sage text-nuprix-pine">
+        <div className="rounded-[16px] border border-dashed border-nuprix-line-strong bg-nuprix-mist/30 px-6 py-12 text-center">
+          <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-violet-100 text-nuprix-violet">
             <PackageOpen className="h-5 w-5" aria-hidden="true" />
           </div>
           <h2 className="text-lg font-semibold text-[#24372a]">
@@ -59,7 +59,7 @@ export default async function DownloadsPage() {
           </p>
           <LocalizedClientLink
             href="/store"
-            className="mt-5 inline-flex rounded-full bg-[#172b20] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#355b40]"
+            className="mt-5 inline-flex rounded-lg bg-nuprix-indigo px-5 py-3 text-sm font-semibold text-white transition hover:bg-nuprix-indigo-hover"
           >
             Explore digital products
           </LocalizedClientLink>
@@ -69,11 +69,11 @@ export default async function DownloadsPage() {
           {downloads.map((download) => (
             <li
               key={download.id}
-              className="flex flex-col gap-5 rounded-[22px] border border-nuprix-line bg-white p-5 shadow-[0_8px_30px_rgba(22,53,40,0.05)] small:flex-row small:items-center small:justify-between"
+              className="flex flex-col gap-5 rounded-[16px] border border-nuprix-line bg-white p-4 shadow-[0_6px_20px_rgba(15,23,42,.03)] small:flex-row small:items-center small:justify-between"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-nuprix-mist text-nuprix-pine">
+                  <div className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-violet-100 text-nuprix-violet">
                     <Download className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div className="min-w-0">
@@ -93,12 +93,12 @@ export default async function DownloadsPage() {
                   Order: {download.order_id}
                 </p>
                 {download.license_key && (
-                  <div className="mt-4 rounded-[14px] border border-nuprix-line-strong bg-nuprix-paper p-3">
-                    <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-nuprix-pine">
+                  <div className="mt-4 rounded-[12px] border border-violet-200 bg-violet-50 p-3">
+                    <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-violet-700">
                       <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
                       License key
                     </p>
-                    <code className="mt-1 block break-all rounded-lg bg-[#f7f9f5] px-3 py-2 text-xs text-[#24372a]">
+                    <code className="mt-1 block break-all rounded-lg border border-violet-100 bg-white px-3 py-2 font-mono text-xs font-bold tracking-[0.06em] text-violet-900">
                       {download.license_key}
                     </code>
                   </div>

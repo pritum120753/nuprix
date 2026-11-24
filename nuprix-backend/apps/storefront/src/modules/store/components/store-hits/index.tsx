@@ -73,7 +73,7 @@ const StoreHits = ({ hitsPerPage, currencyCode }: StoreHitsProps) => {
         </Text>
       ) : (
         <ul
-          className="grid w-full grid-cols-2 gap-x-4 gap-y-8 small:grid-cols-3 small:gap-x-6 medium:grid-cols-4"
+          className="grid w-full grid-cols-2 gap-x-3 gap-y-5 small:grid-cols-3 small:gap-x-5 small:gap-y-8 medium:grid-cols-4"
           data-testid="products-list"
         >
           {items.map((hit) =>
@@ -84,7 +84,7 @@ const StoreHits = ({ hitsPerPage, currencyCode }: StoreHitsProps) => {
                   className="group"
                 >
                   <article
-                    className="rounded-[20px] border border-nuprix-line bg-white p-3 shadow-[0_1px_2px_rgba(22,53,40,0.02)] transition duration-300 group-hover:-translate-y-1 group-hover:border-nuprix-line-strong group-hover:shadow-lift"
+                    className="rounded-[16px] border border-nuprix-line bg-white p-2 shadow-[0_1px_2px_rgba(15,23,42,.03)] transition duration-300 group-hover:-translate-y-1 group-hover:border-nuprix-indigo/30 group-hover:shadow-[0_18px_40px_rgba(15,23,42,.10)]"
                     data-testid="product-wrapper"
                   >
                     <Thumbnail thumbnail={hit.thumbnail} size="full" />

@@ -45,7 +45,7 @@ const DownloadItemActions = ({
             type="button"
             onClick={() => void handleCopyLicenseKey()}
             aria-label={`Copy license key for ${title}`}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-nuprix-line-strong bg-white px-4 py-2 text-xs font-semibold text-nuprix-forest transition hover:-translate-y-0.5 hover:border-nuprix-moss hover:bg-nuprix-paper"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-xs font-bold text-violet-700 transition hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-100"
           >
             {copied ? (
               <Check className="h-4 w-4" aria-hidden="true" />

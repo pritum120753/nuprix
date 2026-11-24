@@ -345,3 +345,17 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   2. Storefront lint passed with 0 errors and existing warnings.
   3. Storefront production build passed.
   4. Playwright desktop and mobile screenshots confirmed responsive hero, header, category, footer, and search-drawer layouts.
+
+### Agency marketplace inner-page redesign — 2026-11-24
+- **Status**: **Implemented**.
+- **Implemented**:
+  1. Restyled product detail media, buy-box, variants, fulfillment states, and mobile purchase controls.
+  2. Restyled the catalog header, filter sidebar, search field, product grid, and card spacing.
+  3. Restyled the account shell, license-key vault cards, copy controls, and link-regeneration controls.
+  4. Restyled vendor dashboard tabs, KPI cards, submission, payout, fulfillment, team, and empty-state surfaces.
+- **Verification**:
+  1. `npx tsc --noEmit` passed with 0 errors.
+  2. `npm run lint` passed with 0 errors and existing warnings.
+  3. `npm run build` passed.
+  4. Playwright desktop/mobile checks passed for catalog and product detail layouts.
+  5. Authenticated downloads and vendor dashboard routes require a customer session and could not be visually opened in Playwright.

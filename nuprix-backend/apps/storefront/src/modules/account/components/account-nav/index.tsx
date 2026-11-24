@@ -136,8 +136,8 @@ const AccountNav = ({
       <div className="hidden small:block" data-testid="account-nav">
         <div>
           <div className="pb-5">
-            <p className="section-kicker">Customer library</p>
-            <h3 className="mt-2 font-display text-xl text-nuprix-forest">My account</h3>
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-indigo">Customer studio</p>
+            <h3 className="mt-2 text-xl font-bold text-nuprix-ink">My account</h3>
           </div>
           <div className="text-base-regular">
             <ul className="flex mb-0 justify-start items-start flex-col gap-y-1.5">

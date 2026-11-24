@@ -20,28 +20,28 @@ const ProductInfo = ({ product, classification }: ProductInfoProps) => {
         {product.collection ? (
           <LocalizedClientLink
             href={`/collections/${product.collection.handle}`}
-            className="text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-leaf hover:text-nuprix-forest transition-colors"
+            className="text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-indigo hover:text-nuprix-indigo-hover transition-colors"
           >
             {product.collection.title}
           </LocalizedClientLink>
         ) : (
-          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-leaf">
+          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-muted">
             Catalog
           </span>
         )}
 
         {productType === "digital" ? (
-          <Badge color="blue">Instant Digital Download</Badge>
+          <Badge color="blue">Instant Digital + License Key</Badge>
         ) : productType === "mixed" ? (
           <Badge color="blue">Digital + Physical</Badge>
         ) : (
-          <Badge color="green">Physical Product</Badge>
+          <Badge color="green">Verified Dropship / Physical</Badge>
         )}
       </div>
 
       <Heading
         level="h1"
-        className="text-3xl small:text-[42px] font-display font-medium leading-[1.04] text-nuprix-forest tracking-[-0.04em]"
+        className="text-3xl small:text-[42px] font-sans font-bold leading-[1.04] text-nuprix-ink tracking-[-0.04em]"
         data-testid="product-title"
       >
         {product.title}

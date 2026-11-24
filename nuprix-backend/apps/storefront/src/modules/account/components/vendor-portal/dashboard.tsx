@@ -212,8 +212,8 @@ export default function VendorDashboard({
     <div className="space-y-6" data-testid="vendor-dashboard">
       <div className="flex flex-col gap-4 border-b border-nuprix-line pb-5 small:flex-row small:items-end small:justify-between">
         <div>
-          <p className="eyebrow">Seller Dashboard</p>
-          <h1 className="heading-display mt-2 text-3xl">{vendor.name}</h1>
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-indigo">Seller studio</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-nuprix-ink">{vendor.name}</h1>
           <p className="mt-1 text-xs text-nuprix-muted">
             @{vendor.handle} · {profile.role === "owner" ? "Store owner" : "Store staff"}
           </p>
@@ -250,7 +250,7 @@ export default function VendorDashboard({
 
       {isVerified && (
         <>
-          <nav className="no-scrollbar flex overflow-x-auto rounded-[16px] border border-nuprix-line bg-nuprix-paper p-1.5" aria-label="Vendor dashboard sections">
+          <nav className="no-scrollbar flex overflow-x-auto rounded-[14px] border border-nuprix-line bg-white p-1.5" aria-label="Vendor dashboard sections">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -258,8 +258,8 @@ export default function VendorDashboard({
                 onClick={() => setActiveTab(tab.id)}
                 className={`min-h-[44px] whitespace-nowrap rounded-[11px] px-4 text-sm font-semibold transition-colors ${
                   activeTab === tab.id
-                    ? "bg-nuprix-forest text-white shadow-sm"
-                    : "text-nuprix-muted hover:bg-white hover:text-nuprix-pine"
+                    ? "bg-nuprix-indigo text-white shadow-sm"
+                    : "text-nuprix-muted hover:bg-nuprix-mist hover:text-nuprix-ink"
                 }`}
                 aria-current={activeTab === tab.id ? "page" : undefined}
               >
@@ -734,7 +734,7 @@ export default function VendorDashboard({
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={htmlFor} className="block text-xs font-semibold text-nuprix-charcoal">{label}</label>
+      <label htmlFor={htmlFor} className="block text-xs font-semibold text-nuprix-muted">{label}</label>
       {children}
     </div>
   )
@@ -742,10 +742,10 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor: string; c
 
 function SummaryCard({ label, value, tone }: { label: string; value: string; tone?: "forest" }) {
   return (
-    <div className={`rounded-[18px] border p-5 shadow-[0_8px_28px_rgba(22,53,40,0.04)] ${
+    <div className={`rounded-[16px] border p-5 shadow-[0_8px_28px_rgba(15,23,42,.04)] ${
       tone === "forest"
-        ? "border-nuprix-forest bg-nuprix-forest text-white"
-        : "border-nuprix-line bg-nuprix-paper"
+        ? "border-nuprix-ink bg-nuprix-ink text-white"
+        : "border-nuprix-line bg-white"
     }`}>
       <p className={`text-xs font-semibold uppercase tracking-[0.08em] ${tone === "forest" ? "text-[#cad9cd]" : "text-nuprix-muted"}`}>{label}</p>
       <p className={`mt-2 text-xl font-semibold ${tone === "forest" ? "text-white" : "text-nuprix-ink"}`}>{value}</p>
@@ -755,10 +755,10 @@ function SummaryCard({ label, value, tone }: { label: string; value: string; ton
 
 function SectionCard({ title, description, action, children }: { title: string; description: string; action: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-[18px] border border-nuprix-line bg-nuprix-paper p-5 shadow-[0_8px_28px_rgba(22,53,40,0.04)]">
+    <section className="rounded-[16px] border border-nuprix-line bg-white p-5 shadow-[0_8px_28px_rgba(15,23,42,.04)]">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-display text-lg text-nuprix-forest">{title}</h2>
+          <h2 className="text-lg font-bold text-nuprix-ink">{title}</h2>
           <p className="mt-1 text-xs text-nuprix-muted">{description}</p>
         </div>
         {action}
@@ -770,8 +770,8 @@ function SectionCard({ title, description, action, children }: { title: string; 
 
 function EmptyState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="rounded-[18px] border border-dashed border-nuprix-line-strong bg-nuprix-paper px-6 py-12 text-center">
-      <p className="font-display text-lg text-nuprix-forest">{title}</p>
+    <div className="rounded-[16px] border border-dashed border-nuprix-line-strong bg-nuprix-mist/40 px-6 py-12 text-center">
+      <p className="text-lg font-bold text-nuprix-ink">{title}</p>
       <p className="mt-1 text-sm text-nuprix-muted">{description}</p>
     </div>
   )

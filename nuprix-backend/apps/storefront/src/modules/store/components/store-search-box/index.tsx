@@ -40,8 +40,8 @@ const StoreSearchBox = () => {
   }
 
   return (
-    <div className="glass-panel mb-6 flex min-h-[52px] items-center gap-x-3 rounded-full px-4">
-      <MagnifyingGlass className="shrink-0 text-nuprix-leaf" />
+    <div className="mb-5 flex min-h-[52px] items-center gap-x-3 rounded-xl border border-nuprix-line bg-white px-4 shadow-[0_4px_16px_rgba(15,23,42,.03)]">
+      <MagnifyingGlass className="shrink-0 text-nuprix-indigo" />
       <input
         type="search"
         value={inputValue}
