@@ -1,11 +1,8 @@
 "use client"
 
-import {
-  regenerateCustomerDownload,
-  type CustomerDownload,
-} from "@lib/data/downloads"
+import { type CustomerDownload } from "@lib/data/downloads"
 import { useState } from "react"
-import { Check, Copy, Download, RotateCcw } from "lucide-react"
+import { Check, Copy } from "lucide-react"
 
 type DownloadItemActionsProps = {
   downloadId: string
@@ -15,34 +12,15 @@ type DownloadItemActionsProps = {
 }
 
 const DownloadItemActions = ({
-  downloadId,
   status,
   title,
   licenseKey,
 }: DownloadItemActionsProps) => {
-  const [pending, setPending] = useState(false)
-  const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [copyError, setCopyError] = useState<string | null>(null)
 
   if (status !== "available" && !licenseKey) {
     return null
-  }
-
-  const handleRegenerate = async () => {
-    setPending(true)
-    setError(null)
-    const result = await regenerateCustomerDownload(downloadId)
-    setPending(false)
-
-    if (result.error) {
-      setError(result.error)
-      return
-    }
-    if (result.download_url) {
-      setDownloadUrl(result.download_url)
-    }
   }
 
   const handleCopyLicenseKey = async () => {
@@ -82,47 +60,6 @@ const DownloadItemActions = ({
             </p>
           )}
         </div>
-      )}
-      {status === "available" && (
-        <>
-          {downloadUrl ? (
-            <div className="flex flex-col gap-1.5 small:items-end">
-              <a
-                href={downloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="primary-action min-h-[44px] px-5 py-2 text-xs"
-                data-testid={`download-now-link-${downloadId}`}
-              >
-                <Download className="h-4 w-4" aria-hidden="true" />
-                Download {title}
-              </a>
-              <p className="text-xs text-nuprix-muted">
-                New link generated. Any previous link for this file is now invalid.
-              </p>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => void handleRegenerate()}
-              disabled={pending}
-              aria-label={`Request new download link for ${title}`}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-nuprix-line-strong bg-white px-4 py-2 text-xs font-semibold text-nuprix-forest transition hover:border-nuprix-moss disabled:opacity-50"
-              data-testid={`regenerate-download-button-${downloadId}`}
-            >
-              <RotateCcw
-                className={`h-4 w-4 ${pending ? "animate-spin" : ""}`}
-                aria-hidden="true"
-              />
-              {pending ? "Generating link..." : "Request new link"}
-            </button>
-          )}
-          {error && (
-            <p className="text-xs text-nuprix-danger" role="alert">
-              {error}
-            </p>
-          )}
-        </>
       )}
     </div>
   )
