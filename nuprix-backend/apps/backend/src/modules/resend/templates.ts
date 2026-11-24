@@ -64,7 +64,7 @@ function digitalDownload(data: DigitalDownloadData): RenderedEmail {
 
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111">
 <h2>Your Nuprix downloads${escapeHtml(orderLabel)}</h2>
-<p>Thank you for your purchase. Your files are ready once your payment is confirmed.</p>
+<p>Thank you for your purchase. Digital access details will be available when the order is eligible.</p>
 <table style="width:100%;border-collapse:collapse">${rows}</table>
 <p style="color:#666;font-size:12px;margin-top:24px">These links are personal. Please do not share them.</p>
 </div>`

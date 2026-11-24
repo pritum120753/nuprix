@@ -55,10 +55,6 @@ jobs:
         run: npm run test:integration:http
 
   storefront:
-    # The Medusa starter storefront already has lint errors that predate this
-    # workflow. Report them without blocking merges; remove continue-on-error
-    # once they are fixed.
-    continue-on-error: true
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -28,7 +28,7 @@ export default async function Footer() {
               <span className="font-display tracking-[-0.04em] text-[27px] lowercase">nuprix</span>
             </LocalizedClientLink>
             <p className="mt-5 max-w-sm text-sm leading-7 text-[#cbd8cd]">
-              Thoughtfully curated everyday essentials and instant digital downloads in a single unified catalog.
+              Thoughtfully curated everyday essentials across a unified catalog.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-[#dfe8df]">

@@ -170,7 +170,7 @@ const DigitalDeliveryTab = ({
         <div>
           <span className="font-semibold text-nuprix-forest block">Instant Electronic Access</span>
           <p>
-            Immediately following completed payment capture, a unique verified download link is generated and sent to your email and accessible in your Account Downloads dashboard.
+            Available digital access details are shown here when the product classification and files are available.
           </p>
         </div>
       </div>
