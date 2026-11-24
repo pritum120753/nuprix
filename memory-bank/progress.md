@@ -333,3 +333,15 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
 - **Verification**:
   1. `npx tsc --noEmit` passed with 0 errors.
   2. Direct PowerShell unit Jest execution passed 19 suites and 78 tests.
+
+### Agency marketplace storefront redesign — 2026-11-24
+- **Status**: **Implemented**.
+- **Implemented**:
+  1. Replaced botanical and serif storefront tokens with the crisp Slate, Indigo, Emerald, and Violet marketplace palette.
+  2. Redesigned the sticky command header, bento marketplace hero, category discovery strip, footer, and product preview cards.
+  3. Preserved existing search, cart, region, customer, and checkout data contracts.
+- **Verification**:
+  1. Storefront `npx tsc --noEmit` passed with 0 errors.
+  2. Storefront lint passed with 0 errors and existing warnings.
+  3. Storefront production build passed.
+  4. Playwright desktop and mobile screenshots confirmed responsive hero, header, category, footer, and search-drawer layouts.

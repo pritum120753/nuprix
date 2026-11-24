@@ -25,14 +25,14 @@ export async function generateMetadata(props: {
 
   return {
     title: {
-      default: "Nuprix — Discover more, shop in one place",
+      default: "Nuprix — Digital assets and verified physical products",
       template: "%s | Nuprix",
     },
     description:
-      "Discover useful digital products and carefully selected physical products across technology, lifestyle, home, fashion, and more.",
+      "Discover instant digital assets and verified physical products in one marketplace.",
     applicationName: STORE_NAME,
     openGraph: {
-      title: "Nuprix — Discover more, shop in one place",
+      title: "Nuprix — Digital assets and verified physical products",
       description:
         "Discover useful digital products and carefully selected physical products across technology, lifestyle, home, fashion, and more.",
       url: `${origin}/${countryCode}`,
@@ -70,17 +70,17 @@ export default async function Home(props: {
 
     return (
       <section className="content-container py-20 text-center" role="status">
-        <h1 className="text-2xl font-semibold tracking-tight text-[#172b20]">
+        <h1 className="text-2xl font-semibold tracking-tight text-nuprix-ink">
           Nuprix is unavailable for this location
         </h1>
-        <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[#66736a]">
+        <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-nuprix-muted">
           We couldn&apos;t load the store region for this page. Please try again
           later.
         </p>
         {fallbackCountryCode && (
           <a
             href={`/${fallbackCountryCode}`}
-            className="mt-6 inline-flex min-h-11 items-center rounded-md bg-[#172b20] px-5 text-sm font-semibold text-white transition hover:bg-[#294b35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#548365]"
+            className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-nuprix-indigo px-5 text-sm font-semibold text-white transition hover:bg-nuprix-indigo-hover"
           >
             Browse the available Nuprix store
           </a>
@@ -147,7 +147,7 @@ export default async function Home(props: {
           </p>
           <LocalizedClientLink
             href="/store"
-            className="mt-6 inline-flex min-h-11 items-center rounded-md bg-[#172b20] px-5 text-sm font-semibold text-white transition hover:bg-[#294b35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#548365]"
+            className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-nuprix-indigo px-5 text-sm font-semibold text-white transition hover:bg-nuprix-indigo-hover"
           >
             Browse all products
           </LocalizedClientLink>

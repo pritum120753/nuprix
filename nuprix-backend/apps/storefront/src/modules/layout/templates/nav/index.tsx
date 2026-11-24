@@ -17,49 +17,61 @@ export default async function Nav() {
   ])
 
   return (
-    <div className="sticky top-0 inset-x-0 z-50 group">
-      <header className="relative h-[72px] mx-auto border-b border-nuprix-line/80 bg-nuprix-paper/85 shadow-[0_8px_30px_rgba(22,53,40,0.04)] backdrop-blur-xl transition-colors duration-200">
-        <nav className="content-container flex items-center justify-between w-full h-full text-small-regular text-nuprix-subtle">
-          <div className="flex-1 basis-0 h-full flex items-center">
+    <div className="sticky top-0 inset-x-0 z-50">
+      <header className="h-[72px] border-b border-nuprix-line/90 bg-white/85 backdrop-blur-md">
+        <nav className="content-container grid h-full grid-cols-[auto_1fr_auto] items-center gap-3 text-sm text-nuprix-muted small:grid-cols-[1fr_minmax(320px,560px)_1fr] small:gap-6">
+          <div className="flex h-full items-center">
             <div className="h-full">
               <SideMenu regions={regions} locales={locales} currentLocale={currentLocale} />
             </div>
-            <div className="hidden medium:flex items-center gap-x-6 ml-6">
+            <LocalizedClientLink
+              href="/"
+              className="hidden small:flex items-center gap-2 mr-5"
+              data-testid="nav-store-link"
+            >
+              <span className="grid h-9 w-9 place-items-center rounded-[10px] bg-nuprix-indigo text-sm font-bold text-white">N</span>
+              <span className="text-[21px] font-bold tracking-[-0.04em] text-nuprix-ink">nuprix</span>
+            </LocalizedClientLink>
+            <div className="hidden medium:flex items-center gap-x-4">
               <LocalizedClientLink
                 href="/store"
-                className="text-sm font-medium text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                className="text-sm font-medium text-nuprix-muted hover:text-nuprix-ink transition-colors"
               >
-                Catalog
+                Explore
               </LocalizedClientLink>
               <LocalizedClientLink
-                href="/search"
-                className="text-sm font-medium text-nuprix-muted hover:text-nuprix-forest transition-colors"
+                href="/store?digital=true"
+                className="text-sm font-medium text-nuprix-muted hover:text-nuprix-ink transition-colors"
               >
-                Search
+                Digital Assets
+              </LocalizedClientLink>
+              <LocalizedClientLink href="/store?physical=true" className="text-sm font-medium text-nuprix-muted hover:text-nuprix-ink transition-colors">
+                Physical Goods
+              </LocalizedClientLink>
+              <LocalizedClientLink href="/account/vendor" className="text-sm font-medium text-nuprix-muted hover:text-nuprix-ink transition-colors">
+                Sell on Nuprix
               </LocalizedClientLink>
             </div>
           </div>
 
-          <div className="flex items-center h-full">
-            <LocalizedClientLink
-              href="/"
-              className="group flex items-center gap-2.5 text-xl font-bold tracking-tight text-nuprix-forest"
-              data-testid="nav-store-link"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-nuprix-forest text-sm font-bold text-nuprix-ivory shadow-[0_8px_18px_rgba(22,53,40,0.18)] transition-transform duration-200 group-hover:-rotate-3">
-                N
-              </span>
-              <span className="font-display tracking-[-0.04em] text-[27px] lowercase">nuprix</span>
-            </LocalizedClientLink>
+          <div className="min-w-0">
+            <Search
+              trigger={
+                <span className="flex w-full items-center gap-2.5">
+                  <span className="text-nuprix-muted">Search</span>
+                  <span className="hidden truncate text-nuprix-subtle small:inline">
+                    software, templates, license keys, and gear
+                  </span>
+                </span>
+              }
+              triggerClassName="flex h-11 w-full items-center rounded-xl border border-nuprix-line bg-nuprix-mist/60 px-3.5 text-sm text-nuprix-muted outline-none transition hover:border-nuprix-line-strong hover:bg-white focus-visible:ring-2 focus-visible:ring-nuprix-indigo/20"
+            />
           </div>
 
-          <div className="flex items-center gap-x-2 xsmall:gap-x-3 h-full flex-1 basis-0 justify-end">
-            <span className="hidden small:flex h-11 w-11 items-center justify-center rounded-full border border-nuprix-line bg-white text-nuprix-muted transition hover:border-nuprix-moss hover:text-nuprix-forest">
-              <Search />
-            </span>
+          <div className="flex items-center justify-end gap-1.5 h-full">
             <div className="hidden small:flex items-center h-full">
               <LocalizedClientLink
-                className="flex h-11 items-center gap-2 rounded-full px-3 text-sm font-semibold text-nuprix-muted transition hover:bg-nuprix-mist hover:text-nuprix-forest"
+                className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-nuprix-muted transition hover:bg-nuprix-mist hover:text-nuprix-ink"
                 href="/account"
                 data-testid="nav-account-link"
               >

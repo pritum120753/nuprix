@@ -2,142 +2,140 @@ import { Heading } from "@modules/common/components/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import {
   ArrowRight,
+  BadgeCheck,
+  BookOpen,
+  Code2,
   Download,
-  Package,
+  Gamepad2,
+  Layers3,
   ShieldCheck,
+  ShoppingBag,
   Sparkles,
+  Truck,
+  Zap,
 } from "lucide-react"
 
-const benefits = [
-  {
-    title: "Browse your way",
-    description: "Find useful products across technology, home, fashion, and more.",
-  },
-  {
-    title: "Physical and digital",
-    description: "Shop shippable products and digital downloads in one catalog.",
-  },
-  {
-    title: "Choose with confidence",
-    description: "Review product information and available options before you buy.",
-  },
-]
-
 const categories = [
-  { name: "Electronics", detail: "Gadgets and tech", tone: "bg-[#dce9dc] text-[#203b29]" },
-  { name: "Home & Living", detail: "Everyday essentials", tone: "bg-[#e9e3fa] text-[#39304f]" },
-  { name: "Fashion", detail: "Style and accessories", tone: "bg-[#f5e5d7] text-[#68452e]" },
-  { name: "Digital Goods", detail: "Files and resources", tone: "bg-[#dce8f4] text-[#29445f]" },
-]
+  { name: "SaaS & Scripts", detail: "Apps and automation", icon: Code2, href: "/store" },
+  { name: "UI Kits & Design", detail: "Templates and assets", icon: Layers3, href: "/store" },
+  { name: "E-Books & Courses", detail: "Learn and build", icon: BookOpen, href: "/store" },
+  { name: "Tech & Gadgets", detail: "Verified gear", icon: Gamepad2, href: "/store" },
+  { name: "Lifestyle & Gear", detail: "Everyday essentials", icon: ShoppingBag, href: "/store" },
+] as const
+
+const trustItems = [
+  { label: "Instant key delivery", icon: Zap },
+  { label: "Buyer protection", icon: ShieldCheck },
+  { label: "Verified vendors", icon: BadgeCheck },
+] as const
 
 const Hero = () => {
   return (
-    <div className="bg-nuprix-ivory text-nuprix-ink">
-      <section className="relative isolate overflow-hidden" aria-labelledby="home-hero-title">
-        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-          <div className="absolute -right-40 -top-48 h-[34rem] w-[34rem] rounded-full bg-nuprix-sage/80 blur-3xl" />
-          <div className="absolute -bottom-64 left-[22%] h-[34rem] w-[34rem] rounded-full bg-nuprix-lilac/70 blur-3xl" />
-          <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(#53645a_0.7px,transparent_0.7px)] [background-size:24px_24px]" />
-        </div>
-
-        <div className="content-container grid items-center gap-10 py-12 small:min-h-[610px] small:grid-cols-[1.08fr_.92fr] small:py-16">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-nuprix-line-strong bg-white/80 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-pine shadow-sm backdrop-blur">
-              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              Curated for everyday living
-            </span>
-
-            <Heading id="home-hero-title" level="h1" className="mt-7 max-w-3xl text-[46px] font-medium leading-[0.98] tracking-[-0.065em] text-nuprix-ink xsmall:text-[56px] small:text-[68px] medium:text-[76px]">
-              Find it here.
-              <span className="block text-nuprix-moss">Love it for longer.</span>
-            </Heading>
-
-            <p className="mt-7 max-w-xl text-base leading-8 text-nuprix-muted small:text-lg">
-              A considered marketplace for useful physical goods and instant digital
-              downloads, brought together in one beautifully simple place.
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <LocalizedClientLink
-                href="/store"
-                className="primary-action"
+    <section className="border-b border-nuprix-line bg-nuprix-ivory" aria-labelledby="home-hero-title">
+      <div className="content-container py-8 small:py-12">
+        <div className="grid gap-4 small:grid-cols-[minmax(0,1.28fr)_minmax(360px,.72fr)]">
+          <div className="relative overflow-hidden rounded-[24px] border border-nuprix-line bg-white px-6 py-8 shadow-[0_14px_40px_rgba(15,23,42,.06)] small:px-10 small:py-12">
+            <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-nuprix-indigo/5 blur-3xl" aria-hidden="true" />
+            <div className="relative max-w-3xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-nuprix-line bg-nuprix-mist px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-muted">
+                <Sparkles className="h-3.5 w-3.5 text-nuprix-indigo" aria-hidden="true" />
+                Hybrid marketplace
+              </span>
+              <Heading
+                id="home-hero-title"
+                level="h1"
+                className="mt-6 max-w-3xl text-[40px] font-bold leading-[1.02] tracking-[-0.055em] text-nuprix-ink xsmall:text-[48px] small:text-[58px]"
               >
-                Browse all products
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </LocalizedClientLink>
-              <LocalizedClientLink
-                href="/search"
-                className="secondary-action"
-              >
-                Search Nuprix
-              </LocalizedClientLink>
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-semibold text-nuprix-muted">
-              <span className="inline-flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-nuprix-moss" aria-hidden="true" />
-                Secure shopping
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Package className="h-4 w-4 text-nuprix-moss" aria-hidden="true" />
-                Physical delivery
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Download className="h-4 w-4 text-nuprix-moss" aria-hidden="true" />
-                Instant digital access
-              </span>
-            </div>
-          </div>
-
-          <div className="relative mx-auto w-full max-w-[500px]">
-            <div className="absolute -inset-4 rotate-3 rounded-[32px] border border-nuprix-line-strong bg-nuprix-sage/80" />
-            <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-nuprix-forest p-6 text-white shadow-[0_28px_80px_rgba(22,53,40,0.22)] small:p-8">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#bdd2c2]">The Nuprix edit</span>
-                <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[#dfe8df]">New finds</span>
+                Instant digital assets.
+                <span className="block text-nuprix-indigo">Curated physical gear.</span>
+              </Heading>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-nuprix-muted small:text-lg">
+                The all-in-one marketplace for software, templates, licenses, and verified
+                dropship products from independent vendors.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <LocalizedClientLink
+                  href="/store"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-nuprix-indigo px-5 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,.20)] transition hover:-translate-y-0.5 hover:bg-nuprix-indigo-hover"
+                >
+                  Explore Marketplace
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </LocalizedClientLink>
+                <LocalizedClientLink
+                  href="/account/vendor"
+                  className="inline-flex min-h-12 items-center justify-center rounded-lg border border-nuprix-line-strong bg-white px-5 text-sm font-semibold text-nuprix-ink transition hover:-translate-y-0.5 hover:border-nuprix-indigo/40"
+                >
+                  Start Selling
+                </LocalizedClientLink>
               </div>
-              <div className="mt-9">
-                <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#aac3af]">Curated across categories</div>
-                <div className="mt-3 font-display text-4xl leading-[1.02] tracking-[-0.045em] small:text-5xl">
-                  Useful things,
-                  <span className="block text-[#bfe0c5]">beautifully found.</span>
-                </div>
-                <p className="mt-5 max-w-sm text-sm leading-6 text-[#d0ddd1]">
-                  Explore products for work, home, style, and instant access.
-                </p>
-              </div>
-              <ul className="mt-9 grid grid-cols-2 gap-3" aria-label="Examples of what you can discover">
-                {categories.map((category) => (
-                  <li key={category.name} className={`rounded-2xl p-4 ${category.tone}`}>
-                    <div className="text-sm font-semibold">{category.name}</div>
-                    <div className="mt-2 text-xs opacity-75">{category.detail}</div>
-                  </li>
+              <div className="mt-7 flex flex-wrap gap-2">
+                {trustItems.map(({ icon: Icon, label }) => (
+                  <span key={label} className="inline-flex items-center gap-1.5 rounded-full border border-nuprix-line bg-nuprix-ivory px-3 py-1.5 text-xs font-semibold text-nuprix-muted">
+                    <Icon className="h-3.5 w-3.5 text-nuprix-indigo" aria-hidden="true" />
+                    {String(label)}
+                  </span>
                 ))}
-              </ul>
-              <div className="mt-5 flex items-center justify-between border-t border-white/15 pt-4 text-xs text-[#c4d6c7]">
-                <span>Physical + digital</span><span aria-hidden="true">✳</span><span>Nuprix</span>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      <section className="border-y border-nuprix-line bg-white/75">
-        <div className="content-container grid gap-7 py-9 small:grid-cols-3 small:gap-10 small:py-11">
-          {benefits.map((benefit, index) => (
-            <article key={benefit.title} className="flex gap-4">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-nuprix-line-strong bg-nuprix-paper text-[11px] font-bold text-nuprix-pine">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <h2 className="text-sm font-semibold text-nuprix-charcoal">{benefit.title}</h2>
-                <p className="mt-1 max-w-xs text-sm leading-6 text-nuprix-muted">{benefit.description}</p>
+          <div className="grid gap-4 small:grid-cols-1">
+            <article className="relative overflow-hidden rounded-[24px] border border-violet-200 bg-white p-5 shadow-[0_14px_40px_rgba(124,58,237,.08)]">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-nuprix-violet">
+                  <Zap className="h-3 w-3" aria-hidden="true" />
+                  Instant delivery
+                </span>
+                <Download className="h-4 w-4 text-violet-500" aria-hidden="true" />
+              </div>
+              <p className="mt-7 text-xs font-semibold text-nuprix-muted">License key</p>
+              <div className="mt-2 flex items-center justify-between rounded-xl border border-violet-200 bg-violet-50/70 px-4 py-3">
+                <code className="font-mono text-sm font-bold tracking-[0.08em] text-violet-800">NPRX-94A2-88F1</code>
+                <BadgeCheck className="h-4 w-4 text-violet-600" aria-hidden="true" />
               </div>
             </article>
+
+            <article className="rounded-[24px] border border-nuprix-line bg-nuprix-ink p-5 text-white shadow-[0_14px_40px_rgba(15,23,42,.14)]">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300">
+                  <Truck className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+                  Tracking in progress
+                </span>
+                <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold text-emerald-300">Verified</span>
+              </div>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400">Vendor payouts</p>
+                  <p className="mt-1 text-lg font-bold tabular-nums">৳284K</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400">Fulfillment</p>
+                  <p className="mt-1 text-sm font-bold text-emerald-300">On track</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2 small:grid-cols-5">
+          {categories.map(({ name, detail, icon: Icon, href }) => (
+            <LocalizedClientLink
+              key={name}
+              href={href}
+              className="group flex min-h-[92px] items-center gap-3 rounded-xl border border-nuprix-line bg-white p-3 transition duration-200 hover:-translate-y-0.5 hover:border-nuprix-indigo/30 hover:shadow-[0_10px_24px_rgba(15,23,42,.07)]"
+            >
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-nuprix-mist text-nuprix-indigo">
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-nuprix-ink small:text-sm">{name}</span>
+                <span className="mt-1 block text-[11px] text-nuprix-subtle">{detail}</span>
+              </span>
+            </LocalizedClientLink>
           ))}
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   )
 }
 

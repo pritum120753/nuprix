@@ -1,6 +1,6 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata, Viewport } from "next"
-import { Fraunces, Inter } from "next/font/google"
+import { Inter, Plus_Jakarta_Sans } from "next/font/google"
 import "styles/globals.css"
 
 // Self-hosted by next/font, so pages don't depend on fonts installed locally.
@@ -10,7 +10,7 @@ const inter = Inter({
   variable: "--font-sans",
 })
 
-const fraunces = Fraunces({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-display",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#f7f8f4",
+  themeColor: "#F8FAFC",
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
@@ -29,7 +29,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html
       lang="en"
       data-mode="light"
-      className={`${inter.variable} ${fraunces.variable}`}
+      className={`${inter.variable} ${plusJakarta.variable}`}
     >
       <head>
         <link rel="ucp" href="/.well-known/ucp" />

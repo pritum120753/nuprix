@@ -19,6 +19,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Thumbnail from "@modules/products/components/thumbnail"
 import { usePathname } from "next/navigation"
 import { Fragment, useEffect, useRef, useState } from "react"
+import { ShoppingCart } from "lucide-react"
 
 const countItems = (cart?: HttpTypes.StoreCart | null) =>
   cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0
@@ -102,10 +103,16 @@ const CartDropdown = ({
       <Popover className="relative h-full flex items-center">
         {/* Valid HTML: PopoverButton without nested <a> */}
         <PopoverButton
-          className="h-full flex items-center text-sm font-medium text-nuprix-muted hover:text-nuprix-forest transition-colors focus:outline-none"
+          className="relative grid h-10 w-10 place-items-center rounded-lg border border-nuprix-line bg-white text-nuprix-muted transition hover:border-nuprix-line-strong hover:bg-nuprix-mist hover:text-nuprix-ink focus:outline-none"
           data-testid="nav-cart-link"
+          aria-label={`Cart, ${totalItems} ${totalItems === 1 ? "item" : "items"}`}
         >
-          <span>Cart ({totalItems})</span>
+          <ShoppingCart className="h-4 w-4" aria-hidden="true" />
+          {totalItems > 0 && (
+            <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-nuprix-indigo px-1 text-[10px] font-bold tabular-nums text-white">
+              {totalItems}
+            </span>
+          )}
         </PopoverButton>
         <Transition
           show={cartDropdownOpen}
