@@ -42,7 +42,7 @@ const SearchDrawer = ({ isOpen, close, children }: SearchDrawerProps) => {
                 data-testid="search-drawer"
               >
                 <div className="flex h-full flex-col border-l border-ui-border-base bg-ui-bg-base shadow-elevation-modal">
-                  <div className="flex items-center justify-between border-b border-ui-border-base px-4 py-3">
+                  <div className="flex items-center justify-between border-b border-nuprix-line px-4 py-3">
                     <Dialog.Title className="text-large-semi text-ui-fg-base">
                       Search
                     </Dialog.Title>

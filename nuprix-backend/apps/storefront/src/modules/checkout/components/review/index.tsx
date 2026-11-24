@@ -3,6 +3,7 @@
 import { Heading, Text, clx } from "@modules/common/components/ui"
 
 import PaymentButton from "../payment-button"
+import { getCartDeliverySplit } from "@lib/util/product"
 import { useSearchParams } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 
@@ -15,9 +16,11 @@ const Review = ({ cart }: { cart: HttpTypes.StoreCart }) => {
     (cart as unknown as Record<string, unknown>)?.gift_cards && ((cart as unknown as Record<string, unknown>)?.gift_cards as unknown[])?.length > 0 && cart?.total === 0
   )
 
+  const { isDigitalOnly } = getCartDeliverySplit(cart.items)
+
   const previousStepsCompleted =
     cart.shipping_address &&
-    (cart.shipping_methods?.length ?? 0) > 0 &&
+    (isDigitalOnly || (cart.shipping_methods?.length ?? 0) > 0) &&
     (cart.payment_collection || paidByGiftcard)
 
   return (
@@ -42,8 +45,8 @@ const Review = ({ cart }: { cart: HttpTypes.StoreCart }) => {
               <Text className="txt-medium-plus text-ui-fg-base mb-1">
                 By clicking the Place Order button, you confirm that you have
                 read, understand and accept our Terms of Use, Terms of Sale and
-                Returns Policy and acknowledge that you have read Medusa
-                Store&apos;s Privacy Policy.
+                Returns Policy and acknowledge that you have read Nuprix&apos;s
+                Privacy Policy.
               </Text>
             </div>
           </div>

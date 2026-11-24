@@ -70,7 +70,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
           leaveTo="opacity-0"
         >
           <div
-            className="bg-white flex flex-col gap-y-3 justify-center items-center text-large-regular p-4 h-full w-full border-t border-gray-200"
+            className="flex h-full w-full flex-col items-center justify-center gap-y-3 border-t border-nuprix-line bg-white/95 p-4 text-large-regular shadow-[0_-12px_30px_rgba(15,23,42,.10)] backdrop-blur-xl"
             data-testid="mobile-actions"
           >
             <div className="flex items-center gap-x-2">
@@ -121,7 +121,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                 type="button"
                 onClick={handleAddToCart}
                 disabled={!inStock || !variant}
-                className="w-full"
+                className="w-full rounded-lg border-0 bg-nuprix-indigo text-white hover:bg-nuprix-indigo-hover"
                 isLoading={isAdding}
                 data-testid="mobile-cart-button"
               >

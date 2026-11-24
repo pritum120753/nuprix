@@ -20,6 +20,31 @@ module.exports = {
         padding: "padding-top padding-right padding-bottom padding-left",
       },
       colors: {
+        // Nuprix marketplace tokens.
+        nuprix: {
+          ivory: "#F8FAFC",
+          paper: "#FFFFFF",
+          mist: "#F1F5F9",
+          line: "#E2E8F0",
+          "line-strong": "#CBD5E1",
+          sage: "#ECFDF5",
+          leaf: "#475569",
+          moss: "#059669",
+          pine: "#1E293B",
+          forest: "#0F172A",
+          ink: "#0F172A",
+          charcoal: "#1E293B",
+          muted: "#475569",
+          subtle: "#64748B",
+          lilac: "#F5F3FF",
+          sand: "#F8FAFC",
+          sky: "#EFF6FF",
+          indigo: "#2563EB",
+          "indigo-hover": "#1D4ED8",
+          violet: "#7C3AED",
+          emerald: "#059669",
+          danger: "#9f2d2d",
+        },
         grey: {
           0: "#FFFFFF",
           5: "#F9FAFB",
@@ -57,8 +82,19 @@ module.exports = {
       fontSize: {
         "3xl": "2rem",
       },
+      boxShadow: {
+        card: "0 1px 2px rgba(23, 43, 32, 0.04), 0 8px 24px rgba(23, 43, 32, 0.06)",
+        lift: "0 18px 45px rgba(28, 48, 34, 0.12)",
+      },
       fontFamily: {
+        display: [
+          "var(--font-sans)",
+          "Inter",
+          "-apple-system",
+          "sans-serif",
+        ],
         sans: [
+          "var(--font-sans)",
           "Inter",
           "-apple-system",
           "BlinkMacSystemFont",

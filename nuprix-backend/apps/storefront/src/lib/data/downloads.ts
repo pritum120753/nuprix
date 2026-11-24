@@ -16,6 +16,7 @@ export type CustomerDownload = {
   revoked_at: string | null
   last_downloaded_at: string | null
   created_at: string
+  license_key: string | null
   status:
     | "available"
     | "awaiting_payment"

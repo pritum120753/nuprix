@@ -1,8 +1,7 @@
-import { listCategories } from "@lib/data/categories";
-import { listCollections } from "@lib/data/collections";
-import { Text, clx } from "@modules/common/components/ui";
-
-import LocalizedClientLink from "@modules/common/components/localized-client-link";
+import { listCategories } from "@lib/data/categories"
+import { listCollections } from "@lib/data/collections"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { BadgeCheck, PackageCheck, ShieldCheck } from "lucide-react"
 
 export default async function Footer() {
   const [{ collections }, productCategories] = await Promise.all([
@@ -11,175 +10,78 @@ export default async function Footer() {
       fields:
         "id,name,handle,parent_category_id,category_children.id,category_children.name,category_children.handle",
     }),
-  ]);
+  ])
 
   return (
-    <footer className="border-t border-ui-border-base w-full">
-      <div className="content-container flex flex-col w-full">
-        <div className="flex flex-col gap-y-6 xsmall:flex-row items-start justify-between py-40">
-          <div>
-            <LocalizedClientLink
-              href="/"
-              className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
-            >
-              Nuprix
+    <footer className="mt-20 border-t border-slate-800 bg-nuprix-ink text-white">
+      <div className="content-container">
+        <div className="grid gap-12 py-14 small:grid-cols-[1.35fr_2fr] small:py-16">
+          <div className="max-w-sm">
+            <LocalizedClientLink href="/" className="inline-flex items-center gap-2">
+              <span className="grid h-9 w-9 place-items-center rounded-[10px] bg-nuprix-indigo text-sm font-bold text-white">N</span>
+              <span className="text-xl font-bold tracking-[-0.04em]">nuprix</span>
             </LocalizedClientLink>
+            <p className="mt-5 text-sm leading-7 text-slate-300">
+              A unified marketplace for instant digital assets and verified physical products.
+            </p>
+            <div className="mt-6 grid gap-2 text-xs text-slate-300">
+              <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-indigo-400" />Buyer protection</span>
+              <span className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-violet-400" />Digital license delivery</span>
+              <span className="flex items-center gap-2"><PackageCheck className="h-4 w-4 text-emerald-400" />Verified physical fulfillment</span>
+            </div>
           </div>
-          <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
-            {productCategories && productCategories?.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  Categories
-                </span>
-                <ul
-                  className="grid grid-cols-1 gap-2"
-                  data-testid="footer-categories"
-                >
-                  {productCategories?.slice(0, 6).map((c) => {
-                    if (c.parent_category_id) {
-                      return;
-                    }
 
-                    const children =
-                      c.category_children?.map((child) => ({
-                        name: child.name,
-                        handle: child.handle,
-                        id: child.id,
-                      })) || null;
-
-                    return (
-                      <li
-                        className="flex flex-col gap-2 text-ui-fg-subtle txt-small"
-                        key={c.id}
-                      >
-                        <LocalizedClientLink
-                          className={clx(
-                            "hover:text-ui-fg-base",
-                            children && "txt-small-plus"
-                          )}
-                          href={`/categories/${c.handle}`}
-                          data-testid="category-link"
-                        >
-                          {c.name}
-                        </LocalizedClientLink>
-                        {children && (
-                          <ul className="grid grid-cols-1 ml-3 gap-2">
-                            {children &&
-                              children.map((child) => (
-                                <li key={child.id}>
-                                  <LocalizedClientLink
-                                    className="hover:text-ui-fg-base"
-                                    href={`/categories/${child.handle}`}
-                                    data-testid="category-link"
-                                  >
-                                    {child.name}
-                                  </LocalizedClientLink>
-                                </li>
-                              ))}
-                          </ul>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
-            {collections && collections.length > 0 && (
-              <div className="flex flex-col gap-y-2">
-                <span className="txt-small-plus txt-ui-fg-base">
-                  Collections
-                </span>
-                <ul
-                  className={clx(
-                    "grid grid-cols-1 gap-2 text-ui-fg-subtle txt-small",
-                    {
-                      "grid-cols-2": (collections?.length || 0) > 3,
-                    }
-                  )}
-                >
-                  {collections?.slice(0, 6).map((c) => (
-                    <li key={c.id}>
-                      <LocalizedClientLink
-                        className="hover:text-ui-fg-base"
-                        href={`/collections/${c.handle}`}
-                      >
-                        {c.title}
-                      </LocalizedClientLink>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div className="flex flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">
-                Help & support
-              </span>
-              <ul className="grid grid-cols-1 gap-y-2 text-ui-fg-subtle txt-small">
-                <li>
-                  <LocalizedClientLink
-                    className="hover:text-ui-fg-base"
-                    href="/shipping"
-                  >
-                    Shipping information
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    className="hover:text-ui-fg-base"
-                    href="/returns"
-                  >
-                    Return policy
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    className="hover:text-ui-fg-base"
-                    href="/terms"
-                  >
-                    Terms of service
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    className="hover:text-ui-fg-base"
-                    href="/privacy"
-                  >
-                    Privacy policy
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    className="hover:text-ui-fg-base"
-                    href="/contact"
-                  >
-                    Contact
-                  </LocalizedClientLink>
-                </li>
-                <li>
-                  <LocalizedClientLink
-                    className="hover:text-ui-fg-base"
-                    href="/search"
-                  >
-                    Search
-                  </LocalizedClientLink>
-                </li>
+          <div className="grid grid-cols-2 gap-8 small:grid-cols-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Marketplace</p>
+              <ul className="mt-4 space-y-3 text-sm">
+                {productCategories?.filter((category) => !category.parent_category_id).slice(0, 6).map((category) => (
+                  <li key={category.id}>
+                    <LocalizedClientLink href={`/categories/${category.handle}`} className="text-slate-300 transition hover:text-white" data-testid="category-link">
+                      {category.name}
+                    </LocalizedClientLink>
+                  </li>
+                ))}
               </ul>
             </div>
-            <div className="flex max-w-xs flex-col gap-y-2">
-              <span className="txt-small-plus txt-ui-fg-base">Discover Nuprix</span>
-              <p className="text-ui-fg-subtle txt-small">
-                A thoughtful mix of digital finds and physical products for
-                everyday life.
-              </p>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Collections</p>
+              <ul className="mt-4 space-y-3 text-sm">
+                {collections?.slice(0, 6).map((collection) => (
+                  <li key={collection.id}>
+                    <LocalizedClientLink href={`/collections/${collection.handle}`} className="text-slate-300 transition hover:text-white">
+                      {collection.title}
+                    </LocalizedClientLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Help</p>
+              <ul className="mt-4 space-y-3 text-sm">
+                {[
+                  ["About", "/about"],
+                  ["FAQ", "/faq"],
+                  ["Shipping", "/shipping"],
+                  ["Returns", "/returns"],
+                  ["Digital License", "/digital-license"],
+                  ["Terms", "/terms"],
+                  ["Privacy", "/privacy"],
+                  ["Contact", "/contact"],
+                ].map(([label, href]) => (
+                  <li key={href}>
+                    <LocalizedClientLink href={href} className="text-slate-300 transition hover:text-white">{label}</LocalizedClientLink>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
-        <div className="flex w-full mb-16 justify-between text-ui-fg-muted">
-          <Text className="txt-compact-small">
-            © {new Date().getFullYear()} Nuprix. All rights reserved.
-          </Text>
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-800 py-6 text-xs text-slate-400 small:flex-row">
+          <p>© {new Date().getFullYear()} Nuprix. All rights reserved.</p>
+          <p className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Digital + physical marketplace</p>
         </div>
       </div>
     </footer>
-  );
+  )
 }

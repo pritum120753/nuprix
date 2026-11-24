@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^Set-Location 'i:\\\\OneDrive\\\\Documents\\\\GitHub\\\\nuprix\\\\nuprix-backend\\\\apps\\\\storefront'; npm run lint$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

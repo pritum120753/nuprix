@@ -58,7 +58,7 @@ const SearchPanel = ({ onNavigate }: { onNavigate: () => void }) => {
             setInputValue(event.target.value)
             refine(event.target.value)
           }}
-          placeholder="Search products"
+          placeholder="Search software, keys, AI subscriptions, and physical gear..."
           aria-label="Search products"
           autoFocus
           className="txt-medium w-full bg-transparent py-4 text-ui-fg-base outline-none placeholder:text-ui-fg-muted"
@@ -115,7 +115,12 @@ const SearchPanel = ({ onNavigate }: { onNavigate: () => void }) => {
   )
 }
 
-const Search = () => {
+type SearchProps = {
+  trigger?: React.ReactNode
+  triggerClassName?: string
+}
+
+const Search = ({ trigger, triggerClassName }: SearchProps = {}) => {
   const { state: isOpen, open, close } = useToggleState()
   const { countryCode } = useParams<{ countryCode: string }>()
 
@@ -129,10 +134,10 @@ const Search = () => {
           open()
         }}
         aria-label="Search products"
-        className="flex items-center hover:text-ui-fg-base"
+        className={triggerClassName || "flex items-center hover:text-ui-fg-base"}
         data-testid="nav-search-button"
       >
-        <MagnifyingGlass />
+        {trigger || <MagnifyingGlass />}
       </Link>
 
       <SearchDrawer isOpen={isOpen} close={close}>

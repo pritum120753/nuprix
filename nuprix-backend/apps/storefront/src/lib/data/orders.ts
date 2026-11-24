@@ -5,6 +5,25 @@ import medusaError from "@lib/util/medusa-error"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { HttpTypes } from "@medusajs/types"
 
+export type VendorFulfillmentGroup = {
+  id: string
+  vendor_id: string
+  vendor_name?: string
+  status: "pending" | "processing" | "shipped" | "delivered" | "canceled" | "exception"
+  carrier: string | null
+  tracking_number: string | null
+  tracking_url: string | null
+  shipped_at: string | null
+  delivered_at: string | null
+  canceled_at: string | null
+  items: Array<{
+    id: string
+    line_item_id: string
+    product_id: string | null
+    quantity: number
+  }>
+}
+
 export const retrieveOrder = async (id: string) => {
   const headers = {
     ...(await getAuthHeaders()),
@@ -19,7 +38,7 @@ export const retrieveOrder = async (id: string) => {
       method: "GET",
       query: {
         fields:
-          "*payment_collections.payments,*items,*items.metadata,*items.variant,*items.product",
+          "*payment_collections.payments,*items,*items.metadata,*items.variant,*items.product,*fulfillments,*fulfillments.labels",
       },
       headers,
       next,
@@ -27,6 +46,24 @@ export const retrieveOrder = async (id: string) => {
     })
     .then(({ order }) => order)
     .catch((err) => medusaError(err))
+}
+
+export const retrieveVendorFulfillmentGroups = async (
+  orderId: string
+): Promise<VendorFulfillmentGroup[]> => {
+  const headers = await getAuthHeaders()
+
+  return sdk.client
+    .fetch<{ fulfillment_groups: VendorFulfillmentGroup[] }>(
+      `/store/orders/${encodeURIComponent(orderId)}/fulfillment-groups`,
+      {
+        method: "GET",
+        headers,
+        cache: "no-store",
+      }
+    )
+    .then((res) => res.fulfillment_groups ?? [])
+    .catch(() => [])
 }
 
 export const listOrders = async (
@@ -49,7 +86,8 @@ export const listOrders = async (
         limit,
         offset,
         order: "-created_at",
-        fields: "*items,+items.metadata,*items.variant,*items.product",
+        fields:
+          "*items,+items.metadata,*items.variant,*items.product,*fulfillments",
         ...filters,
       },
       headers,

@@ -9,13 +9,16 @@ import OrderDetails from "@modules/order/components/order-details"
 import OrderSummary from "@modules/order/components/order-summary"
 import ShippingDetails from "@modules/order/components/shipping-details"
 import React from "react"
+import type { VendorFulfillmentGroup } from "@lib/data/orders"
 
 type OrderDetailsTemplateProps = {
   order: HttpTypes.StoreOrder
+  vendorFulfillmentGroups?: VendorFulfillmentGroup[]
 }
 
 const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
   order,
+  vendorFulfillmentGroups = [],
 }) => {
   return (
     <div className="flex flex-col justify-center gap-y-4">
@@ -35,7 +38,10 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
       >
         <OrderDetails order={order} showStatus />
         <Items order={order} />
-        <ShippingDetails order={order} />
+        <ShippingDetails
+          order={order}
+          vendorFulfillmentGroups={vendorFulfillmentGroups}
+        />
         <OrderSummary order={order} />
         <Help />
       </div>

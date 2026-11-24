@@ -11,7 +11,6 @@ import CountrySelect from "../country-select"
 import LanguageSelect from "../language-select"
 import { Locale } from "@lib/data/locales"
 
-
 const SideMenuItems = {
   Home: "/",
   Store: "/store",
@@ -38,15 +37,19 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
               <div className="relative flex h-full">
                 <Popover.Button
                   data-testid="nav-menu-button"
-                  className="relative h-full flex items-center transition-all ease-out duration-200 focus:outline-none hover:text-ui-fg-base"
+                  className="relative h-full flex items-center gap-1.5 transition-all ease-out duration-200 focus:outline-none text-nuprix-muted hover:text-nuprix-forest font-medium text-sm"
                 >
-                  Menu
+                  <span className="flex flex-col gap-1 w-4">
+                    <span className="h-0.5 w-full bg-current rounded-full" />
+                    <span className="h-0.5 w-full bg-current rounded-full" />
+                  </span>
+                  <span className="hidden xsmall:inline">Catalog</span>
                 </Popover.Button>
               </div>
 
               {open && (
                 <div
-                  className="fixed inset-0 z-[50] bg-black/0 pointer-events-auto"
+                  className="fixed inset-0 z-[50] bg-nuprix-forest/30 backdrop-blur-sm pointer-events-auto transition-opacity"
                   onClick={close}
                   data-testid="side-menu-backdrop"
                 />
@@ -55,34 +58,43 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
               <Transition
                 show={open}
                 as={Fragment}
-                enter="transition ease-out duration-150"
-                enterFrom="opacity-0"
-                enterTo="opacity-100 backdrop-blur-2xl"
+                enter="transition ease-out duration-200"
+                enterFrom="opacity-0 -translate-x-4"
+                enterTo="opacity-100 translate-x-0"
                 leave="transition ease-in duration-150"
-                leaveFrom="opacity-100 backdrop-blur-2xl"
-                leaveTo="opacity-0"
+                leaveFrom="opacity-100 translate-x-0"
+                leaveTo="opacity-0 -translate-x-4"
               >
-                <PopoverPanel className="flex flex-col absolute w-full pr-4 sm:pr-0 sm:w-1/3 2xl:w-1/4 sm:min-w-min h-[calc(100vh-1rem)] z-[51] inset-x-0 text-sm text-ui-fg-on-color m-2 backdrop-blur-2xl">
-                  <div
-                    data-testid="nav-menu-popup"
-                    className="flex flex-col h-full bg-[rgba(3,7,18,0.5)] rounded-rounded justify-between p-6"
-                  >
-                    <div className="flex justify-end" id="xmark">
+                <PopoverPanel className="flex flex-col fixed top-0 left-0 w-full sm:w-80 h-full z-[51] bg-nuprix-ivory border-r border-nuprix-line shadow-2xl p-6 justify-between">
+                  <div>
+                    <div className="flex items-center justify-between pb-6 border-b border-nuprix-line" id="xmark">
+                      <LocalizedClientLink
+                        href="/"
+                        className="flex items-center gap-2 text-xl font-bold tracking-tight text-nuprix-forest"
+                        onClick={close}
+                      >
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-nuprix-forest text-xs font-bold text-nuprix-ivory">
+                          N
+                        </span>
+                        <span className="font-display tracking-tight text-xl lowercase">nuprix</span>
+                      </LocalizedClientLink>
                       <button
                         data-testid="close-menu-button"
                         onClick={close}
                         aria-label="Close menu"
+                        className="p-1 rounded-full text-nuprix-muted hover:text-nuprix-forest hover:bg-nuprix-mist transition-colors"
                       >
                         <XMark />
                       </button>
                     </div>
-                    <ul className="flex flex-col gap-6 items-start justify-start">
+
+                    <ul className="flex flex-col gap-5 mt-8">
                       {Object.entries(SideMenuItems).map(([name, href]) => {
                         return (
                           <li key={name}>
                             <LocalizedClientLink
                               href={href}
-                              className="text-3xl leading-10 hover:text-ui-fg-disabled"
+                              className="text-2xl font-display font-medium text-nuprix-forest hover:text-nuprix-pine transition-colors"
                               onClick={close}
                               data-testid={`${name.toLowerCase()}-link`}
                             >
@@ -92,49 +104,49 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
                         )
                       })}
                     </ul>
-                    <div className="flex flex-col gap-y-6">
-                      {!!locales?.length && (
-                        <div
-                          className="flex justify-between"
-                          onMouseEnter={languageToggleState.open}
-                          onMouseLeave={languageToggleState.close}
-                        >
-                          <LanguageSelect
-                            toggleState={languageToggleState}
-                            locales={locales}
-                            currentLocale={currentLocale}
-                          />
-                          <ArrowRightMini
-                            className={clx(
-                              "transition-transform duration-150",
-                              languageToggleState.state ? "-rotate-90" : ""
-                            )}
-                          />
-                        </div>
-                      )}
+                  </div>
+
+                  <div className="flex flex-col gap-y-4 pt-6 border-t border-nuprix-line">
+                    {!!locales?.length && (
                       <div
-                        className="flex justify-between"
-                        onMouseEnter={countryToggleState.open}
-                        onMouseLeave={countryToggleState.close}
+                        className="flex justify-between items-center text-sm text-nuprix-muted"
+                        onMouseEnter={languageToggleState.open}
+                        onMouseLeave={languageToggleState.close}
                       >
-                        {regions && (
-                          <CountrySelect
-                            toggleState={countryToggleState}
-                            regions={regions}
-                          />
-                        )}
+                        <LanguageSelect
+                          toggleState={languageToggleState}
+                          locales={locales}
+                          currentLocale={currentLocale}
+                        />
                         <ArrowRightMini
                           className={clx(
                             "transition-transform duration-150",
-                            countryToggleState.state ? "-rotate-90" : ""
+                            languageToggleState.state ? "-rotate-90" : ""
                           )}
                         />
                       </div>
-                      <Text className="flex justify-between txt-compact-small">
-                        © {new Date().getFullYear()} Medusa Store. All rights
-                        reserved.
-                      </Text>
+                    )}
+                    <div
+                      className="flex justify-between items-center text-sm text-nuprix-muted"
+                      onMouseEnter={countryToggleState.open}
+                      onMouseLeave={countryToggleState.close}
+                    >
+                      {regions && (
+                        <CountrySelect
+                          toggleState={countryToggleState}
+                          regions={regions}
+                        />
+                      )}
+                      <ArrowRightMini
+                        className={clx(
+                          "transition-transform duration-150",
+                          countryToggleState.state ? "-rotate-90" : ""
+                        )}
+                      />
                     </div>
+                    <Text className="text-xs text-nuprix-subtle pt-2">
+                      © {new Date().getFullYear()} Nuprix. All rights reserved.
+                    </Text>
                   </div>
                 </PopoverPanel>
               </Transition>

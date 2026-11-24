@@ -1,10 +1,12 @@
 import { HttpTypes } from "@medusajs/types"
 import { Table, Text } from "@modules/common/components/ui"
 
+import FulfillmentBadge from "@modules/common/components/fulfillment-badge"
 import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import Thumbnail from "@modules/products/components/thumbnail"
+import { getLineItemFulfillmentType } from "@lib/util/product"
 
 type ItemProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
@@ -28,6 +30,10 @@ const Item = ({ item, currencyCode }: ItemProps) => {
           {item.product_title}
         </Text>
         <LineItemOptions variant={item.variant} data-testid="product-variant" />
+        <FulfillmentBadge
+          type={getLineItemFulfillmentType(item)}
+          context="order"
+        />
       </Table.Cell>
 
       <Table.Cell className="!pr-0">

@@ -260,7 +260,7 @@ const Shipping: React.FC<ShippingProps> = ({
                           {
                             "border-ui-border-interactive":
                               option.id === shippingMethodId,
-                            "hover:shadow-brders-none cursor-not-allowed":
+                            "hover:shadow-borders-none cursor-not-allowed":
                               isDisabled,
                           }
                         )}
@@ -373,7 +373,7 @@ const Shipping: React.FC<ShippingProps> = ({
             />
             <Button
               size="large"
-              className="mt"
+              className="mt-6"
               onClick={handleSubmit}
               isLoading={isLoading}
               disabled={!cart.shipping_methods?.[0]}

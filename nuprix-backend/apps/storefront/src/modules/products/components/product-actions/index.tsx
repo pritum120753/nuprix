@@ -158,7 +158,7 @@ export default function ProductActions({
           <input type="hidden" name="quantity" value="1" />
           <div>
             {(product.variants?.length ?? 0) > 1 && (
-              <div className="flex flex-col gap-y-4">
+              <div className="flex flex-col gap-y-5">
                 {(product.options || []).map((option) => {
                   return (
                     <div key={option.id}>
@@ -183,7 +183,11 @@ export default function ProductActions({
 
           {selectedVariant && isValidVariant && (
             <p
-              className="text-small-regular text-ui-fg-subtle"
+              className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                inStock
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-slate-100 text-slate-600"
+              }`}
               data-testid="product-availability"
             >
               {inStock ? "In stock" : "Out of stock"}
@@ -200,7 +204,7 @@ export default function ProductActions({
               !isValidVariant
             }
             variant="primary"
-            className="w-full h-10"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-lg border-0 bg-nuprix-indigo px-5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(37,99,235,.18)] transition hover:bg-nuprix-indigo-hover disabled:cursor-not-allowed disabled:opacity-50"
             isLoading={isAdding}
             data-testid="add-product-button"
           >

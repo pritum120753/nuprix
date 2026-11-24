@@ -102,6 +102,19 @@ const AccountNav = ({
                   </LocalizedClientLink>
                 </li>
                 <li>
+                  <LocalizedClientLink
+                    href="/account/vendor"
+                    className="flex items-center justify-between py-4 border-b border-gray-200 px-8"
+                    data-testid="vendor-link"
+                  >
+                    <div className="flex items-center gap-x-2">
+                      <Package size={20} />
+                      <span>Seller Portal</span>
+                    </div>
+                    <ChevronDown className="transform -rotate-90" />
+                  </LocalizedClientLink>
+                </li>
+                <li>
                   <button
                     type="button"
                     className="flex items-center justify-between py-4 border-b border-gray-200 px-8 w-full"
@@ -122,11 +135,12 @@ const AccountNav = ({
       </div>
       <div className="hidden small:block" data-testid="account-nav">
         <div>
-          <div className="pb-4">
-            <h3 className="text-base-semi">Account</h3>
+          <div className="pb-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-nuprix-indigo">Customer studio</p>
+            <h3 className="mt-2 text-xl font-bold text-nuprix-ink">My account</h3>
           </div>
           <div className="text-base-regular">
-            <ul className="flex mb-0 justify-start items-start flex-col gap-y-4">
+            <ul className="flex mb-0 justify-start items-start flex-col gap-y-1.5">
               <li>
                 <AccountNavLink href="/account" route={route!} data-testid="overview-link">
                   Overview
@@ -150,6 +164,11 @@ const AccountNav = ({
               <li>
                 <AccountNavLink href="/account/downloads" route={route!} data-testid="downloads-link">
                   My Downloads
+                </AccountNavLink>
+              </li>
+              <li>
+                <AccountNavLink href="/account/vendor" route={route!} data-testid="vendor-link">
+                  Seller Portal
                 </AccountNavLink>
               </li>
               <li className="text-grey-700">
@@ -184,8 +203,8 @@ const AccountNavLink = ({
   return (
     <LocalizedClientLink
       href={href}
-      className={clx("text-ui-fg-subtle hover:text-ui-fg-base", {
-        "text-ui-fg-base font-semibold": active,
+      className={clx("flex min-h-11 w-full items-center rounded-xl px-3 text-sm text-nuprix-muted transition-colors hover:bg-nuprix-mist hover:text-nuprix-forest", {
+        "bg-nuprix-sage/70 text-nuprix-forest font-semibold": active,
       })}
       data-testid={dataTestId}
     >

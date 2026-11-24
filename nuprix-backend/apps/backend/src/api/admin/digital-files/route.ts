@@ -7,6 +7,7 @@ import {
 } from "../../../modules/digital-delivery"
 import type DigitalDeliveryModuleService from "../../../modules/digital-delivery/service"
 import { addDigitalFileWorkflow } from "../../../workflows/digital-file-workflows"
+import { recordAdminAudit } from "../../../lib/admin-audit"
 import type { CreateDigitalFileBody } from "./validators"
 
 export async function GET(
@@ -34,6 +35,17 @@ export async function POST(
   const { result: digital_file } = await addDigitalFileWorkflow(
     req.scope
   ).run({ input: req.validatedBody })
+
+  await recordAdminAudit(req, {
+    action: "digital_file.created",
+    resource_type: "digital_file",
+    resource_id: digital_file.id,
+    after_state: {
+      product_id: digital_file.product_id,
+      title: digital_file.title,
+      file_name: digital_file.file_name,
+    },
+  })
 
   res.status(201).json({ digital_file })
 }

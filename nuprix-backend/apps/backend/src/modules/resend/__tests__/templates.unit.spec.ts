@@ -40,4 +40,23 @@ describe("resend templates", () => {
     expect(email?.html).not.toContain("javascript:")
     expect(email?.html).toContain('href="#"')
   })
+
+  it("renders password-reset template with safe http(s) link", () => {
+    const email = renderTemplate("password-reset", {
+      reset_url: "https://nuprix.example/reset-password?token=tok_123",
+    })
+    expect(email?.subject).toBe("Reset your Nuprix password")
+    expect(email?.html).toContain(
+      "https://nuprix.example/reset-password?token=tok_123"
+    )
+    expect(email?.text).toContain(
+      "https://nuprix.example/reset-password?token=tok_123"
+    )
+
+    const unsafe = renderTemplate("password-reset", {
+      reset_url: "javascript:alert(1)",
+    })
+    expect(unsafe?.html).not.toContain("javascript:")
+    expect(unsafe?.html).toContain('href="#"')
+  })
 })

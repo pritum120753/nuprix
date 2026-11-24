@@ -36,6 +36,7 @@ describe("isFullyPaid", () => {
 
   it("treats a zero-total order as paid without a payment collection", () => {
     expect(isFullyPaid([], 0)).toBe(true)
+    expect(isFullyPaid(undefined, { numeric: 0 })).toBe(true)
   })
 
   it("compares total captured funds to the order total across collections", () => {

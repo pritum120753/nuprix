@@ -40,33 +40,43 @@ async function requestVerificationEmail(email: string, token: string) {
   )
 }
 
-export const retrieveCustomer =
-  async (): Promise<HttpTypes.StoreCustomer | null> => {
-    const authHeaders = await getAuthHeaders()
+export const retrieveCustomer = async (
+  options: { cache?: "force-cache" | "no-store" } = {}
+): Promise<HttpTypes.StoreCustomer | null> => {
+  const authHeaders = await getAuthHeaders()
 
-    if (!("authorization" in authHeaders)) return null
+  if (!("authorization" in authHeaders)) return null
 
-    const headers = {
-      ...authHeaders,
-    }
-
-    const next = {
-      ...(await getCacheOptions("customers")),
-    }
-
-    return await sdk.client
-      .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
-        method: "GET",
-        query: {
-          fields: "*orders",
-        },
-        headers,
-        next,
-        cache: "force-cache",
-      })
-      .then(({ customer }) => customer)
-      .catch(() => null)
+  const headers = {
+    ...authHeaders,
   }
+
+  const fetchOptions = {
+    method: "GET" as const,
+    query: { fields: "*orders" },
+    headers,
+  }
+
+  const cacheOptions =
+    options.cache === "no-store"
+      ? {
+          cache: "no-store" as const,
+        }
+      : {
+          next: {
+            ...(await getCacheOptions("customers")),
+          },
+          cache: "force-cache" as const,
+        }
+
+  return await sdk.client
+    .fetch<{ customer: HttpTypes.StoreCustomer }>(
+      `/store/customers/me`,
+      { ...fetchOptions, ...cacheOptions }
+    )
+    .then(({ customer }) => customer)
+    .catch(() => null)
+}
 
 export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   const headers = {
@@ -378,4 +388,71 @@ export const updateCustomerAddress = async (
     .catch((err) => {
       return { success: false, error: err.toString() }
     })
+}
+
+export async function requestPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+): Promise<{ success: boolean; error: string | null }> {
+  const email = (formData.get("email") as string | null)?.trim()
+  if (!email) {
+    return { success: false, error: "Please enter your email address." }
+  }
+
+  try {
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    })
+  } catch {
+    // Do not reveal whether an account exists for this email.
+  }
+
+  return { success: true, error: null }
+}
+
+export async function completePasswordReset(
+  _currentState: unknown,
+  formData: FormData
+): Promise<{ success: boolean; error: string | null }> {
+  const token = (formData.get("token") as string | null)?.trim()
+  const email = (formData.get("email") as string | null)?.trim()
+  const password = formData.get("password") as string | null
+  const confirmPassword = formData.get("confirm_password") as string | null
+
+  if (!token || !email) {
+    return {
+      success: false,
+      error: "This password reset link is invalid or incomplete.",
+    }
+  }
+
+  if (!password || password.length < 8) {
+    return {
+      success: false,
+      error: "Password must be at least 8 characters long.",
+    }
+  }
+
+  if (password !== confirmPassword) {
+    return {
+      success: false,
+      error: "Passwords do not match.",
+    }
+  }
+
+  try {
+    await sdk.auth.updateProvider(
+      "customer",
+      "emailpass",
+      { email, password },
+      token
+    )
+    return { success: true, error: null }
+  } catch {
+    return {
+      success: false,
+      error:
+        "Could not reset password. The reset link may have expired—please request a new one.",
+    }
+  }
 }

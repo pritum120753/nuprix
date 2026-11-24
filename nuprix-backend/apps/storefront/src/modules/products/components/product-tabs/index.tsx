@@ -3,24 +3,51 @@
 import Back from "@modules/common/icons/back"
 import FastDelivery from "@modules/common/icons/fast-delivery"
 import Refresh from "@modules/common/icons/refresh"
-
 import Accordion from "./accordion"
 import { HttpTypes } from "@medusajs/types"
+import {
+  getProductFulfillmentType,
+  type ProductClassification,
+  type ProductFulfillmentType,
+} from "@lib/util/product"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
+  classification?: ProductClassification | null
 }
 
-const ProductTabs = ({ product }: ProductTabsProps) => {
+const ProductTabs = ({ product, classification }: ProductTabsProps) => {
+  const productType = getProductFulfillmentType(product, classification)
+  const isDigital = productType === "digital"
+  const isMixed = productType === "mixed"
+
   const tabs = [
     {
-      label: "Product Information",
-      component: <ProductInfoTab product={product} />,
+      label: "Specifications & Details",
+      component: (
+        <ProductInfoTab
+          product={product}
+          productType={productType}
+          classification={classification}
+        />
+      ),
     },
-    {
-      label: "Shipping & Returns",
-      component: <ShippingInfoTab />,
-    },
+    ...(isDigital || isMixed
+      ? [
+          {
+            label: "Digital Delivery & Access",
+            component: <DigitalDeliveryTab classification={classification} />,
+          },
+        ]
+      : []),
+    ...(!isDigital
+      ? [
+          {
+            label: "Shipping & Returns",
+            component: <ShippingInfoTab />,
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -41,37 +68,117 @@ const ProductTabs = ({ product }: ProductTabsProps) => {
   )
 }
 
-const ProductInfoTab = ({ product }: ProductTabsProps) => {
-  return (
-    <div className="text-small-regular py-8">
-      <div className="grid grid-cols-2 gap-x-8">
-        <div className="flex flex-col gap-y-4">
+const ProductInfoTab = ({
+  product,
+  productType,
+  classification,
+}: {
+  product: HttpTypes.StoreProduct
+  productType: ProductFulfillmentType
+  classification?: ProductClassification | null
+}) => {
+  const primaryFile = classification?.digital_files?.[0]
+  const licenseText = primaryFile?.license_note
+  const fileCount = classification?.digital_files?.length ?? 0
+
+  if (productType === "digital" || productType === "mixed") {
+    return (
+      <div className="text-xs leading-5 text-nuprix-muted py-4 space-y-3">
+        <p>
+          {productType === "mixed"
+            ? "This product includes both digital download files (delivered electronically upon payment capture) and physical items shipped to your address."
+            : "This is a digital product delivered electronically to your account and verified order email address upon payment confirmation."}
+        </p>
+        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-nuprix-line">
           <div>
-            <span className="font-semibold">Material</span>
-            <p>{product.material ? product.material : "-"}</p>
+            <span className="font-semibold text-nuprix-forest block">Format</span>
+            <span>
+              {primaryFile
+                ? `${primaryFile.file_name}${
+                    fileCount > 1
+                      ? ` (+${fileCount - 1} more)`
+                      : ""
+                  }`
+                : "Not specified"}
+            </span>
           </div>
           <div>
-            <span className="font-semibold">Country of origin</span>
-            <p>{product.origin_country ? product.origin_country : "-"}</p>
-          </div>
-          <div>
-            <span className="font-semibold">Type</span>
-            <p>{product.type ? product.type.value : "-"}</p>
+            <span className="font-semibold text-nuprix-forest block">License</span>
+            <span>{licenseText || "Not specified"}</span>
           </div>
         </div>
-        <div className="flex flex-col gap-y-4">
-          <div>
-            <span className="font-semibold">Weight</span>
-            <p>{product.weight ? `${product.weight} g` : "-"}</p>
-          </div>
-          <div>
-            <span className="font-semibold">Dimensions</span>
-            <p>
-              {product.length && product.width && product.height
-                ? `${product.length}L x ${product.width}W x ${product.height}H`
-                : "-"}
-            </p>
-          </div>
+      </div>
+    )
+  }
+
+  const hasPhysicalSpecs = Boolean(product.material || product.origin_country || product.weight || product.length)
+
+  return (
+    <div className="text-xs leading-5 text-nuprix-muted py-4">
+      {hasPhysicalSpecs ? (
+        <div className="grid grid-cols-2 gap-4">
+          {product.material && (
+            <div>
+              <span className="font-semibold text-nuprix-forest block">Material</span>
+              <p>{product.material}</p>
+            </div>
+          )}
+          {product.origin_country && (
+            <div>
+              <span className="font-semibold text-nuprix-forest block">Country of origin</span>
+              <p>{product.origin_country}</p>
+            </div>
+          )}
+          {product.weight && (
+            <div>
+              <span className="font-semibold text-nuprix-forest block">Weight</span>
+              <p>{product.weight} g</p>
+            </div>
+          )}
+          {product.length && product.width && product.height && (
+            <div>
+              <span className="font-semibold text-nuprix-forest block">Dimensions</span>
+              <p>{product.length}L x {product.width}W x {product.height}H</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <p>Physical merchandise fulfilled according to region shipping standards.</p>
+      )}
+    </div>
+  )
+}
+
+const DigitalDeliveryTab = ({
+  classification,
+}: {
+  classification?: ProductClassification | null
+}) => {
+  const primaryFile = classification?.digital_files?.[0]
+  const allowanceText = primaryFile
+    ? `Up to ${primaryFile.max_downloads} downloads${
+        primaryFile.expires_after_days
+          ? ` within ${primaryFile.expires_after_days} days`
+          : ""
+          }.`
+    : "Not specified."
+
+  return (
+    <div className="text-xs leading-5 text-nuprix-muted py-4 space-y-3">
+      <div className="flex items-start gap-x-2.5">
+        <FastDelivery />
+        <div>
+          <span className="font-semibold text-nuprix-forest block">Instant Electronic Access</span>
+          <p>
+            Available digital access details are shown here when the product classification and files are available.
+          </p>
+        </div>
+      </div>
+      <div className="flex items-start gap-x-2.5">
+        <Refresh />
+        <div>
+          <span className="font-semibold text-nuprix-forest block">Standard Download Allowances</span>
+          <p>{allowanceText}</p>
         </div>
       </div>
     </div>
@@ -80,38 +187,23 @@ const ProductInfoTab = ({ product }: ProductTabsProps) => {
 
 const ShippingInfoTab = () => {
   return (
-    <div className="text-small-regular py-8">
-      <div className="grid grid-cols-1 gap-y-8">
-        <div className="flex items-start gap-x-2">
-          <FastDelivery />
-          <div>
-            <span className="font-semibold">Fast delivery</span>
-            <p className="max-w-sm">
-              Your package will arrive in 3-5 business days at your pick up
-              location or in the comfort of your home.
-            </p>
-          </div>
+    <div className="text-xs leading-5 text-nuprix-muted py-4 space-y-3">
+      <div className="flex items-start gap-x-2.5">
+        <FastDelivery />
+        <div>
+          <span className="font-semibold text-nuprix-forest block">Standard & Expedited Delivery</span>
+          <p>
+            Dispatched via regional fulfillment carriers. Estimated transit times vary by destination.
+          </p>
         </div>
-        <div className="flex items-start gap-x-2">
-          <Refresh />
-          <div>
-            <span className="font-semibold">Simple exchanges</span>
-            <p className="max-w-sm">
-              Is the fit not quite right? No worries - we&apos;ll exchange your
-              product for a new one.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-start gap-x-2">
-          <Back />
-          <div>
-            <span className="font-semibold">Easy returns</span>
-            <p className="max-w-sm">
-              Just return your product and we&apos;ll refund your money. No
-              questions asked – we&apos;ll do our best to make sure your return
-              is hassle-free.
-            </p>
-          </div>
+      </div>
+      <div className="flex items-start gap-x-2.5">
+        <Back />
+        <div>
+          <span className="font-semibold text-nuprix-forest block">Return Policy</span>
+          <p>
+            Eligible physical merchandise may be returned according to our return policy terms.
+          </p>
         </div>
       </div>
     </div>

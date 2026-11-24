@@ -12,6 +12,7 @@ const DigitalFile = model
     mime_type: model.text().nullable(),
     size_bytes: model.number().nullable(),
     license_note: model.text().nullable(),
+    generate_license_key: model.boolean().default(false),
     max_downloads: model.number().default(5),
     expires_after_days: model.number().nullable(),
   })

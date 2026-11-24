@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { listProducts } from "@lib/data/products"
+import { listProducts, retrieveProductClassification } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
@@ -120,6 +120,8 @@ export default async function ProductPage(props: Props) {
     notFound()
   }
 
+  const classification = await retrieveProductClassification(pricedProduct.id)
+
   const origin = await getSiteOrigin()
   const structuredData = buildProductStructuredData({
     product: pricedProduct,
@@ -139,6 +141,7 @@ export default async function ProductPage(props: Props) {
         product={pricedProduct}
         region={region}
         countryCode={params.countryCode}
+        classification={classification}
       />
     </>
   )

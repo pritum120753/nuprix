@@ -73,7 +73,7 @@ const StoreHits = ({ hitsPerPage, currencyCode }: StoreHitsProps) => {
         </Text>
       ) : (
         <ul
-          className="grid grid-cols-2 w-full small:grid-cols-3 medium:grid-cols-4 gap-x-6 gap-y-8"
+          className="grid w-full grid-cols-2 gap-x-3 gap-y-5 small:grid-cols-3 small:gap-x-5 small:gap-y-8 medium:grid-cols-4"
           data-testid="products-list"
         >
           {items.map((hit) =>
@@ -83,18 +83,21 @@ const StoreHits = ({ hitsPerPage, currencyCode }: StoreHitsProps) => {
                   href={`/products/${hit.handle}`}
                   className="group"
                 >
-                  <div data-testid="product-wrapper">
+                  <article
+                    className="rounded-[16px] border border-nuprix-line bg-white p-2 shadow-[0_1px_2px_rgba(15,23,42,.03)] transition duration-300 group-hover:-translate-y-1 group-hover:border-nuprix-indigo/30 group-hover:shadow-[0_18px_40px_rgba(15,23,42,.10)]"
+                    data-testid="product-wrapper"
+                  >
                     <Thumbnail thumbnail={hit.thumbnail} size="full" />
-                    <div className="flex txt-compact-medium mt-4 justify-between">
+                    <div className="flex txt-compact-medium mt-4 justify-between gap-3 px-1 pb-1">
                       <Text
-                        className="text-ui-fg-subtle"
+                        className="line-clamp-2 font-semibold leading-5 text-nuprix-charcoal"
                         data-testid="product-title"
                       >
                         {hit.title}
                       </Text>
                       <HitPrice hit={hit} currencyCode={currencyCode} />
                     </div>
-                  </div>
+                  </article>
                 </LocalizedClientLink>
               </li>
             ) : null

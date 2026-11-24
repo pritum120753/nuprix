@@ -1,125 +1,93 @@
-import { Heading } from "@modules/common/components/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import {
+  BadgeCheck,
+  Bot,
+  Boxes,
+  ChevronRight,
+  CreditCard,
+  Crown,
+  KeyRound,
+  Laptop,
+  PackageCheck,
+  ShoppingBag,
+  Sparkles,
+  Zap,
+} from "lucide-react"
 
-const benefits = [
+const promoCards = [
   {
-    number: "01",
-    title: "Browse your way",
-    description: "Find useful products across technology, home, fashion, and more.",
+    title: "Instant license keys",
+    detail: "Software & digital products",
+    href: "/store",
+    icon: KeyRound,
+    tone: "bg-violet-600",
   },
   {
-    number: "02",
-    title: "Physical and digital",
-    description: "Shop shippable products and digital downloads in one catalog.",
+    title: "AI tools & subscriptions",
+    detail: "Verified accounts and access",
+    href: "/store",
+    icon: Bot,
+    tone: "bg-nuprix-indigo",
   },
   {
-    number: "03",
-    title: "Choose with confidence",
-    description: "Review product information and available options before you buy.",
+    title: "Verified dropship gear",
+    detail: "Fast, trackable physical delivery",
+    href: "/store",
+    icon: PackageCheck,
+    tone: "bg-emerald-600",
   },
-]
+] as const
 
-const categories = [
-  { name: "Electronics", detail: "Gadgets and tech", tone: "bg-[#dce9dc] text-[#203b29]" },
-  { name: "Home & Living", detail: "Everyday essentials", tone: "bg-[#e9e3fa] text-[#39304f]" },
-  { name: "Fashion", detail: "Style and accessories", tone: "bg-[#f5e5d7] text-[#68452e]" },
-  { name: "Digital Goods", detail: "Files and resources", tone: "bg-[#dce8f4] text-[#29445f]" },
-]
+const iconCategories = [
+  { name: "Top-Up", icon: CreditCard },
+  { name: "Software", icon: Laptop },
+  { name: "AI Tools", icon: Bot },
+  { name: "Subscriptions", icon: Crown },
+  { name: "License Keys", icon: KeyRound },
+  { name: "Physical Gear", icon: ShoppingBag },
+] as const
 
 const Hero = () => {
   return (
-    <div className="bg-[#f7f7f2] text-[#17211b]">
-      <section className="relative isolate overflow-hidden" aria-labelledby="home-hero-title">
-        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-          <div className="absolute -right-40 -top-48 h-[34rem] w-[34rem] rounded-full bg-[#d9eddf] blur-3xl" />
-          <div className="absolute -bottom-64 left-[22%] h-[34rem] w-[34rem] rounded-full bg-[#e9e3fa] blur-3xl" />
-          <div className="absolute inset-0 opacity-[0.18] [background-image:radial-gradient(#53645a_0.7px,transparent_0.7px)] [background-size:22px_22px]" />
-        </div>
-
-        <div className="content-container grid items-center gap-12 py-14 small:min-h-[560px] small:grid-cols-[1.1fr_.9fr] small:py-20">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#cbd8cd] bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#42644d]">
-              <span className="h-2 w-2 rounded-full bg-[#5c9b6c]" />
-              Physical finds. Digital downloads.
-            </span>
-
-            <Heading id="home-hero-title" level="h1" className="mt-7 max-w-2xl text-5xl font-semibold leading-[1.04] tracking-[-0.055em] text-[#17211b] small:text-7xl">
-              Everyday finds.
-              <span className="block text-[#548365]">Digital discoveries.</span>
-            </Heading>
-
-            <p className="mt-7 max-w-xl text-base leading-8 text-[#5d6a60] small:text-lg">
-              Explore physical products and digital downloads across technology,
-              lifestyle, home, fashion, and more.
-            </p>
-
-            <div className="mt-9 flex flex-wrap items-center gap-4">
-              <LocalizedClientLink
-                href="/store"
-                className="inline-flex min-h-12 items-center justify-center rounded-md bg-[#203b29] px-6 text-base font-semibold text-white transition-colors hover:bg-[#31563c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#548365] focus-visible:ring-offset-2"
-              >
-                Browse all products
-              </LocalizedClientLink>
-              <LocalizedClientLink
-                href="/search"
-                className="inline-flex min-h-12 items-center rounded-md px-4 text-sm font-semibold text-[#294b35] transition-colors hover:bg-white/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#548365] focus-visible:ring-offset-2"
-              >
-                Search Nuprix <span className="ml-2" aria-hidden="true">→</span>
-              </LocalizedClientLink>
-            </div>
-
-            <p className="mt-8 text-xs font-medium tracking-wide text-[#68766b]">
-              SHOP PRODUCTS <span className="mx-2">·</span> DOWNLOAD DIGITAL GOODS
-            </p>
-          </div>
-
-          <div className="relative mx-auto w-full max-w-[470px]">
-            <div className="absolute -inset-5 rotate-[-5deg] rounded-[2rem] bg-[#dce9dc]" />
-            <div className="relative overflow-hidden rounded-[1.65rem] border border-white/80 bg-[#172b20] p-6 text-white shadow-[0_28px_80px_rgba(27,52,35,0.18)] small:p-8">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#b8d3bd]">The Nuprix marketplace</span>
-                <span className="rounded-full border border-white/20 px-3 py-1 text-[10px] uppercase tracking-widest text-[#d6e7d8]">Explore</span>
-              </div>
-              <div className="mt-10">
-                <div className="text-[11px] uppercase tracking-[0.25em] text-[#a9c6ae]">Find your next favorite</div>
-                <div className="mt-3 text-4xl font-semibold leading-[1.05] tracking-[-0.05em] small:text-5xl">
-                  Shop what you need.
-                  <span className="block text-[#b8e0bd]">Discover what you love.</span>
-                </div>
-                <p className="mt-5 max-w-xs text-sm leading-6 text-[#d0ddd1]">
-                  Browse a mix of physical products and downloadable goods.
+    <section className="border-b border-nuprix-line bg-nuprix-ivory" aria-label="Marketplace promotions">
+      <div className="content-container py-4 small:py-5">
+        <div className="grid grid-cols-1 gap-3 small:grid-cols-3">
+          {promoCards.map(({ title, detail, href, icon: Icon, tone }) => (
+            <LocalizedClientLink
+              key={title}
+              href={href}
+              className={`${tone} group relative flex min-h-[108px] items-center overflow-hidden rounded-xl px-5 py-4 text-white shadow-[0_8px_24px_rgba(15,23,42,.10)] transition duration-200 hover:-translate-y-0.5`}
+            >
+              <div className="relative z-10 min-w-0 pr-12">
+                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/75">
+                  <Zap className="h-3 w-3" aria-hidden="true" />
+                  Instant marketplace
                 </p>
+                <h2 className="mt-2 text-base font-bold leading-5 small:text-lg">{title}</h2>
+                <p className="mt-1 text-xs text-white/80">{detail}</p>
               </div>
-              <ul className="mt-9 grid grid-cols-2 gap-3" aria-label="Examples of what you can discover">
-                {categories.map((category) => (
-                  <li key={category.name} className={`rounded-2xl p-4 ${category.tone}`}>
-                    <div className="text-sm font-semibold">{category.name}</div>
-                    <div className="mt-2 text-xs opacity-75">{category.detail}</div>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-5 flex items-center justify-between border-t border-white/15 pt-4 text-xs text-[#c4d6c7]">
-                <span>Physical + digital</span><span aria-hidden="true">✳</span><span>Nuprix</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-[#e3e8df] bg-white/65">
-        <div className="content-container grid gap-7 py-9 small:grid-cols-3 small:gap-10 small:py-11">
-          {benefits.map((benefit) => (
-            <article key={benefit.number} className="flex gap-4">
-              <span className="pt-1 text-xs font-semibold tracking-widest text-[#71917a]">{benefit.number}</span>
-              <div>
-                <h2 className="text-sm font-semibold text-[#24372a]">{benefit.title}</h2>
-                <p className="mt-1 max-w-xs text-sm leading-6 text-[#758078]">{benefit.description}</p>
-              </div>
-            </article>
+              <span className="absolute right-4 grid h-12 w-12 place-items-center rounded-full border border-white/20 bg-white/10">
+                <Icon className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <ChevronRight className="absolute bottom-3 right-3 h-4 w-4 translate-x-1 opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100" aria-hidden="true" />
+            </LocalizedClientLink>
           ))}
         </div>
-      </section>
-    </div>
+
+        <nav className="no-scrollbar mt-3 flex overflow-x-auto rounded-xl border border-nuprix-line bg-white p-2" aria-label="Product categories">
+          {iconCategories.map(({ name, icon: Icon }) => (
+            <LocalizedClientLink
+              key={name}
+              href="/store"
+              className="flex min-w-[112px] flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-bold text-nuprix-muted transition hover:bg-nuprix-mist hover:text-nuprix-indigo small:min-w-0 small:text-sm"
+            >
+              <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {name}
+            </LocalizedClientLink>
+          ))}
+        </nav>
+      </div>
+    </section>
   )
 }
 

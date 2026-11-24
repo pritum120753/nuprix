@@ -1,7 +1,8 @@
 "use client"
 
-import { isAdyen, isManual, isStripeLike } from "@lib/constants"
+import { isAdyen, isManual, isSslcommerz, isStripeLike } from "@lib/constants"
 import { placeOrder } from "@lib/data/cart"
+import { getCartDeliverySplit } from "@lib/util/product"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@modules/common/components/ui"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
@@ -20,14 +21,18 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   cart,
   "data-testid": dataTestId,
 }) => {
+  const { isDigitalOnly } = getCartDeliverySplit(cart?.items)
   const notReady =
     !cart ||
     !cart.shipping_address ||
     !cart.billing_address ||
     !cart.email ||
-    (cart.shipping_methods?.length ?? 0) < 1
+    (!isDigitalOnly && (cart.shipping_methods?.length ?? 0) < 1)
 
-  const paymentSession = cart.payment_collection?.payment_sessions?.[0]
+  const paymentSession =
+    cart.payment_collection?.payment_sessions?.find(
+      (session) => session.status === "pending"
+    ) ?? cart.payment_collection?.payment_sessions?.[0]
 
   switch (true) {
     case isStripeLike(paymentSession?.provider_id):
@@ -43,6 +48,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
         <AdyenPaymentButton
           notReady={notReady}
           cart={cart}
+          data-testid={dataTestId}
+        />
+      )
+    case isSslcommerz(paymentSession?.provider_id):
+      return (
+        <SslcommerzPaymentButton
+          notReady={notReady}
+          paymentSession={paymentSession}
           data-testid={dataTestId}
         />
       )
@@ -204,6 +217,61 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
       <ErrorMessage
         error={errorMessage}
         data-testid="manual-payment-error-message"
+      />
+    </>
+  )
+}
+
+const SslcommerzPaymentButton = ({
+  notReady,
+  paymentSession,
+  "data-testid": dataTestId,
+}: {
+  notReady: boolean
+  paymentSession?: HttpTypes.StorePaymentSession
+  "data-testid"?: string
+}) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const handlePayment = () => {
+    setErrorMessage(null)
+    const rawUrl =
+      typeof paymentSession?.data?.gateway_url === "string"
+        ? paymentSession.data.gateway_url
+        : ""
+
+    try {
+      const parsed = new URL(rawUrl)
+      if (
+        parsed.protocol !== "https:" ||
+        (!parsed.hostname.endsWith(".sslcommerz.com") &&
+          parsed.hostname !== "sslcommerz.com")
+      ) {
+        setErrorMessage("Invalid SSLCommerz gateway URL.")
+        return
+      }
+      setSubmitting(true)
+      window.location.assign(parsed.toString())
+    } catch {
+      setErrorMessage("SSLCommerz payment session is not ready yet.")
+    }
+  }
+
+  return (
+    <>
+      <Button
+        disabled={notReady}
+        isLoading={submitting}
+        onClick={handlePayment}
+        size="large"
+        data-testid={dataTestId}
+      >
+        Pay with SSLCommerz
+      </Button>
+      <ErrorMessage
+        error={errorMessage}
+        data-testid="sslcommerz-payment-error-message"
       />
     </>
   )

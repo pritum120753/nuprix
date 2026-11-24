@@ -43,7 +43,7 @@ export default function RegenerateDownloadButton({
         onClick={regenerate}
         disabled={isPending}
         aria-label={buttonLabel}
-        className="rounded-full border border-[#b8c9ba] px-4 py-2 text-xs font-semibold text-[#42644d] transition hover:bg-[#f4f7f2] disabled:cursor-wait disabled:opacity-60"
+        className="min-h-[44px] rounded-lg border border-nuprix-line-strong bg-white px-4 py-2 text-xs font-bold text-nuprix-indigo transition hover:-translate-y-0.5 hover:border-nuprix-indigo/40 disabled:cursor-wait disabled:opacity-60"
       >
         {buttonLabel}
       </button>
@@ -51,7 +51,7 @@ export default function RegenerateDownloadButton({
         <p
           ref={messageRef}
           tabIndex={-1}
-          className={`text-xs ${success ? "text-[#42644d]" : "text-red-700"}`}
+          className={`text-xs ${success ? "text-emerald-700" : "text-red-700"}`}
           role={success ? "status" : "alert"}
           aria-live="polite"
         >

@@ -1,10 +1,8 @@
 import { Metadata } from "next"
 
 import { STORE_NAME } from "@lib/util/site"
-import { PlaceholderNotice, PolicyPage } from "@modules/policies/templates"
-
-export const dynamic = "force-static"
-export const revalidate = 60
+import ContactForm from "@modules/contact/components/contact-form"
+import { PolicyPage } from "@modules/policies/templates"
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -14,11 +12,11 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <PolicyPage title="Contact">
-      <PlaceholderNotice />
       <p>
-        Questions about an order, shipping or returns? Contact {STORE_NAME}{" "}
-        customer service and include your order number.
+        Questions about an order, shipping, digital downloads, or refunds? Send
+        a support request below and include your order ID if applicable.
       </p>
+      <ContactForm />
     </PolicyPage>
   )
 }

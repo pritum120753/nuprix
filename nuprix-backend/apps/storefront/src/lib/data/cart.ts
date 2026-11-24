@@ -15,6 +15,8 @@ import {
 } from "./cookies"
 import { getRegion } from "./regions"
 import { getLocale } from "./locale-actions"
+import { getCartDeliverySplit } from "@lib/util/product"
+import { retrieveProductClassification } from "./products"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -48,7 +50,31 @@ export async function retrieveCart(cartId?: string, fields?: string) {
       next,
       cache: "force-cache",
     })
-    .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart)
+    .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
+      const productIds = Array.from(
+        new Set(
+          (cart.items ?? [])
+            .map((item) => item.product?.id ?? item.variant?.product?.id)
+            .filter((id): id is string => Boolean(id))
+        )
+      )
+      const classifications = await Promise.all(
+        productIds.map(async (productId) => [
+          productId,
+          await retrieveProductClassification(productId),
+        ] as const)
+      )
+      const classificationByProductId = new Map(classifications)
+
+      for (const item of cart.items ?? []) {
+        const productId = item.product?.id ?? item.variant?.product?.id
+        if (productId) {
+          ;(item as typeof item & { classification?: unknown }).classification =
+            classificationByProductId.get(productId) ?? null
+        }
+      }
+      return cart
+    })
     .catch(() => null)
 }
 
@@ -278,7 +304,7 @@ export async function applyPromotions(codes: string[]) {
     .catch(medusaError)
 }
 
-export async function applyGiftCard(code: string) {
+export async function applyGiftCard(_code: string) {
   //   const cartId = getCartId()
   //   if (!cartId) return "No cartId cookie found"
   //   try {
@@ -290,7 +316,7 @@ export async function applyGiftCard(code: string) {
   //   }
 }
 
-export async function removeDiscount(code: string) {
+export async function removeDiscount(_code: string) {
   // const cartId = getCartId()
   // if (!cartId) return "No cartId cookie found"
   // try {
@@ -302,8 +328,8 @@ export async function removeDiscount(code: string) {
 }
 
 export async function removeGiftCard(
-  codeToRemove: string,
-  giftCards: any[]
+  _codeToRemove: string,
+  _giftCards: unknown[]
   // giftCards: GiftCard[]
 ) {
   //   const cartId = getCartId()
@@ -328,8 +354,8 @@ export async function submitPromotionForm(
   const code = formData.get("code") as string
   try {
     await applyPromotions([code])
-  } catch (e: any) {
-    return e.message
+  } catch (e: unknown) {
+    return e instanceof Error ? e.message : String(e)
   }
 }
 
@@ -344,45 +370,55 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       throw new Error("No existing cart found when setting addresses")
     }
 
-    const data = {
+    const getField = (key: string) => {
+      const value = formData.get(key)
+      return typeof value === "string" ? value : undefined
+    }
+
+    const data: HttpTypes.StoreUpdateCart = {
       shipping_address: {
-        first_name: formData.get("shipping_address.first_name"),
-        last_name: formData.get("shipping_address.last_name"),
-        address_1: formData.get("shipping_address.address_1"),
+        first_name: getField("shipping_address.first_name"),
+        last_name: getField("shipping_address.last_name"),
+        address_1: getField("shipping_address.address_1"),
         address_2: "",
-        company: formData.get("shipping_address.company"),
-        postal_code: formData.get("shipping_address.postal_code"),
-        city: formData.get("shipping_address.city"),
-        country_code: formData.get("shipping_address.country_code"),
-        province: formData.get("shipping_address.province"),
-        phone: formData.get("shipping_address.phone"),
+        company: getField("shipping_address.company"),
+        postal_code: getField("shipping_address.postal_code"),
+        city: getField("shipping_address.city"),
+        country_code: getField("shipping_address.country_code"),
+        province: getField("shipping_address.province"),
+        phone: getField("shipping_address.phone"),
       },
-      email: formData.get("email"),
-    } as any
+      email: getField("email"),
+    }
 
     const sameAsBilling = formData.get("same_as_billing")
     if (sameAsBilling === "on") data.billing_address = data.shipping_address
 
     if (sameAsBilling !== "on")
       data.billing_address = {
-        first_name: formData.get("billing_address.first_name"),
-        last_name: formData.get("billing_address.last_name"),
-        address_1: formData.get("billing_address.address_1"),
+        first_name: getField("billing_address.first_name"),
+        last_name: getField("billing_address.last_name"),
+        address_1: getField("billing_address.address_1"),
         address_2: "",
-        company: formData.get("billing_address.company"),
-        postal_code: formData.get("billing_address.postal_code"),
-        city: formData.get("billing_address.city"),
-        country_code: formData.get("billing_address.country_code"),
-        province: formData.get("billing_address.province"),
-        phone: formData.get("billing_address.phone"),
+        company: getField("billing_address.company"),
+        postal_code: getField("billing_address.postal_code"),
+        city: getField("billing_address.city"),
+        country_code: getField("billing_address.country_code"),
+        province: getField("billing_address.province"),
+        phone: getField("billing_address.phone"),
       }
     await updateCart(data)
-  } catch (e: any) {
-    return e.message
+  } catch (e: unknown) {
+    return e instanceof Error ? e.message : String(e)
   }
 
+  const cart = await retrieveCart()
+  const nextStep = getCartDeliverySplit(cart?.items).isDigitalOnly
+    ? "payment"
+    : "delivery"
+
   redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
+    `/${formData.get("shipping_address.country_code")}/checkout?step=${nextStep}`
   )
 }
 

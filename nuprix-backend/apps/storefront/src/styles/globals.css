@@ -49,13 +49,85 @@
   }
 }
 
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: #F8FAFC;
+    color: #0F172A;
+  }
+
+  :focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: #DBEAFE;
+    color: #0F172A;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
 @layer components {
   .content-container {
-    @apply max-w-[1440px] w-full mx-auto px-6;
+    @apply max-w-[1440px] w-full mx-auto px-4 xsmall:px-6 small:px-8;
+  }
+
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-nuprix-forest focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.2em] text-nuprix-leaf;
+  }
+
+  .heading-display {
+    @apply font-display font-medium tracking-[-0.02em] text-nuprix-forest;
+  }
+
+  .surface-card {
+    @apply rounded-[20px] border border-nuprix-line bg-white shadow-card;
+  }
+
+  .glass-panel {
+    @apply border border-white/70 bg-white/80 shadow-card backdrop-blur-xl;
+  }
+
+  .section-kicker {
+    @apply text-[11px] font-bold uppercase tracking-[0.18em] text-nuprix-pine;
+  }
+
+  .primary-action {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-nuprix-forest px-6 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(22,53,40,0.16)] transition duration-200 hover:-translate-y-0.5 hover:bg-nuprix-pine hover:shadow-lift focus-visible:outline-none;
+  }
+
+  .secondary-action {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-nuprix-line-strong bg-white px-5 text-sm font-semibold text-nuprix-forest transition duration-200 hover:-translate-y-0.5 hover:border-nuprix-moss hover:bg-nuprix-paper;
+  }
+
+  .link-underline {
+    @apply font-semibold text-nuprix-pine underline decoration-nuprix-line-strong underline-offset-4 transition-colors hover:decoration-nuprix-pine;
   }
 
   .contrast-btn {
-    @apply px-4 py-2 border border-black rounded-full hover:bg-black hover:text-white transition-colors duration-200 ease-in;
+    @apply px-4 py-2 border border-nuprix-forest rounded-full hover:bg-nuprix-forest hover:text-white transition-colors duration-200 ease-in;
+  }
+
+  .portal-input {
+    @apply min-h-[44px] w-full rounded-md border border-nuprix-line bg-white px-3 py-2 text-sm text-nuprix-ink shadow-none outline-none transition-colors focus:border-nuprix-moss focus:ring-1 focus:ring-nuprix-moss;
   }
 
   .text-xsmall-regular {

@@ -7,6 +7,7 @@ jest.mock("resend", () => ({
 }))
 
 import ResendNotificationProviderService from "../service"
+import { renderTemplate } from "../templates"
 
 const logger = { error: jest.fn() } as never
 const options = { api_key: "re_x", from: "Nuprix <orders@example.com>" }
@@ -46,6 +47,28 @@ describe("ResendNotificationProviderService", () => {
         to: ["buyer@example.com"],
       })
     )
+  })
+
+  it("escapes vendor product approval and rejection template values", () => {
+    const approved = renderTemplate("vendor-product-approved", {
+      vendor_name: "Studio <script>alert(1)</script>",
+      product_id: "<img src=x onerror=alert(1)>",
+      commission_rate_bps: 1250,
+    })
+    expect(approved?.html).toContain("Studio &lt;script&gt;")
+    expect(approved?.html).toContain("&lt;img src=x onerror=alert(1)&gt;")
+    expect(approved?.html).not.toContain("<script>")
+    expect(approved?.html).toContain("12.50%")
+
+    const rejected = renderTemplate("vendor-product-rejected", {
+      vendor_name: "Studio & Co",
+      product_id: "prod_<b>unsafe</b>",
+      rejection_reason: "Fix <script>alert(1)</script> first",
+    })
+    expect(rejected?.html).toContain("Studio &amp; Co")
+    expect(rejected?.html).toContain("prod_&lt;b&gt;unsafe&lt;/b&gt;")
+    expect(rejected?.html).toContain("Fix &lt;script&gt;")
+    expect(rejected?.html).not.toContain("<script>")
   })
 
   it("throws for an unknown template without calling Resend", async () => {

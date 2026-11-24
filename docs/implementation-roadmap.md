@@ -10,7 +10,7 @@ This roadmap divides delivery into eight independently reviewable phases. Each p
 
 ## Phase 2 — Commerce rules and customer journey completion
 
-**Status: In progress.** Complete catalog, cart, checkout, account, order-history, and support journeys using existing Medusa capabilities and truthful generic UI. Capture launch market, currency, product classification, mixed-cart rules, tax, refund, license, and shipping choices as unresolved inputs when implementation depends on them.
+**Status: In progress.** Cart quantity changes and item removal are serialized; quantity controls provide accessible labels and update feedback. Continue catalog, checkout, account, order-history, and support journeys using existing Medusa capabilities and truthful generic UI. Capture launch market, currency, product classification, mixed-cart rules, tax, refund, license, and shipping choices as unresolved inputs when implementation depends on them.
 
 ## Phase 3 — Marketplace core and operator workflows
 
@@ -26,11 +26,13 @@ This roadmap divides delivery into eight independently reviewable phases. Each p
 
 ## Phase 6 — Payments, refunds, and marketplace settlement
 
-**Status: Planned; provider, credentials, and settlement decisions are unresolved.** Choose launch payment methods and configure matching backend providers, webhook validation, failure recovery, and refunds. Decide whether suppliers are paid off-platform or through marketplace payouts. If platform-managed, implement commissions, balances, payout reconciliation, dispute operations, and applicable compliance controls. Never activate live payments without approval.
+**Status: In progress; vendor payout requests and approved-payout CSV export implemented.** Vendor requests support bank transfer and bKash, Nagad, or Rocket destination snapshots; MFS requests require a valid Bangladesh mobile number and BDT. Admin operators can export approved payouts for manual disbursement. Provider, credentials, payment policies, automated disbursement, refunds, and dispute operations remain unresolved. These changes do not activate live payment gateways or transfer funds.
 
 ## Phase 7 — Digital delivery hardening
 
-**Status: In progress.** Harden payment-gated entitlements, authenticated customer link regeneration, payment-aware download status, and safe email handling. Download-token request-path redaction, shared status precedence, zero-total/multiple-payment handling, and cross-process locking are included in this hardening pass. Production still requires a PostgreSQL-backed locking provider and a verified private storage configuration; refund/cancel revocation, auditability, and recovery procedures need end-to-end verification before this phase is complete. `DIGITAL_ALLOW_UNCAPTURED` is development/test-only and must never bypass production payment checks.
+**Status: In progress.** Digital files can opt into per-order cryptographically random license keys encrypted at rest; customer downloads expose only active keys, and refund/cancel revocation invalidates them. Successful download telemetry records event time, masked IP, user-agent, and entitlement ID asynchronously alongside the signed-URL redirect. Malware scanning, resumable large-asset streaming, external license-provider activation/revocation, and broader audit/recovery procedures remain unresolved/out of scope for this increment.
+
+**Additional hardening in progress:** Payment-gated entitlements, authenticated customer link regeneration, payment-aware download status, and safe email handling. Download-token request-path redaction, shared status precedence, zero-total/multiple-payment handling, and cross-process locking are included. Production still requires a PostgreSQL-backed locking provider and a verified private storage configuration; refund/cancel revocation, auditability, and recovery procedures need end-to-end verification before this phase is complete. `DIGITAL_ALLOW_UNCAPTURED` is development/test-only and must never bypass production payment checks.
 
 ## Phase 8 — Launch readiness and controlled rollout
 

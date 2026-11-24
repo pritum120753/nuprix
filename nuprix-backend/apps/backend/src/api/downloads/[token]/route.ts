@@ -9,8 +9,6 @@ import { PAYMENT_COLLECTION_FIELDS } from "../../../lib/order-payment"
 import { DIGITAL_DELIVERY_MODULE } from "../../../modules/digital-delivery"
 import type DigitalDeliveryModuleService from "../../../modules/digital-delivery/service"
 
-// Public on purpose: the unguessable token in the URL is the credential, so
-// it works from an email link with no publishable key or login.
 export const AUTHENTICATE = false
 
 const MESSAGES = {
@@ -49,11 +47,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     return blockedStatusResponse("invalid", res)
   }
 
-  // Serialise per entitlement so two parallel requests cannot both pass the
-  // limit check and exceed max_downloads. The signed URL is created before the
-  // download is counted, so a storage failure never costs the customer a try.
   let outcome:
-    | { ok: true; url: string }
+    | { ok: true; url: string; entitlementId: string }
     | {
         ok: false
         status: Exclude<CustomerDownloadStatus, "available"> | "invalid"
@@ -75,10 +70,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
           fields: ["id", "status", "total", ...PAYMENT_COLLECTION_FIELDS],
           filters: { id: currentEntitlement.order_id },
         })
-        const currentOrder = currentOrders[0]
         const status = resolveDownloadStatus(
           currentEntitlement,
-          currentOrder ?? null
+          currentOrders[0] ?? null
         )
         if (status !== "available") {
           return { ok: false as const, status }
@@ -86,7 +80,11 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         const file = await service.retrieveDigitalFile(check.digital_file_id)
         const url = await createDownloadUrl(file.file_key, file.file_name)
         await service.recordDownload(check.entitlement_id)
-        return { ok: true as const, url }
+        return {
+          ok: true as const,
+          url,
+          entitlementId: check.entitlement_id,
+        }
       },
       { timeout: 5 }
     )
@@ -100,6 +98,23 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   if (!outcome.ok) {
     return blockedStatusResponse(outcome.status, res)
   }
+
+  const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER)
+  void (async () => {
+    try {
+      await service.recordDownloadEvent({
+        entitlement_id: outcome.entitlementId,
+        ip_address: req.ip,
+        user_agent: req.headers["user-agent"],
+      })
+    } catch (error: unknown) {
+      logger.error(
+        `Failed to record download event: ${
+          error instanceof Error ? error.message : "unknown error"
+        }`
+      )
+    }
+  })()
 
   res.setHeader("Cache-Control", "no-store")
   res.setHeader("Referrer-Policy", "no-referrer")

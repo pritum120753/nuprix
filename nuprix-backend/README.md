@@ -63,6 +63,17 @@ The fastest way to get started is deploying with [Medusa Cloud](https://cloud.me
 
 ### Local Installation
 
+After dependencies are installed, start both the Next.js storefront and
+Medusa backend from the repository root on Windows:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start-dev.ps1
+```
+
+This opens the storefront at `http://localhost:3000` and Medusa Admin at
+`http://localhost:9000/app`, clearing stale processes from ports 3000 and 9000
+before launching each server.
+
 > **Prerequisites:**
 >
 > - [Node.js](https://nodejs.org/) v22.22+
@@ -179,6 +190,15 @@ The storefront is configured via environment variables in `apps/storefront/.env.
 | `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key (optional) | — |
 | `NEXT_PUBLIC_ADYEN_CLIENT_KEY` | Adyen client key (optional), when the Adyen payment provider is registered in the backend | — |
 | `NEXT_PUBLIC_ADYEN_ENVIRONMENT` | Adyen environment, `test` or `live` (optional) | `test` |
+
+Digital files can optionally generate a unique customer license key per order.
+Set `DIGITAL_LICENSE_ENCRYPTION_KEY` in the backend environment to a persistent
+64-character hexadecimal key (generate one with `openssl rand -hex 32`) before
+enabling this option in the admin. Keep the key backed up and do not rotate it
+without re-encrypting existing licenses. Set `DIGITAL_DOWNLOAD_IP_SALT` to a
+persistent secret so download telemetry can store SHA-256 IP hashes. Telemetry
+stores the event time, entitlement ID, salted IP hash, and truncated user-agent
+string.
 
 ## Resources
 

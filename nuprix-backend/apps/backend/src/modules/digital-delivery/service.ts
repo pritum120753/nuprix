@@ -4,9 +4,18 @@ import {
   type DownloadOrderStatusInput,
   resolveDownloadStatus,
 } from "../../lib/customer-download-status"
+import {
+  hashIpAddress,
+  normalizeUserAgent,
+} from "../../lib/download-analytics"
 import { hashDownloadToken, newDownloadToken } from "../../lib/download-token"
+import {
+  decryptLicenseKey,
+  generateLicenseKey,
+} from "../../lib/license-keys"
 import DigitalFile from "./models/digital-file"
 import DownloadEntitlement from "./models/download-entitlement"
+import DownloadEvent from "./models/download-event"
 
 export type GrantInput = {
   order_id: string
@@ -15,6 +24,13 @@ export type GrantInput = {
   digital_file_id: string
   max_downloads: number
   expires_after_days?: number | null
+  generate_license_key?: boolean
+}
+
+export type DownloadEventInput = {
+  entitlement_id: string
+  ip_address?: string
+  user_agent?: string
 }
 
 export type DownloadCheck =
@@ -34,14 +50,14 @@ export type CustomerDownloadSummary = {
   last_downloaded_at: Date | null
   created_at: Date
   status: CustomerDownloadStatus
+  license_key: string | null
 }
 
 class DigitalDeliveryModuleService extends MedusaService({
   DigitalFile,
   DownloadEntitlement,
+  DownloadEvent,
 }) {
-  // Creates an entitlement and returns the raw token. The raw token exists
-  // only in this return value; it cannot be recovered later.
   async grant(input: GrantInput): Promise<{ id: string; token: string }> {
     if (!input.email) {
       throw new MedusaError(
@@ -51,9 +67,10 @@ class DigitalDeliveryModuleService extends MedusaService({
     }
 
     const token = newDownloadToken()
-    const expires_at = input.expires_after_days
+    const expiresAt = input.expires_after_days
       ? new Date(Date.now() + input.expires_after_days * 24 * 60 * 60 * 1000)
       : null
+    const license = input.generate_license_key ? generateLicenseKey() : null
 
     const created = await this.createDownloadEntitlements({
       order_id: input.order_id,
@@ -61,14 +78,15 @@ class DigitalDeliveryModuleService extends MedusaService({
       email: input.email,
       digital_file_id: input.digital_file_id,
       token_hash: hashDownloadToken(token),
+      license_key_encrypted: license?.encrypted ?? null,
+      license_key_hash: license?.hash ?? null,
       max_downloads: input.max_downloads,
-      expires_at,
+      expires_at: expiresAt,
     })
 
     return { id: created.id, token }
   }
 
-  // Returns only safe display fields; never return token_hash or a raw token.
   async listCustomerDownloads(
     customerId: string,
     orderById: ReadonlyMap<string, DownloadOrderStatusInput>
@@ -98,13 +116,13 @@ class DigitalDeliveryModuleService extends MedusaService({
       ? await this.listDigitalFiles({ id: fileIds }, { take: fileIds.length })
       : []
     const fileById = new Map(files.map((file) => [file.id, file]))
+
     return entitlements.map((item) => {
       const file = fileById.get(item.digital_file_id)
       const status = resolveDownloadStatus(
         item,
         orderById.get(item.order_id) ?? null
       )
-
       return {
         id: item.id,
         order_id: item.order_id,
@@ -118,11 +136,23 @@ class DigitalDeliveryModuleService extends MedusaService({
         last_downloaded_at: item.last_downloaded_at,
         created_at: item.created_at,
         status,
+        license_key:
+          status === "available" && item.license_key_encrypted
+            ? decryptLicenseKey(item.license_key_encrypted)
+            : null,
       }
     })
   }
 
-  // Replaces the token of an existing entitlement (for "resend my link").
+  async recordDownloadEvent(input: DownloadEventInput): Promise<void> {
+    await this.createDownloadEvents({
+      entitlement_id: input.entitlement_id,
+      occurred_at: new Date(),
+      ip_hash: hashIpAddress(input.ip_address),
+      user_agent: normalizeUserAgent(input.user_agent),
+    })
+  }
+
   async rotateToken(
     entitlement_id: string
   ): Promise<{ token: string; previous_token_hash: string }> {
@@ -135,8 +165,6 @@ class DigitalDeliveryModuleService extends MedusaService({
     return { token, previous_token_hash: entitlement.token_hash }
   }
 
-  // Restore the prior link only if the failed email attempt still owns the
-  // current token hash. Callers serialize this with the download lock.
   async restoreRotatedToken(
     entitlement_id: string,
     token: string,
@@ -157,7 +185,6 @@ class DigitalDeliveryModuleService extends MedusaService({
       { token_hash: hashDownloadToken(token) },
       { take: 1 }
     )
-
     if (!entitlement) {
       return { ok: false, reason: "invalid" }
     }
@@ -175,6 +202,30 @@ class DigitalDeliveryModuleService extends MedusaService({
       download_count: entitlement.download_count + 1,
       last_downloaded_at: new Date(),
     })
+  }
+
+  async revokeByOrder(order_id: string): Promise<{ revoked_count: number }> {
+    if (!order_id) {
+      return { revoked_count: 0 }
+    }
+    const entitlements = await this.listDownloadEntitlements(
+      { order_id },
+      { take: 500 }
+    )
+    const now = new Date()
+    const active = entitlements.filter((item) => !item.revoked_at)
+    if (!active.length) {
+      return { revoked_count: 0 }
+    }
+    await this.updateDownloadEntitlements(
+      active.map((item) => ({
+        id: item.id,
+        revoked_at: now,
+        license_key_encrypted: null,
+        license_key_hash: null,
+      }))
+    )
+    return { revoked_count: active.length }
   }
 }
 

@@ -23,7 +23,7 @@ export default async function ProductRail({
   if (!pricedProducts?.length) {
     return (
       <section className="content-container py-12" role="status">
-        <p className="text-sm text-[#788279]">
+        <p className="text-sm text-nuprix-muted">
           No featured products are available in {collection.title} right now.
         </p>
         <div className="mt-3">
@@ -34,24 +34,21 @@ export default async function ProductRail({
   }
 
   return (
-    <section className="content-container py-12 small:py-20">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4 small:mb-10">
+    <section className="content-container py-8 small:py-10">
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#71917a]">
-            Explore the collection
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.18em] text-nuprix-indigo">
+            Trending now
           </p>
-          <h2 className="text-2xl font-semibold tracking-[-0.04em] text-[#172b20] small:text-3xl">
-            {collection.title}
+          <h2 className="text-2xl font-bold tracking-[-0.04em] text-nuprix-ink small:text-3xl">
+            Bestsellers
           </h2>
-          <p className="mt-2 max-w-lg text-sm leading-6 text-[#788279]">
-            Discover products selected to bring more convenience, creativity, and value to everyday life.
-          </p>
         </div>
         <InteractiveLink href={`/collections/${collection.handle}`}>
           View all products
         </InteractiveLink>
       </div>
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-10 small:grid-cols-3 small:gap-x-6 small:gap-y-14">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
         {pricedProducts.map((product) => (
           <li key={product.id} className="min-w-0">
             <ProductPreview product={product} region={region} isFeatured />

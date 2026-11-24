@@ -29,6 +29,10 @@ export const paymentInfoMap: Record<
     title: "Manual Payment",
     icon: <CreditCard />,
   },
+  pp_sslcommerz_sslcommerz: {
+    title: "SSLCommerz (bKash, Nagad, Cards)",
+    icon: <CreditCard />,
+  },
   // Add more payment providers here
 }
 
@@ -98,6 +102,10 @@ export const isStripeLike = (providerId?: string) => {
 
 export const isPaypal = (providerId?: string) => {
   return providerId?.startsWith("pp_paypal")
+}
+
+export const isSslcommerz = (providerId?: string) => {
+  return providerId?.startsWith("pp_sslcommerz")
 }
 export const isManual = (providerId?: string) => {
   return providerId?.startsWith("pp_system_default")

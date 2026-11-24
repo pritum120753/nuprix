@@ -14,6 +14,7 @@ export const CreateDigitalFileSchema = z.object({
   mime_type: z.string().max(100).optional(),
   size_bytes: z.number().int().nonnegative().optional(),
   license_note: z.string().max(1000).optional(),
+  generate_license_key: z.boolean().optional(),
   max_downloads: z.number().int().min(1).max(100).optional(),
   expires_after_days: z.number().int().min(1).max(3650).optional(),
 })

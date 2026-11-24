@@ -1,3 +1,4 @@
+const path = require("path")
 const checkEnvVariables = require("./check-env-variables")
 
 checkEnvVariables()
@@ -15,6 +16,14 @@ const nextConfig = {
   reactStrictMode: true,
   async headers() {
     return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
       {
         source: "/:path*",
         headers: [{ key: "Link", value: '</.well-known/ucp>; rel="ucp"' }],
@@ -46,7 +55,7 @@ const nextConfig = {
     },
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: {
     unoptimized: true,
@@ -73,6 +82,24 @@ const nextConfig = {
           ]
         : []),
     ],
+  },
+  // Pin React 19 in the monorepo so hoisted dependencies cannot pull React 18
+  // from the workspace root.
+  turbopack: {
+    resolveAlias: {
+      react: "./node_modules/react",
+      "react-dom": "./node_modules/react-dom",
+      "react/jsx-runtime": "./node_modules/react/jsx-runtime",
+      "react/jsx-dev-runtime": "./node_modules/react/jsx-dev-runtime",
+    },
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      react: path.resolve(__dirname, "node_modules/react"),
+      "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
+    }
+    return config
   },
 }
 

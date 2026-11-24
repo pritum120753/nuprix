@@ -59,10 +59,36 @@ Heading.displayName = "Heading"
 
 // Button Component
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "transparent"
+  variant?: "primary" | "secondary" | "transparent" | "danger"
   size?: "small" | "medium" | "large"
   isLoading?: boolean
 }
+
+/** Shared button styling, also usable on links that should look like buttons. */
+export const buttonClasses = ({
+  variant = "primary",
+  size = "medium",
+  className,
+}: {
+  variant?: ButtonProps["variant"]
+  size?: ButtonProps["size"]
+  className?: string
+} = {}) =>
+  clsx(
+    "inline-flex gap-2 items-center justify-center rounded-full font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nuprix-moss focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+    variant === "primary" &&
+      "bg-nuprix-forest text-white hover:bg-nuprix-pine",
+    variant === "secondary" &&
+      "bg-white text-nuprix-forest border border-nuprix-line-strong hover:bg-nuprix-mist",
+    variant === "transparent" &&
+      "bg-transparent text-nuprix-pine hover:bg-nuprix-mist",
+    variant === "danger" &&
+      "bg-white text-nuprix-danger border border-nuprix-danger/40 hover:bg-red-50",
+    size === "small" && "min-h-9 px-4 text-sm",
+    size === "medium" && "min-h-11 px-5 text-sm",
+    size === "large" && "min-h-12 px-6 text-base",
+    className
+  )
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -81,20 +107,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={disabled || isLoading}
-        className={clsx(
-          "inline-flex gap-2 items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-          variant === "primary" && "bg-black text-white hover:bg-gray-800",
-          variant === "secondary" &&
-            "bg-white text-black border border-gray-200 hover:bg-gray-50",
-          variant === "transparent" && "bg-transparent hover:bg-gray-100",
-          size === "small" && "h-8 px-3 text-sm",
-          size === "medium" && "h-10 px-4",
-          size === "large" && "h-12 px-6 text-lg",
-          className
-        )}
+        aria-busy={isLoading || undefined}
+        className={buttonClasses({ variant, size, className })}
         {...props}
       >
-        {isLoading ? "Loading..." : children}
+        {isLoading ? (
+          <>
+            <span
+              className="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
+              aria-hidden="true"
+            />
+            <span>Please wait…</span>
+          </>
+        ) : (
+          children
+        )}
       </button>
     )
   }
@@ -109,7 +136,10 @@ export const Container = forwardRef<HTMLDivElement, ContainerProps>(
     return (
       <div
         ref={ref}
-        className={clsx("bg-white rounded-lg p-4", className)}
+        className={clsx(
+          "bg-white rounded-2xl border border-nuprix-line p-4",
+          className
+        )}
         {...props}
       >
         {children}
@@ -130,13 +160,13 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
       <span
         ref={ref}
         className={clsx(
-          "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium",
-          color === "green" && "bg-green-100 text-green-700",
-          color === "red" && "bg-red-100 text-red-700",
-          color === "blue" && "bg-blue-100 text-blue-700",
-          color === "orange" && "bg-orange-100 text-orange-700",
-          color === "grey" && "bg-gray-100 text-gray-700",
-          color === "purple" && "bg-purple-100 text-purple-700",
+          "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+          color === "green" && "bg-nuprix-sage text-nuprix-forest",
+          color === "red" && "bg-red-50 text-nuprix-danger",
+          color === "blue" && "bg-nuprix-sky text-[#29445f]",
+          color === "orange" && "bg-nuprix-sand text-[#68452e]",
+          color === "grey" && "bg-nuprix-mist text-nuprix-muted",
+          color === "purple" && "bg-nuprix-lilac text-[#39304f]",
           className
         )}
         {...props}

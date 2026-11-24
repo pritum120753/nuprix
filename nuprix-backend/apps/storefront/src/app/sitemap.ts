@@ -3,11 +3,17 @@ import { listRegions } from "@lib/data/regions"
 import { getSiteOrigin, listCountryCodes } from "@lib/util/site"
 import type { MetadataRoute } from "next"
 
+export const dynamic = "force-dynamic"
+
 const STATIC_PATHS = [
   "",
   "/store",
+  "/about",
+  "/faq",
   "/shipping",
   "/returns",
+  "/refund-policy",
+  "/digital-license",
   "/terms",
   "/privacy",
   "/contact",
@@ -34,22 +40,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const [origin, regions, products, categories, collections] = await Promise.all([
     getSiteOrigin(),
-    listRegions(),
+    listRegions().catch(() => []),
     listAll<Entry>((offset) =>
       sdk.store.product
         .list({ ...query, offset })
         .then((res) => ({ items: res.products, count: res.count }))
-    ),
+    ).catch(() => []),
     listAll<Entry>((offset) =>
       sdk.store.category
         .list({ ...query, offset })
         .then((res) => ({ items: res.product_categories, count: res.count }))
-    ),
+    ).catch(() => []),
     listAll<Entry>((offset) =>
       sdk.store.collection
         .list({ ...query, offset })
         .then((res) => ({ items: res.collections, count: res.count }))
-    ),
+    ).catch(() => []),
   ])
 
   const toEntries = (base: string, prefix: string, items: Entry[]) =>

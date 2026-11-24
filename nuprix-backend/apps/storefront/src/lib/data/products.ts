@@ -4,6 +4,7 @@ import { sdk } from "@lib/config"
 import { OptionValueIds } from "@lib/util/product-option-filters"
 import { sortProducts } from "@lib/util/sort-products"
 import { HttpTypes } from "@medusajs/types"
+import { ProductClassification } from "@lib/util/product"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { getRegion, retrieveRegion } from "./regions"
@@ -148,4 +149,28 @@ export const listProductsWithSort = async ({
     nextPage,
     queryParams,
   }
+}
+
+export const retrieveProductClassification = async (
+  productId: string
+): Promise<ProductClassification | null> => {
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  const next = {
+    ...(await getCacheOptions("products")),
+    revalidate: 60,
+  }
+
+  return sdk.client
+    .fetch<ProductClassification>(
+      `/store/products/${productId}/classification`,
+      {
+        method: "GET",
+        headers,
+        next,
+      }
+    )
+    .catch(() => null)
 }
