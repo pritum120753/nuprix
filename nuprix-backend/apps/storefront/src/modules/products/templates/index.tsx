@@ -5,26 +5,26 @@ import ProductTabs from "@modules/products/components/product-tabs"
 import RelatedProducts from "@modules/products/components/related-products"
 import ProductInfo from "@modules/products/templates/product-info"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
-import { retrieveProductClassification } from "@lib/data/products"
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
+import type { ProductClassification } from "@lib/util/product"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   countryCode: string
+  classification: ProductClassification | null
 }
 
-const ProductTemplate: React.FC<ProductTemplateProps> = async ({
+const ProductTemplate: React.FC<ProductTemplateProps> = ({
   product,
   region,
   countryCode,
+  classification,
 }) => {
   if (!product || !product.id) {
     return notFound()
   }
-
-  const classification = await retrieveProductClassification(product.id)
 
   return (
     <div className="bg-nuprix-ivory py-6 small:py-10">

@@ -359,3 +359,12 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
   3. `npm run build` passed.
   4. Playwright desktop/mobile checks passed for catalog and product detail layouts.
   5. Authenticated downloads and vendor dashboard routes require a customer session and could not be visually opened in Playwright.
+
+### Storefront React child error & middleware hardening — 2026-11-24
+- **Status**: **Implemented**.
+- **Root cause**: `ProductTemplate` in `modules/products/templates/index.tsx` was declared `async` (returning a `Promise`) while typed as `React.FC` and rendered as a direct child of `ProductPage` — an "unawaited Promise rendered as a React child," surfacing as `Error: Objects are not valid as a React child`.
+- **Fix 1 (React child error)**: Moved `await retrieveProductClassification(product.id)` from `ProductTemplate` up to `products/[handle]/page.tsx` (`ProductPage`), which now awaits it and passes `classification` down as a prop. `ProductTemplate` is now a synchronous server component (no longer returns a Promise).
+- **Fix 2 (middleware getRegionMap)**: Wrapped the `fetch(`${BACKEND_URL}/store/regions`)` in `src/middleware.ts` `getRegionMap()` in try/catch. Transient connection-refused errors while the backend boots are caught cleanly; the current (possibly empty) region cache is returned so middleware keeps resolving `DEFAULT_REGION` instead of crashing the request.
+- **Verification**:
+  1. `npx tsc --noEmit` completed with 0 errors.
+  2. `npm run build` completed successfully (exit code 0), compiled in ~11s, TypeScript check finished, all static pages (14/14) and routes generated including `/[countryCode]/products/[handle]`.
