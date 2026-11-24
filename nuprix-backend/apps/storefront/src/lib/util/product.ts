@@ -1,6 +1,10 @@
 import { HttpTypes } from "@medusajs/types"
 
-export type ProductFulfillmentType = "digital" | "physical" | "mixed"
+export type ProductFulfillmentType =
+  | "digital"
+  | "physical"
+  | "mixed"
+  | "unknown"
 
 export interface ProductDigitalFileSummary {
   id: string
@@ -31,23 +35,30 @@ export const getProductFulfillmentType = (
   if (classification?.product_type) {
     return classification.product_type
   }
-  return "physical"
+  return "unknown"
 }
 
 export type LineItemWithProduct = {
   product?: HttpTypes.StoreProduct | null
   variant?: { product?: HttpTypes.StoreProduct | null } | null
   metadata?: Record<string, unknown> | null
+  classification?: ProductClassification | null
 }
 
 export const getLineItemFulfillmentType = (
   item: LineItemWithProduct
 ): ProductFulfillmentType => {
+  if (item.classification) {
+    return item.classification.product_type
+  }
   const product = item.product ?? item.variant?.product
   if (product) {
-    return getProductFulfillmentType(product)
+    return getProductFulfillmentType(
+      product,
+      item.classification
+    )
   }
-  return "physical"
+  return "unknown"
 }
 
 export const getCartDeliverySplit = (
@@ -55,6 +66,7 @@ export const getCartDeliverySplit = (
 ) => {
   let hasDigital = false
   let hasPhysical = false
+  let hasUnknown = false
 
   for (const item of items ?? []) {
     const type = getLineItemFulfillmentType(item)
@@ -63,7 +75,10 @@ export const getCartDeliverySplit = (
     } else if (type === "mixed") {
       hasDigital = true
       hasPhysical = true
+    } else if (type === "physical") {
+      hasPhysical = true
     } else {
+      hasUnknown = true
       hasPhysical = true
     }
   }
@@ -72,6 +87,7 @@ export const getCartDeliverySplit = (
     hasDigital,
     hasPhysical,
     isMixed: hasDigital && hasPhysical,
-    isDigitalOnly: hasDigital && !hasPhysical,
+    isDigitalOnly: hasDigital && !hasPhysical && !hasUnknown,
+    hasUnknown,
   }
 }

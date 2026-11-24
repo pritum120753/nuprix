@@ -14,11 +14,13 @@ const LABELS: Record<
     digital: "Digital · Download after payment",
     mixed: "Digital + Physical · Download & shipping",
     physical: "Physical · Ships to address",
+    unknown: "Fulfillment · Verification needed",
   },
   order: {
     digital: "Digital · Download in account once paid",
     mixed: "Digital + Physical · Download & shipment",
     physical: "Physical · Standard shipping",
+    unknown: "Fulfillment · Verification needed",
   },
 }
 
@@ -26,6 +28,7 @@ const COLORS: Record<ProductFulfillmentType, "blue" | "green"> = {
   digital: "blue",
   mixed: "blue",
   physical: "green",
+  unknown: "green",
 }
 
 const FulfillmentBadge = ({

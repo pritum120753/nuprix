@@ -16,6 +16,7 @@ import {
 import { getRegion } from "./regions"
 import { getLocale } from "./locale-actions"
 import { getCartDeliverySplit } from "@lib/util/product"
+import { retrieveProductClassification } from "./products"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -49,7 +50,31 @@ export async function retrieveCart(cartId?: string, fields?: string) {
       next,
       cache: "force-cache",
     })
-    .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart)
+    .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
+      const productIds = Array.from(
+        new Set(
+          (cart.items ?? [])
+            .map((item) => item.product?.id ?? item.variant?.product?.id)
+            .filter((id): id is string => Boolean(id))
+        )
+      )
+      const classifications = await Promise.all(
+        productIds.map(async (productId) => [
+          productId,
+          await retrieveProductClassification(productId),
+        ] as const)
+      )
+      const classificationByProductId = new Map(classifications)
+
+      for (const item of cart.items ?? []) {
+        const productId = item.product?.id ?? item.variant?.product?.id
+        if (productId) {
+          ;(item as typeof item & { classification?: unknown }).classification =
+            classificationByProductId.get(productId) ?? null
+        }
+      }
+      return cart
+    })
     .catch(() => null)
 }
 
