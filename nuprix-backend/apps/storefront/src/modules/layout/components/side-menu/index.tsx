@@ -43,7 +43,7 @@ const SideMenu = ({ regions, locales, currentLocale }: SideMenuProps) => {
                     <span className="h-0.5 w-full bg-current rounded-full" />
                     <span className="h-0.5 w-full bg-current rounded-full" />
                   </span>
-                  <span>Menu</span>
+                  <span className="hidden xsmall:inline">Catalog</span>
                 </Popover.Button>
               </div>
 

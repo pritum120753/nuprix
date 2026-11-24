@@ -3,7 +3,7 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
-import { ArrowUpRight, Download, Package } from "lucide-react"
+import { Package, Zap } from "lucide-react"
 import { getProductFulfillmentType } from "@lib/util/product"
 import { retrieveProductClassification } from "@lib/data/products"
 
@@ -19,67 +19,68 @@ export default async function ProductPreview({
   const { cheapestPrice } = getProductPrice({ product })
   const classification = await retrieveProductClassification(product.id)
   const fulfillmentType = getProductFulfillmentType(product, classification)
+  const deliveryText =
+    fulfillmentType === "digital"
+      ? "24/7 Auto-Delivery"
+      : fulfillmentType === "mixed"
+        ? "Digital + Shipping"
+        : fulfillmentType === "physical"
+          ? "Fast Shipping"
+          : "Fulfillment pending"
 
   return (
-    <LocalizedClientLink href={`/products/${product.handle}`} className="group block h-full">
-      <article className="flex h-full flex-col">
-        <div className="relative rounded-[16px] border border-nuprix-line bg-nuprix-mist p-1 transition duration-300 group-hover:-translate-y-1 group-hover:border-nuprix-line-strong group-hover:shadow-[0_18px_40px_rgba(15,23,42,.10)]">
+    <article className="group flex h-full flex-col rounded-xl border border-nuprix-line bg-white p-2 shadow-[0_1px_2px_rgba(15,23,42,.03)] transition duration-200 hover:-translate-y-0.5 hover:border-nuprix-indigo/25 hover:shadow-[0_12px_28px_rgba(15,23,42,.09)]">
+      <LocalizedClientLink href={`/products/${product.handle}`} className="block">
+        <div className="relative overflow-hidden rounded-lg border border-nuprix-line/80 bg-nuprix-mist">
           <Thumbnail
             thumbnail={product.thumbnail}
             images={product.images}
             alt={product.title}
             size="full"
             isFeatured={isFeatured}
-            className="rounded-[12px] bg-nuprix-mist p-0 shadow-none"
+            className="rounded-lg bg-nuprix-mist p-0 shadow-none"
           />
-          <span className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.10em] shadow-sm backdrop-blur ${
-            fulfillmentType === "digital"
-              ? "border-violet-200 bg-violet-50/95 text-violet-700"
-              : fulfillmentType === "mixed"
-                ? "border-indigo-200 bg-indigo-50/95 text-indigo-700"
-                : fulfillmentType === "physical"
-                  ? "border-emerald-200 bg-emerald-50/95 text-emerald-700"
-                  : "border-slate-200 bg-white/95 text-slate-600"
-          }`}>
-            {fulfillmentType === "digital" ? (
-              <Download className="h-3.5 w-3.5" aria-hidden="true" />
-            ) : (
-              <Package className="h-3.5 w-3.5" aria-hidden="true" />
-            )}
-            {fulfillmentType === "digital"
-              ? "Instant Digital"
-              : fulfillmentType === "mixed"
-                ? "Digital + Physical"
-                : fulfillmentType === "physical"
-                  ? "Ships Physical"
-                  : "Fulfillment pending"}
-          </span>
-          <span className="absolute bottom-3 right-3 grid h-10 w-10 translate-y-2 place-items-center rounded-full bg-nuprix-ink text-white opacity-0 shadow-lg transition duration-300 group-hover:translate-y-0 group-hover:opacity-100" aria-hidden="true">
-            <ArrowUpRight className="h-4 w-4" />
-          </span>
         </div>
+      </LocalizedClientLink>
 
-        <div className="flex flex-1 items-start justify-between gap-3 px-1 pt-4">
-          <div className="min-w-0">
-            <h3 className="line-clamp-2 text-sm font-bold leading-6 text-nuprix-ink transition-colors group-hover:text-nuprix-indigo small:text-base">
-              {product.title}
-            </h3>
-            {product.description && (
-              <p className="mt-1 line-clamp-2 text-xs leading-5 text-nuprix-muted small:text-sm">
-                {product.description}
-              </p>
-            )}
-          </div>
-          {cheapestPrice && (
-            <div className="shrink-0 pt-0.5 text-sm font-bold tabular-nums text-nuprix-ink">
-              <PreviewPrice price={cheapestPrice} />
-            </div>
+      <div className="flex flex-1 flex-col px-1 pt-3">
+        {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
+
+        <LocalizedClientLink
+          href={`/products/${product.handle}`}
+          className="mt-2 block"
+        >
+          <h3 className="line-clamp-2 min-h-10 text-sm font-bold leading-5 text-nuprix-ink transition-colors group-hover:text-nuprix-indigo">
+            {product.title}
+          </h3>
+        </LocalizedClientLink>
+
+        <span
+          className={`mt-2 inline-flex w-fit items-center gap-1.5 rounded-full border px-2 py-1 text-[9px] font-bold ${
+            fulfillmentType === "digital"
+              ? "border-violet-200 bg-violet-50 text-violet-700"
+              : fulfillmentType === "mixed"
+                ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                : fulfillmentType === "physical"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-slate-200 bg-slate-50 text-slate-600"
+          }`}
+        >
+          {fulfillmentType === "physical" ? (
+            <Package className="h-3 w-3" aria-hidden="true" />
+          ) : (
+            <Zap className="h-3 w-3" aria-hidden="true" />
           )}
-        </div>
-        <span className="mt-4 inline-flex w-fit items-center gap-2 text-xs font-bold text-nuprix-indigo transition-colors group-hover:text-nuprix-indigo-hover">
-          View product <span aria-hidden="true">→</span>
+          {deliveryText}
         </span>
-      </article>
-    </LocalizedClientLink>
+
+        <LocalizedClientLink
+          href={`/products/${product.handle}`}
+          className="mt-3 flex min-h-10 w-full items-center justify-center rounded-lg bg-nuprix-indigo text-sm font-bold text-white transition hover:bg-nuprix-indigo-hover"
+        >
+          Buy
+        </LocalizedClientLink>
+      </div>
+    </article>
   )
 }

@@ -368,3 +368,14 @@ The remaining work follows `docs/implementation-roadmap.md` and aligns with `NUP
 - **Verification**:
   1. `npx tsc --noEmit` completed with 0 errors.
   2. `npm run build` completed successfully (exit code 0), compiled in ~11s, TypeScript check finished, all static pages (14/14) and routes generated including `/[countryCode]/products/[handle]`.
+
+### ggsel-style header and marketplace landing redesign — 2026-11-24
+- **Status**: **Implemented**.
+- **Implemented**:
+  1. Added a compact sticky Nuprix header with Catalog control, centered search-drawer trigger, Orders, Account, cart badge, Start Selling, and trending category ribbon.
+  2. Replaced the homepage hero with three horizontal promotion cards and a responsive icon category strip.
+  3. Updated the bestseller rail to a dense 2/3/4/5-column responsive grid with 4:3 covers, tabular sale prices, two-line titles, backend fulfillment trust pills, and full-width Buy actions.
+- **Verification**:
+  1. `npx tsc --noEmit` passed with 0 errors.
+  2. `npm run build` passed and generated all storefront routes.
+  3. Playwright desktop/mobile checks confirmed the header, ribbon, promo cards, category strip, and catalog layout are aligned and responsive.

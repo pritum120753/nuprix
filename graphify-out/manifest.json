@@ -714,8 +714,8 @@
     "semantic_hash": "782cca7e6aaf700d3dbf58ea51806f25"
   },
   "nuprix-backend/apps/storefront/next-env.d.ts": {
-    "mtime": 1795501109.6246247,
-    "seen": 1795501196.992737,
+    "mtime": 1795502699.1665962,
+    "seen": 1795503457.4013555,
     "ast_hash": "0e4a65e8b2b9aa3ed0f8957b9406bd41",
     "semantic_hash": ""
   },
@@ -966,10 +966,10 @@
     "semantic_hash": "5ad7a2fe16ec1b9f2164135a76eee2bd"
   },
   "nuprix-backend/apps/storefront/src/app/[countryCode]/(main)/products/[handle]/page.tsx": {
-    "mtime": 1794605700.9303808,
-    "seen": 1795357765.307046,
-    "ast_hash": "b4639878479a60987c6684ae31d205a9",
-    "semantic_hash": "b4639878479a60987c6684ae31d205a9"
+    "mtime": 1795503080.2552452,
+    "seen": 1795503457.4126532,
+    "ast_hash": "4905991dc10847c91ec61bfb0caaecd3",
+    "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/src/app/[countryCode]/(main)/refund-policy/page.tsx": {
     "mtime": 1794927526.068216,
@@ -1428,10 +1428,10 @@
     "semantic_hash": "df3b7d06f330584777d24a6fa5f39ede"
   },
   "nuprix-backend/apps/storefront/src/middleware.ts": {
-    "mtime": 1794605700.9630787,
-    "seen": 1795357765.3274496,
-    "ast_hash": "2caf843f13a6f7d8274fd955552d857a",
-    "semantic_hash": "2caf843f13a6f7d8274fd955552d857a"
+    "mtime": 1795502607.5861423,
+    "seen": 1795503457.432655,
+    "ast_hash": "4b619fe299047284232cb5a0c9c78d13",
+    "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/src/modules/account/components/account-info/index.tsx": {
     "mtime": 1794605700.9655895,
@@ -2208,9 +2208,9 @@
     "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/src/modules/products/templates/index.tsx": {
-    "mtime": 1795499767.9341605,
-    "seen": 1795501197.0569468,
-    "ast_hash": "e0ef785b41b8a9f610934cda5c5dd49b",
+    "mtime": 1795503106.7218235,
+    "seen": 1795503457.4636536,
+    "ast_hash": "2bcd6f844523fcad0c71d6cfcbf19091",
     "semantic_hash": ""
   },
   "nuprix-backend/apps/storefront/src/modules/products/templates/product-info/index.tsx": {
@@ -2490,9 +2490,9 @@
     "semantic_hash": ""
   },
   "memory-bank/progress.md": {
-    "mtime": 1795501050.77765,
-    "seen": 1795501197.069306,
-    "ast_hash": "c0df5fb1d02c0b7617cd9859d264d2cb",
+    "mtime": 1795503341.5586662,
+    "seen": 1795503457.4783278,
+    "ast_hash": "4a818830e523c82b7c9fbe90019c72eb",
     "semantic_hash": ""
   },
   "memory-bank/projectbrief.md": {

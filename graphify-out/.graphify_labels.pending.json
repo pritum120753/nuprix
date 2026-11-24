@@ -1,8 +1,12 @@
 {
-  "39": "payment-return/route.ts",
-  "48": "@medusajs/types",
-  "55": "getAuthHeaders",
-  "64": "free-shipping-price-nudge/index.tsx",
-  "79": "edit-address-modal.tsx",
-  "101": "products/[handle]/page.tsx"
+  "48": "getCacheOptions",
+  "53": "products/[handle]/page.tsx",
+  "55": "policies/templates/index.tsx",
+  "61": "util/product.ts",
+  "80": "account-nav/index.tsx",
+  "81": "cart-dropdown/index.tsx",
+  "82": "line-item-price/index.tsx",
+  "94": "orders.ts",
+  "99": "verify-account/index.tsx",
+  "101": "variant-image-gallery.tsx"
 }

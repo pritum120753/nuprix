@@ -1,17 +1,17 @@
 # Graph Report - nuprix  (2026-11-24)
 
 ## Corpus Check
-- 453 files · ~113,735 words
+- 453 files · ~113,951 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 19 file(s) not represented in the graph (top: .toml 8, (none) 6, .example 2)
 
 ## Summary
-- 2018 nodes · 5420 edges · 103 communities (87 shown, 16 thin omitted)
+- 2018 nodes · 5419 edges · 107 communities (92 shown, 15 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 29 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `342eacc8`
+- Built from commit: `4a29e6b4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -64,19 +64,20 @@
 - icon.ts
 - Text
 - getCacheOptions
-- @medusajs/types
+- getCacheOptions
 - regenerate-download-link.ts
 - DigitalDeliveryModuleService
 - tasks
 - export/route.ts
 - products/[handle]/page.tsx
 - product-preview/index.tsx
-- getAuthHeaders
+- policies/templates/index.tsx
 - admin-audit.ts
 - customer.ts
 - check-env-variables.js
 - retrieveCustomer
 - commission.ts
+- util/product.ts
 - seed-demo-products.ts
 - Migration20261118000002
 - free-shipping-price-nudge/index.tsx
@@ -94,22 +95,25 @@
 - Migration20261118000001
 - overrides
 - edit-address-modal.tsx
+- account-nav/index.tsx
+- cart-dropdown/index.tsx
+- line-item-price/index.tsx
 - nuprix-backend/package.json
 - auth-password-reset.ts
 - jest.config.js
 - .prettierrc.json
-- config.ts
+- orders.ts
 - digital-file-steps.ts
 - digital-delivery/index.ts
 - downloads/page.tsx
 - product-tabs/index.tsx
+- verify-account/index.tsx
 - download-status.ts
-- products/[handle]/page.tsx
+- variant-image-gallery.tsx
 - members/route.ts
 - Migration20261114003242
 - app/layout.tsx
 - ErrorMessage
-- engines
 
 ## God Nodes (most connected - your core abstractions)
 1. `@medusajs/framework` - 108 edges
@@ -124,16 +128,16 @@
 10. `VendorModuleService` - 36 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `AccountNav()` --calls--> `MapPin()`  [EXTRACTED]
-  nuprix-backend/apps/storefront/src/modules/account/components/account-nav/index.tsx → nuprix-backend/apps/storefront/src/modules/common/icons/map-pin.tsx
-- `AccountNav()` --calls--> `Package()`  [EXTRACTED]
-  nuprix-backend/apps/storefront/src/modules/account/components/account-nav/index.tsx → nuprix-backend/apps/storefront/src/modules/common/icons/package.tsx
-- `AccountNav()` --calls--> `User()`  [EXTRACTED]
-  nuprix-backend/apps/storefront/src/modules/account/components/account-nav/index.tsx → nuprix-backend/apps/storefront/src/modules/common/icons/user.tsx
-- `placeOrder()` --indirect_call--> `medusaError()`  [INFERRED]
-  nuprix-backend/apps/storefront/src/lib/data/cart.ts → nuprix-backend/apps/storefront/src/lib/util/medusa-error.ts
 - `Addresses()` --indirect_call--> `setAddresses()`  [INFERRED]
   nuprix-backend/apps/storefront/src/modules/checkout/components/addresses/index.tsx → nuprix-backend/apps/storefront/src/lib/data/cart.ts
+- `AddAddress()` --indirect_call--> `addCustomerAddress()`  [INFERRED]
+  nuprix-backend/apps/storefront/src/modules/account/components/address-card/add-address.tsx → nuprix-backend/apps/storefront/src/lib/data/customer.ts
+- `EditAddress()` --indirect_call--> `updateCustomerAddress()`  [INFERRED]
+  nuprix-backend/apps/storefront/src/modules/account/components/address-card/edit-address-modal.tsx → nuprix-backend/apps/storefront/src/lib/data/customer.ts
+- `placeOrder()` --indirect_call--> `medusaError()`  [INFERRED]
+  nuprix-backend/apps/storefront/src/lib/data/cart.ts → nuprix-backend/apps/storefront/src/lib/util/medusa-error.ts
+- `updateCustomer()` --indirect_call--> `medusaError()`  [INFERRED]
+  nuprix-backend/apps/storefront/src/lib/data/customer.ts → nuprix-backend/apps/storefront/src/lib/util/medusa-error.ts
 
 ## Import Cycles
 - 2-file cycle: `nuprix-backend/apps/storefront/src/modules/account/components/forgot-password/index.tsx -> nuprix-backend/apps/storefront/src/modules/account/templates/login-template.tsx -> nuprix-backend/apps/storefront/src/modules/account/components/forgot-password/index.tsx`
@@ -142,27 +146,27 @@
 - 2-file cycle: `nuprix-backend/apps/backend/src/modules/vendor/models/vendor-member.ts -> nuprix-backend/apps/backend/src/modules/vendor/models/vendor.ts -> nuprix-backend/apps/backend/src/modules/vendor/models/vendor-member.ts`
 - 3-file cycle: `nuprix-backend/apps/storefront/src/lib/config.ts -> nuprix-backend/apps/storefront/src/lib/util/get-locale-header.ts -> nuprix-backend/apps/storefront/src/lib/data/locale-actions.ts -> nuprix-backend/apps/storefront/src/lib/config.ts`
 
-## Communities (103 total, 16 thin omitted)
+## Communities (107 total, 15 thin omitted)
 
 ### Community 0 - "cart.ts"
-Cohesion: 0.14
-Nodes (23): Cart(), metadata, addToCart(), applyPromotions(), deleteLineItem(), getOrSetCart(), initiatePaymentSession(), retrieveCart() (+15 more)
+Cohesion: 0.17
+Nodes (23): addToCart(), applyPromotions(), deleteLineItem(), getOrSetCart(), initiatePaymentSession(), retrieveCart(), setAddresses(), setShippingMethod() (+15 more)
 
 ### Community 1 - "items/index.tsx"
-Cohesion: 0.23
-Nodes (12): Loading(), repeat(), ItemsTemplate(), ItemsTemplateProps, ItemsPreviewTemplate(), ItemsTemplateProps, Table, ItemsProps (+4 more)
+Cohesion: 0.22
+Nodes (14): Loading(), repeat(), Item(), ItemsTemplate(), ItemsTemplateProps, ItemsPreviewTemplate(), ItemsTemplateProps, Table (+6 more)
 
 ### Community 2 - "search/index.tsx"
-Cohesion: 0.08
-Nodes (40): clsx@^2.1.1, instantsearch.js@4.113.0, react-instantsearch@^7.46.0, metadata, StorePage(), useSearchSettled(), indexedCurrency(), priceAttribute() (+32 more)
+Cohesion: 0.07
+Nodes (44): clsx@^2.1.1, instantsearch.js@4.113.0, react-instantsearch@^7.46.0, metadata, StorePage(), useSearchSettled(), indexedCurrency(), priceAttribute() (+36 more)
 
 ### Community 3 - "VendorModuleService"
 Cohesion: 0.07
 Nodes (16): POST(), ApplyVendorBody, SubmitVendorProductBody, VENDOR_MODULE, VendorEarning, VendorFulfillmentGroup, VendorFulfillmentItem, VendorMember (+8 more)
 
 ### Community 4 - "PolicyPage"
-Cohesion: 0.07
-Nodes (42): AboutPage(), dynamic, metadata, revalidate, ContactPage(), metadata, DigitalLicensePage(), dynamic (+34 more)
+Cohesion: 0.09
+Nodes (24): AboutPage(), dynamic, metadata, revalidate, ContactPage(), metadata, dynamic, FaqPage() (+16 more)
 
 ### Community 5 - "env"
 Cohesion: 0.05
@@ -170,7 +174,7 @@ Nodes (43): defaults, env, runs-on, services, steps, run, ADMIN_CORS, AUTH_CORS 
 
 ### Community 6 - "ui/index.tsx"
 Cohesion: 0.07
-Nodes (25): BadgeProps, ButtonProps, CheckboxProps, ContainerProps, HeadingProps, IconBadgeProps, IconButtonProps, InputProps (+17 more)
+Nodes (28): CartItemSelect, NativeSelectProps, BadgeProps, ButtonProps, CheckboxProps, ContainerProps, HeadingProps, IconBadge (+20 more)
 
 ### Community 7 - "nuprix-backend/package.json"
 Cohesion: 0.17
@@ -185,12 +189,12 @@ Cohesion: 0.07
 Nodes (39): author, description, devDependencies, autoprefixer@^10.4.2, @babel/core@^7.17.5, babel-loader@^8.2.3, eslint@^9.13.0, eslint-config-next@16.4.6 (+31 more)
 
 ### Community 10 - "Button"
-Cohesion: 0.17
-Nodes (18): createTransferRequest(), TransferRequestForm(), getCheckoutStep(), Summary(), SummaryProps, DiscountCode(), DiscountCodeProps, formatAddress() (+10 more)
+Cohesion: 0.16
+Nodes (24): Checkout(), metadata, getPaymentInfo(), isSslcommerz(), getCartDeliverySplit(), getCheckoutStep(), Summary(), SummaryProps (+16 more)
 
 ### Community 11 - "site.ts"
 Cohesion: 0.14
-Nodes (25): dynamic, generateMetadata(), Home(), revalidate, generateMetadata(), GET(), robots(), dynamic (+17 more)
+Nodes (24): dynamic, generateMetadata(), Home(), revalidate, GET(), robots(), dynamic, Entry (+16 more)
 
 ### Community 12 - "search/product.ts"
 Cohesion: 0.08
@@ -201,12 +205,12 @@ Cohesion: 0.16
 Nodes (14): @headlessui/react@^2.2.0, react-country-flag@^3.1.0, Locale, StateType, CountryOption, CountrySelectProps, DEFAULT_OPTION, getCountryCodeFromLocale() (+6 more)
 
 ### Community 14 - "Input"
-Cohesion: 0.11
-Nodes (23): Divider(), metadata, Profile(), updateCustomer(), AccountInfo(), AccountInfoProps, MyInformationProps, ProfileBillingAddress() (+15 more)
+Cohesion: 0.13
+Nodes (21): Divider(), metadata, Profile(), updateCustomer(), AccountInfo(), AccountInfoProps, MyInformationProps, ProfileBillingAddress() (+13 more)
 
 ### Community 15 - "backend/package.json"
 Cohesion: 0.07
-Nodes (38): author, description, devDependencies, jest@^29.7.0, @medusajs/test-utils@2.22.7, prop-types@^15.8.1, react@^18.3.1, react-dom@^18.3.1 (+30 more)
+Nodes (40): author, description, devDependencies, jest@^29.7.0, @medusajs/test-utils@2.22.7, prop-types@^15.8.1, react@^18.3.1, react-dom@^18.3.1 (+32 more)
 
 ### Community 16 - "dependencies"
 Cohesion: 0.09
@@ -218,7 +222,7 @@ Nodes (11): buildSslcommerzInitPayload(), buildSslcommerzReturnUrl(), buildSslco
 
 ### Community 18 - "@medusajs/types"
 Cohesion: 0.16
-Nodes (19): Addresses(), metadata, GET(), HEADERS, generateMetadata(), getQuery(), Props, SearchPage() (+11 more)
+Nodes (20): GET(), HEADERS, generateMetadata(), generateMetadata(), getQuery(), Props, SearchPage(), listProducts() (+12 more)
 
 ### Community 19 - "product-digital-files.tsx"
 Cohesion: 0.09
@@ -233,8 +237,8 @@ Cohesion: 0.18
 Nodes (10): AUTHENTICATE, blockedStatusResponse(), GET(), MESSAGES, allowsUncapturedDownloads(), CustomerDownloadStatus, DownloadEntitlementStatusInput, DownloadOrderStatusInput (+2 more)
 
 ### Community 22 - "LocalizedClientLink"
-Cohesion: 0.10
-Nodes (28): metadata, OrderConfirmedPage(), Props, resetOnboardingState(), VendorFulfillmentGroup, isArray(), isEmpty(), isObject() (+20 more)
+Cohesion: 0.11
+Nodes (25): metadata, OrderConfirmedPage(), Props, VendorFulfillmentGroup, isArray(), isEmpty(), isObject(), convertToLocale() (+17 more)
 
 ### Community 23 - "store/vendors/validators.ts"
 Cohesion: 0.12
@@ -261,16 +265,16 @@ Cohesion: 0.08
 Nodes (25): compilerOptions, allowJs, baseUrl, esModuleInterop, forceConsistentCasingInFileNames, incremental, isolatedModules, jsx (+17 more)
 
 ### Community 29 - "payment/index.tsx"
-Cohesion: 0.13
-Nodes (28): @stripe/react-stripe-js@^5.3.0, getPaymentInfo(), isAdyen(), isManual(), isSslcommerz(), AdyenPaymentResult, getPaymentErrorMessage(), getCartDeliverySplit() (+20 more)
+Cohesion: 0.12
+Nodes (25): @stripe/react-stripe-js@^5.3.0, @stripe/stripe-js@^8.2.0, isAdyen(), isManual(), AdyenPaymentResult, getPaymentErrorMessage(), AdyenPaymentButton(), AdyenPaymentButtonProps (+17 more)
 
 ### Community 30 - "Text"
-Cohesion: 0.11
-Nodes (22): metadata, NotFound(), metadata, NotFound(), metadata, NotFound(), metadata, NotFound() (+14 more)
+Cohesion: 0.13
+Nodes (17): metadata, NotFound(), metadata, NotFound(), metadata, NotFound(), metadata, NotFound() (+9 more)
 
 ### Community 31 - "shipping-address/index.tsx"
-Cohesion: 0.22
-Nodes (12): compareAddresses(), AddressSelect(), AddressSelectProps, Addresses(), ShippingAddress(), CheckboxProps, CheckboxWithLabel(), Radio() (+4 more)
+Cohesion: 0.27
+Nodes (9): compareAddresses(), AddressSelect(), AddressSelectProps, ShippingAddress(), CheckboxProps, CheckboxWithLabel(), Checkbox, Label (+1 more)
 
 ### Community 32 - "dependencies"
 Cohesion: 0.07
@@ -278,7 +282,7 @@ Nodes (30): dependencies, @adyen/adyen-web@^6.46.0, lodash@^4.17.21, @medusajs/i
 
 ### Community 33 - "cart/components/item/index.tsx"
 Cohesion: 0.16
-Nodes (22): getLineItemFulfillmentType(), CartItemSelect, NativeSelectProps, Item(), ItemProps, DeleteButton(), FulfillmentBadge(), LineItemOptions() (+14 more)
+Nodes (15): ItemProps, FulfillmentBadge(), LineItemOptions(), LineItemOptionsProps, LineItemUnitPrice(), LineItemUnitPriceProps, Item(), ItemProps (+7 more)
 
 ### Community 34 - "order-payment.ts"
 Cohesion: 0.29
@@ -293,39 +297,39 @@ Cohesion: 0.15
 Nodes (13): hashIpAddress(), normalizeUserAgent(), decryptLicenseKey(), encryptionKey(), GeneratedLicenseKey, generateLicenseKey(), DigitalFile, DownloadEntitlement (+5 more)
 
 ### Community 37 - "LocalizedClientLink"
-Cohesion: 0.09
-Nodes (32): CheckoutLayout(), metadata, Orders(), metadata, OverviewTemplate(), AccountPageLayout(), metadata, VerifyAccountPage() (+24 more)
+Cohesion: 0.13
+Nodes (20): CheckoutLayout(), metadata, Orders(), metadata, OverviewTemplate(), OrderCard(), OrderCardProps, OrderOverview() (+12 more)
 
 ### Community 38 - "getAuthHeaders"
-Cohesion: 0.13
-Nodes (31): applyAsVendor(), inviteVendorMember(), MyVendorProfile, PublicVendorProfile, removeVendorMember(), requestVendorPayout(), submitVendorProduct(), updateVendorFulfillment() (+23 more)
+Cohesion: 0.10
+Nodes (38): metadata, VendorAccountPage(), applyAsVendor(), inviteVendorMember(), MyVendorProfile, PublicVendorProfile, removeVendorMember(), requestVendorPayout() (+30 more)
 
 ### Community 39 - "payment-return/route.ts"
-Cohesion: 0.32
-Nodes (10): GET(), getFormString(), handleSslcommerzReturn(), POST(), getAdyenSession(), submitAdyenPayment(), placeOrder(), setCartId() (+2 more)
+Cohesion: 0.31
+Nodes (11): GET(), getFormString(), handleSslcommerzReturn(), POST(), getAdyenSession(), submitAdyenPayment(), placeOrder(), removeCartId() (+3 more)
 
 ### Community 40 - "compilerOptions"
 Cohesion: 0.11
 Nodes (17): compilerOptions, allowImportingTsExtensions, isolatedModules, jsx, lib, module, moduleResolution, noEmit (+9 more)
 
 ### Community 41 - "constants.tsx"
-Cohesion: 0.12
-Nodes (21): @stripe/stripe-js@^8.2.0, Checkout(), metadata, adyenInfo, getMedusaPaymentsAccount(), isMedusaPayments(), isStripeLike(), medusaPaymentsInfo (+13 more)
+Cohesion: 0.17
+Nodes (15): adyenInfo, getMedusaPaymentsAccount(), isMedusaPayments(), isStripeLike(), medusaPaymentsInfo, noDivisionCurrencies, paymentInfoMap, getStripePromise() (+7 more)
 
 ### Community 42 - "@medusajs/framework"
 Cohesion: 0.07
 Nodes (13): { MetadataStorage }, UpdateSupportTicketBody, UpdateSupportTicketSchema, RequestWithOptionalAuth, CreateSupportTicketBody, CreateSupportTicketSchema, Migration20261123154708, SUPPORT_MODULE (+5 more)
 
 ### Community 43 - "product-actions/index.tsx"
-Cohesion: 0.15
-Nodes (18): useIntersection(), CART_UPDATED_EVENT, notifyCartUpdated(), getPercentageDiff(), getPricesForVariant(), getProductPrice(), VariantWithPrice, isVariantInStock() (+10 more)
+Cohesion: 0.24
+Nodes (12): useIntersection(), getProductPrice(), isSimpleProduct(), getDefaultVariant(), optionsAsKeymap(), ProductActions(), ProductActionsProps, MobileActions() (+4 more)
 
 ### Community 44 - "recordAdminAudit"
 Cohesion: 0.11
 Nodes (18): PATCH(), UpdatePayoutBody, UpdatePayoutSchema, PATCH(), POST(), PATCH(), POST(), AssignVendorProductBody (+10 more)
 
 ### Community 45 - "icon.ts"
-Cohesion: 0.13
+Cohesion: 0.14
 Nodes (10): Loading(), Loading(), MapPin(), Medusa(), NextJs(), Package(), Spinner(), User() (+2 more)
 
 ### Community 46 - "Text"
@@ -333,12 +337,12 @@ Cohesion: 0.33
 Nodes (8): TransferPage(), TransferPage(), TransferPage(), acceptTransferRequest(), declineTransferRequest(), TransferActions(), TransferStatus, TransferImage()
 
 ### Community 47 - "getCacheOptions"
-Cohesion: 0.20
-Nodes (11): originalFetch, sdk, getLocale(), setLocaleCookie(), updateLocale(), listLocales(), SupportFormState, getLocaleHeader() (+3 more)
+Cohesion: 0.13
+Nodes (20): addLineItem(), errorMessage(), POST(), resolveVariantId(), GET(), NO_STORE, originalFetch, sdk (+12 more)
 
-### Community 48 - "@medusajs/types"
-Cohesion: 0.17
-Nodes (14): generateMetadata(), OrderDetailPage(), Props, retrieveCollection(), getCacheOptions(), calculatePriceForShippingOption(), listCartShippingMethods(), listOrders() (+6 more)
+### Community 48 - "getCacheOptions"
+Cohesion: 0.31
+Nodes (6): retrieveCollection(), getCacheOptions(), calculatePriceForShippingOption(), listCartShippingMethods(), listCartPaymentMethods(), retrieveVariant()
 
 ### Community 49 - "regenerate-download-link.ts"
 Cohesion: 0.33
@@ -357,24 +361,24 @@ Cohesion: 0.43
 Nodes (5): createApprovedPayoutCsv(), csvCell(), headers, PayoutExportRecord, GET()
 
 ### Community 53 - "products/[handle]/page.tsx"
-Cohesion: 0.38
-Nodes (10): renderProductMarkdown(), buildProductStructuredData(), getPricedVariants(), buildRegionsReturnPolicies(), buildReturnPolicy(), buildShippingDetails(), businessDays(), formatDayRange() (+2 more)
+Cohesion: 0.20
+Nodes (18): dynamic, ProductMetaTags(), ProductPage(), Props, revalidate, isVariantInStock(), renderProductMarkdown(), buildProductStructuredData() (+10 more)
 
 ### Community 54 - "product-preview/index.tsx"
-Cohesion: 0.12
-Nodes (17): generateMetadata(), VendorStorePage(), retrievePublicVendor(), getProductFulfillmentType(), LineItemWithProduct, ProductClassification, ProductDigitalFileSummary, ProductFulfillmentType (+9 more)
+Cohesion: 0.26
+Nodes (10): generateMetadata(), VendorStorePage(), retrievePublicVendor(), getProductFulfillmentType(), Badge, FeaturedProducts(), ProductRail(), ProductPreview() (+2 more)
 
-### Community 55 - "getAuthHeaders"
-Cohesion: 0.42
-Nodes (10): metadata, VendorAccountPage(), getAuthHeaders(), retrieveCustomer(), retrieveMyVendor(), retrieveMyVendorEarnings(), retrieveMyVendorMembers(), retrieveMyVendorOrders() (+2 more)
+### Community 55 - "policies/templates/index.tsx"
+Cohesion: 0.16
+Nodes (18): DigitalLicensePage(), dynamic, metadata, revalidate, dynamic, metadata, ReturnsPage(), revalidate (+10 more)
 
 ### Community 56 - "admin-audit.ts"
 Cohesion: 0.24
 Nodes (7): AUDIT_LOG_MODULE, AuditLog, AuditLogModuleService, RecordAuditInput, REDACTED_KEYS, redactValue(), sanitizeAuditPayload()
 
 ### Community 57 - "customer.ts"
-Cohesion: 0.30
-Nodes (12): getPendingCustomer(), PendingCustomer, removeAuthToken(), removeCartId(), removePendingCustomer(), setAuthToken(), setPendingCustomer(), completeLogin() (+4 more)
+Cohesion: 0.18
+Nodes (16): Addresses(), metadata, Cart(), metadata, getPendingCustomer(), PendingCustomer, removeAuthToken(), removePendingCustomer() (+8 more)
 
 ### Community 58 - "check-env-variables.js"
 Cohesion: 0.15
@@ -387,6 +391,10 @@ Nodes (7): metadata, PageLayout(), listCartOptions(), listCategories(), transfer
 ### Community 60 - "commission.ts"
 Cohesion: 0.18
 Nodes (8): calculateCommissionSplit(), CommissionSplit, computeVendorBalance(), DEFAULT_COMMISSION_BPS, EarningLike, PayoutLike, VendorBalanceSummary, toNumericAmount()
+
+### Community 61 - "util/product.ts"
+Cohesion: 0.22
+Nodes (7): LineItemWithProduct, ProductClassification, ProductDigitalFileSummary, ProductFulfillmentType, COLORS, FulfillmentBadgeProps, LABELS
 
 ### Community 62 - "seed-demo-products.ts"
 Cohesion: 0.20
@@ -445,8 +453,20 @@ Cohesion: 0.40
 Nodes (5): ajv, ajv, overrides, eslint, @eslint/eslintrc
 
 ### Community 79 - "edit-address-modal.tsx"
-Cohesion: 0.16
-Nodes (15): ModalContext, ModalProvider(), ModalProviderProps, useModal(), useToggleState(), AddressBook(), AddressBookProps, AddAddress() (+7 more)
+Cohesion: 0.14
+Nodes (18): ModalContext, ModalProvider(), ModalProviderProps, useModal(), useToggleState(), AddressBook(), AddressBookProps, AddAddress() (+10 more)
+
+### Community 80 - "account-nav/index.tsx"
+Cohesion: 0.31
+Nodes (6): AccountPageLayout(), AccountNav(), AccountNavLink(), AccountNavLinkProps, AccountLayout(), AccountLayoutProps
+
+### Community 81 - "cart-dropdown/index.tsx"
+Cohesion: 0.38
+Nodes (7): CART_UPDATED_EVENT, notifyCartUpdated(), getLineItemFulfillmentType(), DeleteButton(), buttonClasses(), CartDropdown(), countItems()
+
+### Community 82 - "line-item-price/index.tsx"
+Cohesion: 0.39
+Nodes (5): getPercentageDiff(), getPricesForVariant(), VariantWithPrice, LineItemPrice(), LineItemPriceProps
 
 ### Community 83 - "nuprix-backend/package.json"
 Cohesion: 0.18
@@ -456,9 +476,9 @@ Nodes (10): ajv@^8.13.0, react-dom@18.3.1, engines, node, react-dom, name, packa
 Cohesion: 0.67
 Nodes (3): authPasswordResetHandler(), config, resolveStorefrontUrl()
 
-### Community 94 - "config.ts"
-Cohesion: 0.29
-Nodes (9): addLineItem(), errorMessage(), POST(), resolveVariantId(), GET(), NO_STORE, activateCart(), MAX_LINE_ITEM_QUANTITY (+1 more)
+### Community 94 - "orders.ts"
+Cohesion: 0.52
+Nodes (5): generateMetadata(), OrderDetailPage(), Props, retrieveOrder(), retrieveVendorFulfillmentGroups()
 
 ### Community 95 - "digital-file-steps.ts"
 Cohesion: 0.26
@@ -472,13 +492,17 @@ Nodes (11): lucide-react@^1.77.0, DownloadsPage(), metadata, statusLabels, Custo
 Cohesion: 0.19
 Nodes (15): @radix-ui/react-accordion@^1.2.3, Back(), FastDelivery(), Refresh(), Accordion(), AccordionItemProps, AccordionProps, Item() (+7 more)
 
+### Community 99 - "verify-account/index.tsx"
+Cohesion: 0.43
+Nodes (5): metadata, VerifyAccountPage(), confirmEmailVerification(), VerificationState, VerifyAccount()
+
 ### Community 100 - "download-status.ts"
 Cohesion: 0.50
 Nodes (3): EntitlementStatus, EntitlementStatusInput, resolveEntitlementStatus()
 
-### Community 101 - "products/[handle]/page.tsx"
-Cohesion: 0.22
-Nodes (10): dynamic, ProductMetaTags(), ProductPage(), Props, revalidate, ImageGallery(), ImageGalleryProps, getImagesForVariant() (+2 more)
+### Community 101 - "variant-image-gallery.tsx"
+Cohesion: 0.53
+Nodes (4): ImageGallery(), ImageGalleryProps, getImagesForVariant(), VariantImageGallery()
 
 ### Community 102 - "members/route.ts"
 Cohesion: 0.60
@@ -489,28 +513,28 @@ Cohesion: 0.25
 Nodes (5): inter, metadata, plusJakarta, viewport, getBaseURL()
 
 ### Community 110 - "ErrorMessage"
-Cohesion: 0.13
-Nodes (24): Login(), metadata, metadata, ResetPasswordPage(), completePasswordReset(), login(), requestPasswordReset(), submitSupportTicket() (+16 more)
+Cohesion: 0.11
+Nodes (29): Login(), metadata, metadata, ResetPasswordPage(), completePasswordReset(), login(), requestPasswordReset(), createTransferRequest() (+21 more)
 
 ## Knowledge Gaps
 - **3 isolated node(s):** `FORGOT_PASSWORD`, `REGISTER`, `SIGN_IN`
   These have ≤1 connection - possible missing edges. (Counts symbols only; 604 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **16 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `@medusajs/framework` connect `@medusajs/framework` to `VendorModuleService`, `search/product.ts`, `backend/package.json`, `dependencies`, `SslcommerzPaymentProviderService`, `product-digital-files.tsx`, `digital-storage.ts`, `[token]/route.ts`, `store/vendors/validators.ts`, `templates.ts`, `order-payment.ts`, `digital-delivery/index.ts`, `digital-delivery/service.ts`, `recordAdminAudit`, `regenerate-download-link.ts`, `export/route.ts`, `admin-audit.ts`, `seed-demo-products.ts`, `Migration20261118000002`, `DigitalDeliveryModuleService`, `product-classification.ts`, `initial-data-seed.ts`, `start-server.mjs`, `Migration20261118000001`, `auth-password-reset.ts`, `digital-file-steps.ts`, `digital-delivery/index.ts`, `members/route.ts`, `Migration20261114003242`?**
-  _High betweenness centrality (0.094) - this node is a cross-community bridge._
+- **Why does `next` connect `Text` to `cart.ts`, `search/index.tsx`, `PolicyPage`, `products.ts`, `storefront/package.json`, `Button`, `site.ts`, `side-menu/index.tsx`, `Input`, `@medusajs/types`, `LocalizedClientLink`, `operations.ts`, `payment/index.tsx`, `dependencies`, `cart/components/item/index.tsx`, `LocalizedClientLink`, `getAuthHeaders`, `payment-return/route.ts`, `product-actions/index.tsx`, `getCacheOptions`, `products/[handle]/page.tsx`, `product-preview/index.tsx`, `policies/templates/index.tsx`, `customer.ts`, `retrieveCustomer`, `middleware.ts`, `account-nav/index.tsx`, `cart-dropdown/index.tsx`, `orders.ts`, `downloads/page.tsx`, `verify-account/index.tsx`, `variant-image-gallery.tsx`, `app/layout.tsx`, `ErrorMessage`?**
+  _High betweenness centrality (0.084) - this node is a cross-community bridge._
 - **What connects `FORGOT_PASSWORD`, `REGISTER`, `SIGN_IN` to the rest of the system?**
   _3 weakly-connected nodes found - possible missing edges._
-- **Should `cart.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.13978494623655913 - nodes in this community are weakly interconnected._
-- **Why does `@medusajs/types` connect `@medusajs/types` to `cart.ts`, `items/index.tsx`, `products.ts`, `storefront/package.json`, `Button`, `side-menu/index.tsx`, `Input`, `@medusajs/types`, `LocalizedClientLink`, `operations.ts`, `payment/index.tsx`, `Text`, `shipping-address/index.tsx`, `cart/components/item/index.tsx`, `LocalizedClientLink`, `payment-return/route.ts`, `constants.tsx`, `product-actions/index.tsx`, `getCacheOptions`, `products/[handle]/page.tsx`, `product-preview/index.tsx`, `customer.ts`, `retrieveCustomer`, `free-shipping-price-nudge/index.tsx`, `middleware.ts`, `edit-address-modal.tsx`, `config.ts`, `product-tabs/index.tsx`, `products/[handle]/page.tsx`?**
-  _High betweenness centrality (0.083) - this node is a cross-community bridge._
 - **Should `search/index.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.0803633822501747 - nodes in this community are weakly interconnected._
-- **Why does `next` connect `LocalizedClientLink` to `cart.ts`, `search/index.tsx`, `PolicyPage`, `products.ts`, `storefront/package.json`, `Button`, `site.ts`, `side-menu/index.tsx`, `Input`, `@medusajs/types`, `LocalizedClientLink`, `operations.ts`, `payment/index.tsx`, `Text`, `shipping-address/index.tsx`, `dependencies`, `cart/components/item/index.tsx`, `getAuthHeaders`, `payment-return/route.ts`, `constants.tsx`, `product-actions/index.tsx`, `icon.ts`, `getCacheOptions`, `@medusajs/types`, `product-preview/index.tsx`, `getAuthHeaders`, `customer.ts`, `retrieveCustomer`, `middleware.ts`, `config.ts`, `downloads/page.tsx`, `products/[handle]/page.tsx`, `app/layout.tsx`, `ErrorMessage`?**
-  _High betweenness centrality (0.050) - this node is a cross-community bridge._
+  _Cohesion score 0.07305669199298656 - nodes in this community are weakly interconnected._
+- **Why does `@medusajs/framework` connect `@medusajs/framework` to `VendorModuleService`, `search/product.ts`, `backend/package.json`, `dependencies`, `SslcommerzPaymentProviderService`, `product-digital-files.tsx`, `digital-storage.ts`, `[token]/route.ts`, `store/vendors/validators.ts`, `templates.ts`, `order-payment.ts`, `digital-delivery/index.ts`, `digital-delivery/service.ts`, `recordAdminAudit`, `regenerate-download-link.ts`, `export/route.ts`, `admin-audit.ts`, `seed-demo-products.ts`, `Migration20261118000002`, `DigitalDeliveryModuleService`, `product-classification.ts`, `initial-data-seed.ts`, `start-server.mjs`, `Migration20261118000001`, `auth-password-reset.ts`, `digital-file-steps.ts`, `digital-delivery/index.ts`, `members/route.ts`, `Migration20261114003242`?**
+  _High betweenness centrality (0.084) - this node is a cross-community bridge._
 - **Should `VendorModuleService` be split into smaller, more focused modules?**
   _Cohesion score 0.06766917293233082 - nodes in this community are weakly interconnected._
+- **Why does `@medusajs/types` connect `@medusajs/types` to `cart.ts`, `items/index.tsx`, `products.ts`, `storefront/package.json`, `Button`, `side-menu/index.tsx`, `Input`, `LocalizedClientLink`, `operations.ts`, `payment/index.tsx`, `Text`, `shipping-address/index.tsx`, `cart/components/item/index.tsx`, `LocalizedClientLink`, `payment-return/route.ts`, `constants.tsx`, `product-actions/index.tsx`, `getCacheOptions`, `getCacheOptions`, `products/[handle]/page.tsx`, `product-preview/index.tsx`, `customer.ts`, `retrieveCustomer`, `util/product.ts`, `free-shipping-price-nudge/index.tsx`, `middleware.ts`, `edit-address-modal.tsx`, `account-nav/index.tsx`, `cart-dropdown/index.tsx`, `line-item-price/index.tsx`, `orders.ts`, `product-tabs/index.tsx`, `variant-image-gallery.tsx`, `ErrorMessage`?**
+  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+- **Should `PolicyPage` be split into smaller, more focused modules?**
+  _Cohesion score 0.08735632183908046 - nodes in this community are weakly interconnected._

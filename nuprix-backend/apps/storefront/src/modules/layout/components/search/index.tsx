@@ -58,7 +58,7 @@ const SearchPanel = ({ onNavigate }: { onNavigate: () => void }) => {
             setInputValue(event.target.value)
             refine(event.target.value)
           }}
-          placeholder="Search software, templates, license keys, and physical gear"
+          placeholder="Search software, keys, AI subscriptions, and physical gear..."
           aria-label="Search products"
           autoFocus
           className="txt-medium w-full bg-transparent py-4 text-ui-fg-base outline-none placeholder:text-ui-fg-muted"

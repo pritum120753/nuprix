@@ -7,7 +7,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import CartButton from "@modules/layout/components/cart-button"
 import Search from "@modules/layout/components/search"
 import SideMenu from "@modules/layout/components/side-menu"
-import { UserRound } from "lucide-react"
+import { PackageCheck, ShoppingCart, Store, UserRound } from "lucide-react"
 
 export default async function Nav() {
   const [regions, locales, currentLocale] = await Promise.all([
@@ -16,84 +16,90 @@ export default async function Nav() {
     getLocale(),
   ])
 
+  const trending = [
+    ["AI Tools", "/store"],
+    ["Software & Keys", "/store"],
+    ["Subscriptions", "/store"],
+    ["Windows & Office", "/store"],
+    ["Gaming", "/store"],
+    ["Physical Gear", "/store"],
+  ] as const
+
   return (
     <div className="sticky top-0 inset-x-0 z-50">
-      <header className="h-[72px] border-b border-nuprix-line/90 bg-white/85 backdrop-blur-md">
-        <nav className="content-container grid h-full grid-cols-[auto_1fr_auto] items-center gap-3 text-sm text-nuprix-muted small:grid-cols-[1fr_minmax(320px,560px)_1fr] small:gap-6">
-          <div className="flex h-full items-center">
+      <header className="border-b border-nuprix-line bg-white/95 backdrop-blur-md">
+        <nav className="content-container grid h-[64px] grid-cols-[auto_1fr_auto] items-center gap-2 text-sm text-nuprix-muted small:gap-4">
+          <div className="flex h-full min-w-0 items-center gap-2">
+            <LocalizedClientLink href="/" className="flex shrink-0 items-center gap-2" data-testid="nav-store-link">
+              <span className="grid h-9 w-9 place-items-center rounded-[9px] bg-nuprix-indigo text-sm font-bold text-white">N</span>
+              <span className="hidden text-xl font-bold tracking-[-0.04em] text-nuprix-ink medium:inline">nuprix</span>
+            </LocalizedClientLink>
             <div className="h-full">
               <SideMenu regions={regions} locales={locales} currentLocale={currentLocale} />
-            </div>
-            <LocalizedClientLink
-              href="/"
-              className="hidden small:flex items-center gap-2 mr-5"
-              data-testid="nav-store-link"
-            >
-              <span className="grid h-9 w-9 place-items-center rounded-[10px] bg-nuprix-indigo text-sm font-bold text-white">N</span>
-              <span className="text-[21px] font-bold tracking-[-0.04em] text-nuprix-ink">nuprix</span>
-            </LocalizedClientLink>
-            <div className="hidden medium:flex items-center gap-x-4">
-              <LocalizedClientLink
-                href="/store"
-                className="text-sm font-medium text-nuprix-muted hover:text-nuprix-ink transition-colors"
-              >
-                Explore
-              </LocalizedClientLink>
-              <LocalizedClientLink
-                href="/store?digital=true"
-                className="text-sm font-medium text-nuprix-muted hover:text-nuprix-ink transition-colors"
-              >
-                Digital Assets
-              </LocalizedClientLink>
-              <LocalizedClientLink href="/store?physical=true" className="text-sm font-medium text-nuprix-muted hover:text-nuprix-ink transition-colors">
-                Physical Goods
-              </LocalizedClientLink>
-              <LocalizedClientLink href="/account/vendor" className="text-sm font-medium text-nuprix-muted hover:text-nuprix-ink transition-colors">
-                Sell on Nuprix
-              </LocalizedClientLink>
             </div>
           </div>
 
           <div className="min-w-0">
             <Search
               trigger={
-                <span className="flex w-full items-center gap-2.5">
-                  <span className="text-nuprix-muted">Search</span>
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <span className="shrink-0 text-nuprix-muted">Search</span>
                   <span className="hidden truncate text-nuprix-subtle small:inline">
-                    software, templates, license keys, and gear
+                    software, keys, AI subscriptions, and physical gear
                   </span>
                 </span>
               }
-              triggerClassName="flex h-11 w-full items-center rounded-xl border border-nuprix-line bg-nuprix-mist/60 px-3.5 text-sm text-nuprix-muted outline-none transition hover:border-nuprix-line-strong hover:bg-white focus-visible:ring-2 focus-visible:ring-nuprix-indigo/20"
+              triggerClassName="flex h-10 w-full items-center rounded-lg border border-nuprix-line bg-nuprix-mist/60 px-3 text-xs text-nuprix-muted outline-none transition hover:border-nuprix-indigo/30 hover:bg-white focus-visible:ring-2 focus-visible:ring-nuprix-indigo/20 small:text-sm"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-1.5 h-full">
-            <div className="hidden small:flex items-center h-full">
-              <LocalizedClientLink
-                className="flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-nuprix-muted transition hover:bg-nuprix-mist hover:text-nuprix-ink"
-                href="/account"
-                data-testid="nav-account-link"
-              >
-                <UserRound className="h-4 w-4" aria-hidden="true" />
-                Account
-              </LocalizedClientLink>
-            </div>
+          <div className="flex items-center justify-end gap-1.5">
+            <LocalizedClientLink
+              href="/account/orders"
+              className="hidden h-10 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-nuprix-muted hover:bg-nuprix-mist small:flex"
+            >
+              <PackageCheck className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden medium:inline">Orders</span>
+            </LocalizedClientLink>
+            <LocalizedClientLink
+              className="hidden h-10 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-nuprix-muted hover:bg-nuprix-mist small:flex"
+              href="/account"
+              data-testid="nav-account-link"
+            >
+              <UserRound className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden medium:inline">Account</span>
+            </LocalizedClientLink>
             <Suspense
               fallback={
-                <LocalizedClientLink
-                  className="text-sm font-medium text-nuprix-muted hover:text-nuprix-forest flex gap-2"
-                  href="/cart"
-                  data-testid="nav-cart-link"
-                >
-                  Cart (0)
+                <LocalizedClientLink className="grid h-10 w-10 place-items-center rounded-lg border border-nuprix-line" href="/cart" data-testid="nav-cart-link">
+                  <ShoppingCart className="h-4 w-4" />
                 </LocalizedClientLink>
               }
             >
               <CartButton />
             </Suspense>
+            <LocalizedClientLink
+              href="/account/vendor"
+              className="hidden h-10 items-center gap-2 rounded-lg bg-nuprix-indigo px-3 text-sm font-bold text-white shadow-[0_8px_18px_rgba(37,99,235,.16)] hover:bg-nuprix-indigo-hover medium:flex"
+            >
+              <Store className="h-4 w-4" aria-hidden="true" />
+              Start Selling
+            </LocalizedClientLink>
           </div>
         </nav>
+        <div className="no-scrollbar overflow-x-auto border-t border-nuprix-line/80 bg-nuprix-ivory">
+          <div className="content-container flex min-w-max items-center gap-2 py-2">
+            {trending.map(([label, href]) => (
+              <LocalizedClientLink
+                key={label}
+                href={href}
+                className="rounded-full border border-nuprix-line bg-white px-3 py-1.5 text-xs font-semibold text-nuprix-muted transition hover:border-nuprix-indigo/30 hover:text-nuprix-indigo"
+              >
+                {label}
+              </LocalizedClientLink>
+            ))}
+          </div>
+        </div>
       </header>
     </div>
   )
